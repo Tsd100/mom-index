@@ -123,6 +123,18 @@ body {
 /* 加载状态 */
 .loading { text-align: center; padding: 60px; color: #64748b; }
 
+/* 模拟数据提示 */
+.mock-banner {
+  background: rgba(245, 158, 11, 0.10);
+  border: 1px solid #b45309;
+  color: #fbbf24;
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  text-align: center;
+}
+
 @media (max-width: 600px) {
   .charts { grid-template-columns: 1fr; }
   .card .index-value { font-size: 36px; }
@@ -138,24 +150,17 @@ body {
 </div>
 
 <div class="container">
+  <!-- 模拟数据提示横幅（真实数据攒满后自动隐藏） -->
+  <div class="mock-banner" id="mock-banner" style="display:none"></div>
+
   <!-- 四个板块指数卡片 -->
   <div class="cards" id="cards"></div>
 
-  <!-- 图例 -->
-  <div class="legend">
-    <div class="legend-item"><div class="legend-dot nasdaq"></div>纳斯达克</div>
-    <div class="legend-item"><div class="legend-dot gold"></div>黄金</div>
-    <div class="legend-item"><div class="legend-dot cpo"></div>CPO通信</div>
-    <div class="legend-item"><div class="legend-dot semiconductor"></div>半导体</div>
-  </div>
+  <!-- 图例（由 JS 动态渲染） -->
+  <div class="legend" id="legend"></div>
 
-  <!-- 历史曲线 -->
-  <div class="charts">
-    <div class="chart-box"><h3>📈 纳斯达克 — 宝妈指数走势</h3><canvas id="chart-nasdaq"></canvas></div>
-    <div class="chart-box"><h3>🥇 黄金 — 宝妈指数走势</h3><canvas id="chart-gold"></canvas></div>
-    <div class="chart-box"><h3>🔌 CPO通信 — 宝妈指数走势</h3><canvas id="chart-cpo"></canvas></div>
-    <div class="chart-box"><h3>💾 半导体 — 宝妈指数走势</h3><canvas id="chart-semiconductor"></canvas></div>
-  </div>
+  <!-- 历史曲线（由 JS 动态渲染） -->
+  <div class="charts" id="charts"></div>
 
   <!-- Top 小白帖 -->
   <div class="top-posts" id="top-posts">
@@ -173,16 +178,32 @@ body {
 <script>
 const SECTOR_NAMES = {
   nasdaq: '纳斯达克',
-  gold: '黄金', 
-  cpo: 'CPO通信',
-  semiconductor: '半导体'
+  gold: '黄金',
+  telecom: '通信',
+  semiconductor: '半导体',
+  innovative_drug: '创新药',
+  nonferrous_metals: '有色金属',
+  new_energy: '新能源',
+  power: '电力',
+  chip: '芯片',
+  robot: '机器人',
+  petrochemical: '石油石化',
+  aerospace: '商业航天'
 };
 
 const SECTOR_COLORS = {
   nasdaq: '#06b6d4',
   gold: '#fbbf24',
-  cpo: '#a78bfa',
-  semiconductor: '#34d399'
+  telecom: '#a78bfa',
+  semiconductor: '#34d399',
+  innovative_drug: '#f472b6',
+  nonferrous_metals: '#fb923c',
+  new_energy: '#22d3ee',
+  power: '#facc15',
+  chip: '#818cf8',
+  robot: '#4ade80',
+  petrochemical: '#e879f9',
+  aerospace: '#94a3b8'
 };
 
 function getSignalClass(idx) {
@@ -200,6 +221,27 @@ function getEmoji(idx) {
   if (idx >= 20) return '🟢';
   return '🔵';
 }
+function renderLegend(data) {
+  const container = document.getElementById('legend');
+  const sectors = data && data.sector_history ? Object.keys(data.sector_history) : [];
+  container.innerHTML = sectors.map(key =>
+    '<div class="legend-item"><div class="legend-dot" style="background:' + (SECTOR_COLORS[key] || '#94a3b8') + '"></div>' + (SECTOR_NAMES[key] || key) + '</div>'
+  ).join('');
+}
+
+function renderDataNotice(data, realDates) {
+  const banner = document.getElementById('mock-banner');
+  const realCount = data.real_record_count ?? data.record_count;
+  const hasMock = (data.record_count || 0) > realCount;
+  if (hasMock) {
+    banner.style.display = 'block';
+    banner.textContent =
+      `⚠️ 当前历史曲线包含模拟数据（真实记录 ${realCount} 天，曲线虚线部分为模拟）。` +
+      `攒满 5 个交易日的真实记录后会自动切换为真实曲线。`;
+  } else {
+    banner.style.display = 'none';
+  }
+}
 
 function renderCards(data) {
   const container = document.getElementById('cards');
@@ -215,8 +257,10 @@ function renderCards(data) {
   container.innerHTML = Object.entries(latest.sectors).map(([key, sector]) => {
     const cls = getSignalClass(sector.index);
     const d = sector.details || {};
+    const color = SECTOR_COLORS[key] || '#64748b';
     return `
-      <div class="card ${key}">
+      <div class="card">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,${color},${color}88);"></div>
         <div class="sector-name">${getEmoji(sector.index)} ${SECTOR_NAMES[key]}</div>
         <div class="index-value">${sector.index}</div>
         <div class="index-label">宝妈指数</div>
@@ -252,20 +296,36 @@ function renderCards(data) {
 }
 
 function renderCharts(data) {
+  const chartsContainer = document.getElementById('charts');
+  chartsContainer.innerHTML = '';
   const history = data.sector_history || {};
+  const priceHistory = data.price_history || {};
+  const realDates = new Set(data.real_dates || []);
   
   Object.entries(history).forEach(([sector, records]) => {
-    const canvasId = `chart-${sector}`;
-    const canvas = document.getElementById(canvasId);
-    if (!canvas || !records.length) return;
+    if (!records.length) return;
     
+    const box = document.createElement('div');
+    box.className = 'chart-box';
+    box.innerHTML = `<h3>📈 ${SECTOR_NAMES[sector] || sector} — 宝妈指数走势</h3><canvas id="chart-${sector}"></canvas>`;
+    chartsContainer.appendChild(box);
+    
+    const canvas = box.querySelector('canvas');
     const ctx = canvas.getContext('2d');
     const color = SECTOR_COLORS[sector] || '#94a3b8';
+    
+    // 价格数据按日期对齐
+    const pArr = priceHistory[sector] || [];
+    const priceMap = {};
+    pArr.forEach(p => { priceMap[p.date] = p.price; });
+    const priceVals = records.map(r => priceMap[r.date] || null);
+    const hasPrice = priceVals.some(v => v !== null);
+    const dates = records.map(r => r.date);
     
     new Chart(ctx, {
       type: 'line',
       data: {
-        labels: records.map(r => r.date.slice(5)), // MM-DD
+        labels: records.map(r => r.date.slice(5)),
         datasets: [{
           label: SECTOR_NAMES[sector],
           data: records.map(r => r.index),
@@ -276,11 +336,31 @@ function renderCharts(data) {
           tension: 0.3,
           pointRadius: 2,
           pointHoverRadius: 5,
-        }]
+          yAxisID: 'y',
+          segment: {
+            borderDash: ctx => realDates.has(dates[ctx.p0DataIndex]) ? undefined : [6, 4],
+          },
+        }].concat(hasPrice ? {
+          label: SECTOR_NAMES[sector] + ' 价格',
+          data: priceVals,
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245,158,11,0.08)',
+          borderWidth: 1.5,
+          borderDash: [4, 2],
+          fill: false,
+          tension: 0.3,
+          pointRadius: 1,
+          pointHoverRadius: 4,
+          yAxisID: 'y1',
+          segment: {
+            borderDash: ctx => realDates.has(dates[ctx.p0DataIndex]) ? [4, 2] : [2, 3],
+          },
+        } : [])
       },
       options: {
         responsive: true,
         maintainAspectRatio: true,
+        interaction: { mode: 'index', intersect: false },
         plugins: {
           legend: { display: false },
           tooltip: {
@@ -290,16 +370,30 @@ function renderCharts(data) {
             borderColor: '#334155',
             borderWidth: 1,
             callbacks: {
-              label: ctx => `宝妈指数: ${ctx.parsed.y}`
+              label: ctx => {
+                const tag = realDates.has(dates[ctx.dataIndex]) ? '' : '（模拟）';
+                return ctx.dataset.yAxisID === 'y1'
+                  ? `价格: ${ctx.parsed.y}${tag}`
+                  : `宝妈指数: ${ctx.parsed.y}${tag}`;
+              }
             }
           }
         },
         scales: {
           y: {
-            min: 0, max: 100,
+            min: 0, max: 100, position: 'left',
             grid: { color: '#33415533' },
-            ticks: { color: '#64748b', callback: v => v },
+            ticks: { color: '#64748b' },
+            title: { display: true, text: '宝妈指数', color: '#64748b' },
           },
+          ...(hasPrice ? {
+            y1: {
+              position: 'right',
+              grid: { drawOnChartArea: false },
+              ticks: { color: '#f59e0b' },
+              title: { display: true, text: '价格', color: '#f59e0b' },
+            }
+          } : {}),
           x: {
             grid: { color: '#33415533' },
             ticks: { color: '#64748b', maxTicksLimit: 10 },
@@ -359,6 +453,8 @@ fetch('data/dashboard_data.json')
   .then(r => r.json())
   .then(data => {
     renderCards(data);
+    renderLegend(data);
+    renderDataNotice(data);
     renderCharts(data);
     renderTopPosts(data);
   })

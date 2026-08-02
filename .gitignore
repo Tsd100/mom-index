@@ -30,3 +30,8 @@ desktop.ini
 
 # Chrome profiles (Playwright)
 *.pw_profile/
+
+# 运行产物
+*.db
+*.log
+output/

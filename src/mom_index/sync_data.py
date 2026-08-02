@@ -1,4 +1,4 @@
-"""数据同步脚本 — 从 data/ 同步到 frontend/data/
+"""数据同步脚本 — 从 src/data/ 同步到 src/mom_index/frontend/data/
 运行: python sync_data.py
 pipeline.py 已内置自动同步，此脚本用于手动修复不一致。
 """
@@ -6,9 +6,10 @@ import os
 import shutil
 import sys
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(HERE, "data")
-FRONTEND_DATA_DIR = os.path.join(HERE, "frontend", "data")
+_pkg_dir = os.path.dirname(os.path.abspath(__file__))       # src/mom_index
+_repo_root = os.path.dirname(os.path.dirname(_pkg_dir))     # 仓库根目录
+DATA_DIR = os.environ.get("MOM_INDEX_DATA_DIR", os.path.join(_repo_root, "data"))
+FRONTEND_DATA_DIR = os.path.join(_pkg_dir, "frontend", "data")
 FILES = ["dashboard_data.json", "history.json", "xhs_posts.json"]
 
 def sync():

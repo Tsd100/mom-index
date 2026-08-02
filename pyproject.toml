@@ -1,0 +1,20 @@
+[project]
+name = "mom-index"
+version = "1.0.0"
+description = "宝妈指数 — 基于擦鞋童理论的行为金融学反向指标"
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.28.0",
+    "playwright>=1.40.0",
+]
+
+[project.urls]
+repository = "https://github.com/Tsd100/mom-index"
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["mom_index*"]

@@ -7,13 +7,22 @@ from typing import Dict, List
 import json
 import os
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+DATA_DIR = os.environ.get("MOM_INDEX_DATA_DIR",
+    os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data"))
 
 SECTOR_NAMES = {
     "nasdaq": "纳斯达克",
     "gold": "黄金",
-    "cpo": "CPO通信",
+    "telecom": "通信",
     "semiconductor": "半导体",
+    "innovative_drug": "创新药",
+    "nonferrous_metals": "有色金属",
+    "new_energy": "新能源",
+    "power": "电力",
+    "chip": "芯片",
+    "robot": "机器人",
+    "petrochemical": "石油石化",
+    "aerospace": "商业航天",
 }
 
 
@@ -25,7 +34,7 @@ def compute_sector_index(analysis_results: List) -> Dict:
     1. 小白占比 (40%) — 该板块中小白帖的比例
     2. 小白强度 (25%) — 小白帖的平均得分
     3. 情绪极端度 (20%) — 贪婪/恐慌的情绪极端程度
-    4. 热度信号 (15%) — 该板块的讨论活跃度
+    4. 小白纯度 (15%) — 纯小白在小白帖中的占比（纯度越高，情绪越无脑）
     """
     if not analysis_results:
         return {
@@ -162,13 +171,19 @@ def save_history(history: Dict):
         json.dump(history, f, ensure_ascii=False, indent=2)
 
 
-def add_record(sector_indices: Dict[str, Dict], analysis_results: Dict):
+def add_record(sector_indices: Dict[str, Dict], analysis_results: Dict, prices: Dict[str, float] = None):
     """添加一条历史记录"""
+    if prices:
+        for sid, price in prices.items():
+            if sid in sector_indices:
+                sector_indices[sid]["price"] = price
+    
     history = load_history()
     
     record = {
         "date": datetime.now().strftime("%Y-%m-%d"),
         "timestamp": datetime.now().isoformat(),
+        "source": "real",
         "sectors": sector_indices,
     }
     
@@ -190,14 +205,14 @@ def get_dashboard_data() -> Dict:
     
     # 最新一条
     latest = records[-1] if records else None
+
+    # 真实记录统计（source == "real"；模拟记录用于前端预览，回测与后续分析会忽略）
+    real_records = [r for r in records if r.get("source") == "real"]
+    real_dates = sorted({r["date"] for r in real_records})
     
     # 为每个板块准备历史曲线数据
-    sector_history = {
-        "nasdaq": [],
-        "gold": [],
-        "cpo": [],
-        "semiconductor": [],
-    }
+    sector_history = {key: [] for key in SECTOR_NAMES}
+    price_history = {key: [] for key in SECTOR_NAMES}
     
     for r in records:
         for sector, data in r.get("sectors", {}).items():
@@ -206,9 +221,17 @@ def get_dashboard_data() -> Dict:
                     "date": r["date"],
                     "index": data["index"],
                 })
+            if sector in price_history and "price" in data:
+                price_history[sector].append({
+                    "date": r["date"],
+                    "price": data["price"],
+                })
     
     return {
         "latest": latest,
         "sector_history": sector_history,
+        "price_history": price_history,
         "record_count": len(records),
+        "real_record_count": len(real_records),
+        "real_dates": real_dates,
     }
