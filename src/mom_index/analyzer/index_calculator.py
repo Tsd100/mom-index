@@ -213,6 +213,7 @@ def get_dashboard_data() -> Dict:
     # 为每个板块准备历史曲线数据
     sector_history = {key: [] for key in SECTOR_NAMES}
     price_history = {key: [] for key in SECTOR_NAMES}
+    price_real_dates = set()
     
     for r in records:
         for sector, data in r.get("sectors", {}).items():
@@ -226,6 +227,25 @@ def get_dashboard_data() -> Dict:
                     "date": r["date"],
                     "price": data["price"],
                 })
+                price_real_dates.add(r["date"])
+
+    # 真实历史价格回填（腾讯K线）：价格曲线优先用真实价格
+    backfill_file = os.path.join(DATA_DIR, "price_backfill.json")
+    if os.path.exists(backfill_file):
+        try:
+            with open(backfill_file, 'r', encoding='utf-8') as f:
+                backfill = json.load(f)
+            for sector, rows in backfill.items():
+                if sector not in price_history:
+                    continue
+                existing = {p["date"] for p in price_history[sector]}
+                for row in rows:
+                    if row["date"] not in existing:
+                        price_history[sector].append(row)
+                        price_real_dates.add(row["date"])
+                price_history[sector].sort(key=lambda p: p["date"])
+        except Exception:
+            pass  # 回填文件损坏时静默忽略，不影响主流程
     
     return {
         "latest": latest,
@@ -234,4 +254,5 @@ def get_dashboard_data() -> Dict:
         "record_count": len(records),
         "real_record_count": len(real_records),
         "real_dates": real_dates,
+        "price_real_dates": sorted(price_real_dates),
     }

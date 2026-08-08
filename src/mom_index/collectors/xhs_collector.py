@@ -11,7 +11,7 @@ from typing import List, Dict, Optional
 # 设置环境变量 RNODE_API_KEY 或直接填入
 API_KEY = os.environ.get("RNODE_API_KEY", "")
 API_BASE = "https://rnote.dev/api/v2"
-PROXY = {"http": "http://127.0.0.1:7890", "https": "http://127.0.0.1:7890"}
+PROXY = os.environ.get("XHS_PROXY") or None
 
 SEARCH_KEYWORDS = {
     # 用小白的语言去搜，才能找到小白
@@ -184,7 +184,11 @@ def _gen_sample_posts() -> Dict[str, List[Dict]]:
 
 
 def collect_all() -> Dict[str, List[Dict]]:
-    """采集所有板块的小红书数据。API不可用时使用模拟数据。"""
+    """采集所有板块的小红书数据。
+
+    无 API Key 时默认直接跳过（不再混入模拟数据，保证看板数据 100% 真实）。
+    如需演示效果，可设置 XHS_ALLOW_MOCK=1 强制使用模拟数据。
+    """
     if API_KEY:
         result = {}
         for sector_key, keywords in SEARCH_KEYWORDS.items():
@@ -202,11 +206,14 @@ def collect_all() -> Dict[str, List[Dict]]:
             print(f"  [小红书-{sector_key}] 采集到 {len(unique)} 条")
         return result
     else:
-        print("  ⚠️ 无 API Key，使用模拟小红书数据（26条）")
-        sample = _gen_sample_posts()
-        for sector, posts in sample.items():
-            print(f"  [小红书-模拟-{sector}] {len(posts)} 条")
-        return sample
+        if os.environ.get("XHS_ALLOW_MOCK") == "1":
+            print("  ⚠️ XHS_ALLOW_MOCK=1，使用模拟小红书数据（仅供演示）")
+            sample = _gen_sample_posts()
+            for sector, posts in sample.items():
+                print(f"  [小红书-模拟-{sector}] {len(posts)} 条")
+            return sample
+        print("  ⚠️ 未设置 RNODE_API_KEY，跳过小红书（不使用模拟数据）")
+        return {}
 
 if __name__ == "__main__":
     if not API_KEY:

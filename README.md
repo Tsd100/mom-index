@@ -65,16 +65,19 @@ mom-index/
 │       ├── pipeline.py          # 主流程：采集→分析→指数→存储
 │       ├── storage.py           # 原始帖子存档（SQLite）
 │       ├── backtest.py          # 回测：验证反向指标假设
+│       ├── backfill_history.py  # 真实历史价格回填（腾讯K线）
 │       ├── sync_data.py         # 数据同步脚本（data/ → frontend/data/）
 │       ├── collectors/
 │       │   ├── anti_detection.py    # 反检测：UA轮换+隐身+延迟
 │       │   ├── guba_collector.py    # 东方财富股吧采集（✅ 生产可用）
 │       │   ├── price_collector.py   # 腾讯财经 ETF 实时价格
 │       │   ├── xhs_collector.py     # 小红书（⚠️ 需充值/登录）
-│       │   └── xhs_playwright.py    # 小红书 Playwright 方案
+│       │   ├── xhs_playwright.py    # 小红书 Playwright 方案
+│       │   └── xueqiu_collector.py  # 雪球（⚠️ 需登录 Cookie，默认关闭）
 │       ├── analyzer/
 │       │   ├── llm_analyzer.py      # 多维度分类引擎（40+信号词库）
-│       │   └── index_calculator.py  # 指数计算（含买入/卖出子指数）
+│       │   ├── index_calculator.py  # 指数计算（含买入/卖出子指数）
+│       │   └── signal.py            # 每日操作信号清单
 │       └── frontend/
 │           ├── dashboard.html       # 看板页面（Chart.js 暗色主题）
 │           └── data/                # 前端数据（pipeline 自动同步）
@@ -110,15 +113,31 @@ python -m mom_index.backtest
 
 # 指定观察周期（5/10/20 个交易日）
 python -m mom_index.backtest --horizons 5 10 20
+
+# 阈值校准（样本充足时给出建议分界点）
+python -m mom_index.backtest --calibrate
 ```
 
-回测输出各情绪区间之后的 N 日平均收益，并检验"指数越高、未来收益越低"的反向假设（期望负相关）。报告生成在 `data/backtest_report.md`。
+回测输出各情绪区间之后的 N 日平均收益，并检验"指数越高、未来收益越低"的反向假设（期望负相关）。样本充足时 `--calibrate` 会扫描最优分界点。报告生成在 `data/backtest_report.md`。
+
+## 历史价格回填
+
+```powershell
+python -m mom_index.backfill_history            # 默认 30 天
+python -m mom_index.backfill_history --days 60
+```
+
+用腾讯 K 线接口拉取各 ETF 真实日K收盘价到 `data/price_backfill.json`，前端价格曲线优先显示真实价格（情绪曲线仍以真实记录为准）。
 
 ## 数据说明
 
 - **真实记录**（`source=real`）：管线真实采集生成，回测只认这类记录。
 - **模拟记录**（`source=mock`）：真实记录不足 5 天时，自动生成 30 天模拟曲线用于前端预览（固定种子、跨运行稳定，前端以虚线+横幅标注）。攒满 5 天后自动移除模拟数据。
 - **原始帖子存档**：每次采集的帖子原样存入 `data/raw_posts.db`（SQLite），将来调整信号词库可重算历史。
+- **小红书**：无 `RNODE_API_KEY` 时直接跳过，不再混入模拟数据；`XHS_ALLOW_MOCK=1` 可强制演示。
+- **股吧多页采集**：默认翻 3 页并去重（`GUBA_PAGES` 可调），低活跃板块样本更充分。
+- **今日信号清单**：看板顶部按严重程度列出"操作信号"（指数 + 较前日变化 + 买卖比 + 价格趋势合成）。
+- **LLM 抽查复核**（可选）：设置 `MOM_INDEX_LLM_API_KEY` 后，按 `MOM_INDEX_LLM_SAMPLE_RATE` 采样率用大模型复核规则引擎拿不准的帖子；未设置时纯规则引擎。
 
 ## 数据源
 
@@ -126,7 +145,9 @@ python -m mom_index.backtest --horizons 5 10 20
 |--------|------|------|
 | 东方财富股吧 | ✅ 稳定 | 12 个 ETF 吧，无需 cookie，无风控 |
 | 腾讯财经 (qt.gtimg.cn) | ✅ 稳定 | ETF 实时价格，免费无 key |
-| 小红书 (rnote.dev / Playwright) | ⚠️ 需充值/登录 | 暂无稳定免费方案 |
+| 腾讯K线 (ifzq.gtimg.cn) | ✅ 稳定 | 历史日K，用于价格回填 |
+| 小红书 (rnote.dev / Playwright) | ⚠️ 需充值/登录 | 无 key 时自动跳过（不再模拟） |
+| 雪球 (xueqiu) | ⚠️ 需登录 Cookie | 搜索接口被 WAF 拦截，预留接入点 |
 
 ## 已知局限
 
@@ -134,6 +155,7 @@ python -m mom_index.backtest --horizons 5 10 20
 - **关键词规则限制**：非 LLM 语义理解，会漏掉隐含信号、误判部分 spam
 - **商业航天用军工 ETF 代理**：对应关系需后续用真实商业航天标的验证
 - **单日快照**：一次采集只是一个数据点，需要持续运行积累
+- **雪球/微博/抖音**：均需登录态与反爬绕过，暂未接入真实数据
 
 ## 部署到飞牛 NAS
 

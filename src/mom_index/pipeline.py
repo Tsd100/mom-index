@@ -9,7 +9,9 @@ from typing import Dict
 
 from mom_index.collectors.guba_collector import collect_all as collect_guba, SECTORS
 from mom_index.collectors.xhs_collector import collect_all as collect_xhs
+from mom_index.collectors.xueqiu_collector import collect_all as collect_xueqiu
 from mom_index.analyzer.llm_analyzer import analyze_all
+from mom_index.analyzer.signal import generate_signals
 from mom_index.analyzer.index_calculator import (
     compute_sector_index, add_record, get_dashboard_data, save_history, load_history, SECTOR_NAMES
 )
@@ -52,6 +54,18 @@ def run_pipeline():
                 print(f"    ↳ 已存档 {saved} 条原始帖子")
     except Exception as e:
         print(f"  小红书采集跳过: {e}")
+
+    # 雪球（可选，需 MOM_INDEX_ENABLE_XUEQIU=1 + 登录 Cookie）
+    print("  [雪球]")
+    try:
+        xueqiu_data = collect_xueqiu()
+        for sector, posts in xueqiu_data.items():
+            all_posts[sector] = all_posts.get(sector, []) + posts
+            saved = save_posts(sector, posts, platform="xueqiu")
+            if saved:
+                print(f"    ↳ 已存档 {saved} 条原始帖子")
+    except Exception as e:
+        print(f"  雪球采集跳过: {e}")
     
     total_collected = sum(len(v) for v in all_posts.values())
     print(f"\n  共采集 {total_collected} 条帖子（累计存档 {count_posts()} 条）\n")
@@ -125,6 +139,9 @@ def run_pipeline():
             dashboard = get_dashboard_data()
             print(f"\n✅ 真实记录已满 {real_count} 天，已移除模拟历史")
 
+    # 生成每日操作信号清单
+    dashboard["signals"] = generate_signals(dashboard)
+
     os.makedirs(DATA_DIR, exist_ok=True)
     dashboard_file = os.path.join(DATA_DIR, "dashboard_data.json")
     with open(dashboard_file, 'w', encoding='utf-8') as f:
@@ -151,6 +168,13 @@ def run_pipeline():
             name = SECTOR_NAMES.get(sector, sector)
             print(f"   {name}: {data['index']} — {data['interpretation']}")
     print("=" * 65)
+
+    # 信号清单摘要
+    if dashboard.get("signals"):
+        print("\n🚦 今日操作信号:")
+        for s in dashboard["signals"][:5]:
+            extra = f"（{s['extras']}）" if s["extras"] else ""
+            print(f"   {s['name']:6s} {s['index']:5.1f}  {s['action']}{extra}")
     
     return dashboard
 

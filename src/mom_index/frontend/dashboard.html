@@ -135,6 +135,31 @@ body {
   text-align: center;
 }
 
+/* 今日操作信号 */
+.signals-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.signal-chip {
+  flex: 1 1 280px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-left: 4px solid #64748b;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+}
+.signal-chip.danger  { border-left-color: #ef4444; }
+.signal-chip.warning { border-left-color: #f97316; }
+.signal-chip.watch   { border-left-color: #eab308; }
+.signal-chip.normal  { border-left-color: #22c55e; }
+.signal-chip.cold    { border-left-color: #3b82f6; }
+.signal-chip .sc-title { font-weight: 700; margin-bottom: 4px; color: #e2e8f0; }
+.signal-chip .sc-index { color: #94a3b8; font-weight: 400; }
+.signal-chip .sc-extra { color: #64748b; font-size: 11px; margin-top: 2px; }
+
 @media (max-width: 600px) {
   .charts { grid-template-columns: 1fr; }
   .card .index-value { font-size: 36px; }
@@ -152,6 +177,9 @@ body {
 <div class="container">
   <!-- 模拟数据提示横幅（真实数据攒满后自动隐藏） -->
   <div class="mock-banner" id="mock-banner" style="display:none"></div>
+
+  <!-- 今日操作信号 -->
+  <div class="signals-panel" id="signals-panel"></div>
 
   <!-- 四个板块指数卡片 -->
   <div class="cards" id="cards"></div>
@@ -227,6 +255,10 @@ function renderLegend(data) {
   container.innerHTML = sectors.map(key =>
     '<div class="legend-item"><div class="legend-dot" style="background:' + (SECTOR_COLORS[key] || '#94a3b8') + '"></div>' + (SECTOR_NAMES[key] || key) + '</div>'
   ).join('');
+  const realCount = data.real_record_count ?? data.record_count;
+  if ((data.record_count || 0) > realCount) {
+    container.innerHTML += '<div class="legend-item" style="color:#fbbf24">┅┅ 虚线 = 模拟历史</div>';
+  }
 }
 
 function renderDataNotice(data, realDates) {
@@ -254,16 +286,25 @@ function renderCards(data) {
   document.getElementById('update-time').textContent = 
     `更新于 ${latest.date}`;
 
-  container.innerHTML = Object.entries(latest.sectors).map(([key, sector]) => {
+  const signalsMap = {};
+  (data.signals || []).forEach(s => { signalsMap[s.sector] = s; });
+
+  container.innerHTML = Object.entries(latest.sectors)
+  .sort((a, b) => b[1].index - a[1].index)
+  .map(([key, sector]) => {
     const cls = getSignalClass(sector.index);
     const d = sector.details || {};
     const color = SECTOR_COLORS[key] || '#64748b';
+    const sig = signalsMap[key] || {};
+    const deltaHtml = sig.delta != null
+      ? `<div class="index-label" style="color:${sig.delta >= 0 ? '#f87171' : '#4ade80'}">较前日 ${sig.delta >= 0 ? '+' : ''}${sig.delta.toFixed(1)}</div>`
+      : '<div class="index-label">宝妈指数</div>';
     return `
       <div class="card">
         <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,${color},${color}88);"></div>
         <div class="sector-name">${getEmoji(sector.index)} ${SECTOR_NAMES[key]}</div>
         <div class="index-value">${sector.index}</div>
-        <div class="index-label">宝妈指数</div>
+        ${deltaHtml}
         <div class="signal ${cls}">${sector.interpretation}</div>
         <!-- 买入/卖出子指数 -->
         <div style="margin-top:14px; display:flex; gap:8px;">
@@ -295,12 +336,31 @@ function renderCards(data) {
   }).join('');
 }
 
+function renderSignals(data) {
+  const panel = document.getElementById('signals-panel');
+  const list = data.signals || [];
+  if (!list.length) {
+    panel.innerHTML = '';
+    return;
+  }
+  panel.innerHTML = list.map(s => `
+    <div class="signal-chip ${s.level}">
+      <div class="sc-title">${s.name} <span class="sc-index">${s.index}</span>
+        ${s.delta != null ? `<span style="color:${s.delta >= 0 ? '#f87171' : '#4ade80'}">${s.delta >= 0 ? '▲' : '▼'} ${Math.abs(s.delta)}</span>` : ''}
+      </div>
+      <div>${s.action}</div>
+      ${s.extras ? `<div class="sc-extra">${s.extras}</div>` : ''}
+    </div>
+  `).join('');
+}
+
 function renderCharts(data) {
   const chartsContainer = document.getElementById('charts');
   chartsContainer.innerHTML = '';
   const history = data.sector_history || {};
   const priceHistory = data.price_history || {};
   const realDates = new Set(data.real_dates || []);
+  const priceRealDates = new Set(data.price_real_dates || Array.from(realDates));
   
   Object.entries(history).forEach(([sector, records]) => {
     if (!records.length) return;
@@ -353,7 +413,7 @@ function renderCharts(data) {
           pointHoverRadius: 4,
           yAxisID: 'y1',
           segment: {
-            borderDash: ctx => realDates.has(dates[ctx.p0DataIndex]) ? [4, 2] : [2, 3],
+            borderDash: ctx => priceRealDates.has(dates[ctx.p0DataIndex]) ? [4, 2] : [2, 3],
           },
         } : [])
       },
@@ -371,7 +431,8 @@ function renderCharts(data) {
             borderWidth: 1,
             callbacks: {
               label: ctx => {
-                const tag = realDates.has(dates[ctx.dataIndex]) ? '' : '（模拟）';
+                const set = ctx.dataset.yAxisID === 'y1' ? priceRealDates : realDates;
+                const tag = set.has(dates[ctx.dataIndex]) ? '' : '（模拟）';
                 return ctx.dataset.yAxisID === 'y1'
                   ? `价格: ${ctx.parsed.y}${tag}`
                   : `宝妈指数: ${ctx.parsed.y}${tag}`;
@@ -448,20 +509,25 @@ function renderTopPosts(data) {
   `).join('');
 }
 
-// 加载数据
-fetch('data/dashboard_data.json')
-  .then(r => r.json())
-  .then(data => {
-    renderCards(data);
-    renderLegend(data);
-    renderDataNotice(data);
-    renderCharts(data);
-    renderTopPosts(data);
-  })
-  .catch(err => {
-    document.getElementById('cards').innerHTML = 
-      `<div class="loading">⚠️ 数据加载失败: ${err.message}<br>请先运行 pipeline.py 生成数据</div>`;
-  });
+// 加载数据（每 5 分钟自动刷新）
+function loadData() {
+  fetch('data/dashboard_data.json')
+    .then(r => r.json())
+    .then(data => {
+      renderCards(data);
+      renderLegend(data);
+      renderDataNotice(data);
+      renderSignals(data);
+      renderCharts(data);
+      renderTopPosts(data);
+    })
+    .catch(err => {
+      document.getElementById('cards').innerHTML =
+        `<div class="loading">⚠️ 数据加载失败: ${err.message}<br>请先运行 pipeline.py 生成数据</div>`;
+    });
+}
+loadData();
+setInterval(loadData, 5 * 60 * 1000);
 </script>
 </body>
 </html>

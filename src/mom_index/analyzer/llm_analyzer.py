@@ -6,6 +6,8 @@ from typing import Dict, List, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime
 import json
+import os
+import random
 
 # ============================================================
 # 信号定义库
@@ -303,10 +305,12 @@ def _analyze_sentiment(text: str) -> float:
 # ============================================================
 
 def analyze_sector(posts: List[Dict], sector: str) -> List[AnalysisResult]:
-    """分析一个板块的所有帖子"""
+    """分析一个板块的所有帖子（可选 LLM 抽查复核，默认关闭）"""
     results = []
     for post in posts:
         result = analyze_post(post, sector)
+        if llm_spotcheck_enabled() and random.random() < LLM_SAMPLE_RATE:
+            result = llm_rejudge(post, result)
         results.append(result)
     
     # 按小白分数排序
@@ -320,4 +324,81 @@ def analyze_all(sector_data: Dict[str, List[Dict]]) -> Dict[str, List[AnalysisRe
     for sector, posts in sector_data.items():
         print(f"  分析 {sector}: {len(posts)} 条帖子...")
         all_results[sector] = analyze_sector(posts, sector)
+    if llm_used_count() > 0:
+        print(f"  🤖 LLM 抽查复核 {llm_used_count()} 条")
     return all_results
+
+
+# ============================================================
+# 可选 LLM 混合分析（默认关闭，设置 MOM_INDEX_LLM_API_KEY 后启用）
+# 规则引擎优先，LLM 按采样率抽查复核，拿不准的帖子交给大模型判断。
+# ============================================================
+LLM_API_KEY = os.environ.get("MOM_INDEX_LLM_API_KEY", "")
+LLM_BASE_URL = os.environ.get("MOM_INDEX_LLM_BASE_URL", "https://api.openai.com/v1").rstrip("/")
+LLM_MODEL = os.environ.get("MOM_INDEX_LLM_MODEL", "gpt-4o-mini")
+LLM_SAMPLE_RATE = float(os.environ.get("MOM_INDEX_LLM_SAMPLE_RATE", "0.05"))
+_llm_used = 0
+
+
+def llm_spotcheck_enabled() -> bool:
+    return bool(LLM_API_KEY) and LLM_SAMPLE_RATE > 0
+
+
+def llm_used_count() -> int:
+    return _llm_used
+
+
+def _level_for_score(score: float) -> str:
+    if score >= 50:
+        return "纯小白"
+    if score >= 35:
+        return "偏小白"
+    if score >= 20:
+        return "中间派"
+    if score >= 10:
+        return "偏专业"
+    return "专业投资者"
+
+
+def llm_rejudge(post: Dict, result: AnalysisResult) -> AnalysisResult:
+    """用 LLM 复核一条帖子的小白程度（失败时保留规则引擎结果）"""
+    global _llm_used
+    try:
+        import requests as _req
+
+        prompt = (
+            "你是散户情绪分析器。判断这条帖子作者的\"小白程度\""
+            "（越不懂投资分越高）。\n"
+            f"帖子标题: {post.get('title', '')[:120]}\n"
+            "只输出JSON: {\"newbie_score\": 0-100整数, "
+            "\"intent\": \"buy|sell|neutral\", \"sentiment\": -1|0|1, "
+            "\"reasoning\": \"一句话\"}"
+        )
+        resp = _req.post(
+            f"{LLM_BASE_URL}/chat/completions",
+            headers={
+                "Authorization": f"Bearer {LLM_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": LLM_MODEL,
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0,
+                "max_tokens": 150,
+            },
+            timeout=20,
+        )
+        resp.raise_for_status()
+        content = resp.json()["choices"][0]["message"]["content"]
+        data = json.loads(content[content.find("{"):content.rfind("}") + 1])
+        score = float(data.get("newbie_score", result.newbie_score))
+        result.newbie_score = max(0, min(100, score))
+        result.level = _level_for_score(result.newbie_score)
+        result.intent = data.get("intent", result.intent)
+        result.sentiment_score = float(data.get("sentiment", result.sentiment_score))
+        result.reasoning = f"[LLM复核] {data.get('reasoning', '').strip()}"
+        result.newbie_confidence = "high"
+        _llm_used += 1
+    except Exception:
+        pass  # LLM 失败不影响主流程
+    return result

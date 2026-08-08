@@ -94,7 +94,38 @@ def pearson(xs, ys):
     return cov / math.sqrt(vx * vy)
 
 
-def run(horizons=(5, 10, 20), include_mock=False):
+def calibrate(samples, horizons):
+    """扫描候选阈值，找到\"之上收益显著低于之下\"的分界点（反指分档校准）
+
+    需要每侧至少 10 个样本才可信，样本不足时返回提示。
+    """
+    if len(samples) < 20:
+        return "样本不足（<20），暂不校准。攒够真实记录后自动生效。"
+
+    lines = ["## 阈值校准（基于真实前瞻收益）", ""]
+    for h in horizons:
+        best = None
+        for cutoff in range(10, 95, 5):
+            above = [s[3][h] for s in samples if s[3].get(h) is not None and s[2] >= cutoff]
+            below = [s[3][h] for s in samples if s[3].get(h) is not None and s[2] < cutoff]
+            if len(above) < 10 or len(below) < 10:
+                continue
+            gap = statistics.mean(below) - statistics.mean(above)  # 之下收益 - 之上收益
+            if best is None or gap > best[0]:
+                best = (gap, cutoff, statistics.mean(above), statistics.mean(below))
+        if best:
+            gap, cutoff, avg_above, avg_below = best
+            verdict = "✅ 反指成立（之上显著弱于之下）" if gap > 0 else "⚠️ 反指未体现"
+            lines.append(
+                f"- {h}日观察: 最优分界 ≈ **{cutoff}**（之上均收益 {avg_above * 100:+.2f}%，"
+                f"之下 {avg_below * 100:+.2f}%，差距 {gap * 100:+.2f}%）— {verdict}"
+            )
+        else:
+            lines.append(f"- {h}日观察: 样本不足以判断（每侧需 ≥10 个样本）")
+    return "\n".join(lines)
+
+
+def run(horizons=(5, 10, 20), include_mock=False, do_calibrate=False):
     records = load_history(include_mock)
     if not records:
         print("暂无可用记录。"
@@ -167,6 +198,12 @@ def run(horizons=(5, 10, 20), include_mock=False):
         for line in corr_lines:
             print(line)
 
+    # 阈值校准
+    if do_calibrate or len(samples) >= 20:
+        cal = calibrate(samples, horizons)
+        print("\n🎯 阈值校准:")
+        print(cal)
+
     # 生成 Markdown 报告
     report_path = os.path.join(DATA_DIR, "backtest_report.md")
     lines = [
@@ -188,6 +225,8 @@ def run(horizons=(5, 10, 20), include_mock=False):
         lines += ["", "## 相关性检验", ""]
         for line in corr_lines:
             lines.append(line.replace("    ", "- "))
+    if do_calibrate or len(samples) >= 20:
+        lines += ["", calibrate(samples, horizons)]
     lines += [
         "",
         "> 说明: 回测仅用真实记录（source=real）。模拟历史用于前端预览，不参与结论。",
@@ -204,5 +243,8 @@ if __name__ == "__main__":
                         help="连同模拟数据一起回测（仅测试逻辑用）")
     parser.add_argument("--horizons", nargs="+", type=int, default=[5, 10, 20],
                         help="观察周期（交易日），默认 5 10 20")
+    parser.add_argument("--calibrate", action="store_true",
+                        help="执行阈值校准（样本充足时）")
     args = parser.parse_args()
-    run(horizons=tuple(args.horizons), include_mock=args.include_mock)
+    run(horizons=tuple(args.horizons), include_mock=args.include_mock,
+        do_calibrate=args.calibrate)

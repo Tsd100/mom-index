@@ -1,458 +1,127 @@
 {
   "latest": {
-    "date": "2026-08-02",
-    "timestamp": "2026-08-02T13:14:08.087224",
+    "date": "2026-08-08",
+    "timestamp": "2026-08-08T10:37:54.976424",
     "source": "real",
     "sectors": {
       "nasdaq": {
-        "index": 23.7,
-        "interpretation": "🟢 正常区间 — 小白参与度适中，无需特别操作",
+        "index": 10.8,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
         "details": {
-          "total_posts": 85,
-          "valid_posts": 85,
+          "total_posts": 220,
+          "valid_posts": 220,
           "spam_posts": 0,
-          "newbie_posts": 16,
-          "pure_newbie": 3,
-          "newbie_ratio": 18.8,
-          "avg_newbie_score": 36.8,
-          "avg_sentiment": 20.8,
-          "purity_signal": 18.8,
+          "newbie_posts": 15,
+          "pure_newbie": 0,
+          "newbie_ratio": 6.8,
+          "avg_newbie_score": 26.8,
+          "avg_sentiment": 6.7,
+          "purity_signal": 0.0,
           "activity": 100,
-          "mom_buy_index": 32.7,
-          "mom_sell_index": 12.7,
-          "buy_sell_ratio": 4.0,
-          "buy_count": 8,
+          "mom_buy_index": 11.0,
+          "mom_sell_index": 11.0,
+          "buy_sell_ratio": 1.0,
+          "buy_count": 2,
           "sell_count": 2
         },
         "top_newbie_posts": [
           {
-            "title": "美股还能不能买啊，感觉涨好多了",
-            "score": 70.0,
-            "level": "纯小白",
-            "reasoning": "帖子「美股还能不能买啊，感觉涨好多了...」 命中2个小信号: 身份自述(8分), 决策依赖(7分)。 综合得分70.0分， 判定为「纯小白」 (置信度: medium)。",
-            "sentiment": 0.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「身份自述」明确自称小白/新手/刚入门/宝妈 (命中: 小白)",
-              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 能不能)"
-            ]
-          },
-          {
-            "title": "现在买纳指会不会高位接盘啊",
-            "score": 51.6,
-            "level": "纯小白",
-            "reasoning": "帖子「现在买纳指会不会高位接盘啊...」 命中2个小信号: 知识求助(6分), 跟风行为(6分)。 命中1个专业信号: 冷静表达(-2分)。 综合得分51.6分， 判定为「纯小白」 (置信度: medium)。",
-            "sentiment": 0.0,
-            "intent": "neutral",
-            "intent_label": "⚪ 观望",
-            "key_signals": [
-              "「知识求助」在问基础问题（怎么买/在哪看/什么意思） (命中: 大佬)",
-              "「跟风行为」提及跟别人买/听说/博主推荐/朋友说 (命中: 都在买)"
-            ]
-          },
-          {
-            "title": "把A股清仓全部换纳指了",
-            "score": 50.0,
-            "level": "纯小白",
-            "reasoning": "帖子「把A股清仓全部换纳指了...」 命中2个小信号: 身份自述(8分), 跟风行为(6分)。 命中1个专业信号: 专业术语(-5分)。 综合得分50.0分， 判定为「纯小白」 (置信度: medium)。",
-            "sentiment": 0.0,
-            "intent": "neutral",
-            "intent_label": "⚪ 观望",
-            "key_signals": [
-              "「身份自述」明确自称小白/新手/刚入门/宝妈 (命中: 小白)",
-              "「跟风行为」提及跟别人买/听说/博主推荐/朋友说 (命中: 朋友说)"
-            ]
-          },
-          {
-            "title": "小白想问，为什么纳指一直涨啊",
-            "score": 42.0,
-            "level": "偏小白",
-            "reasoning": "帖子「小白想问，为什么纳指一直涨啊...」 命中1个小信号: 身份自述(8分)。 综合得分42.0分， 判定为「偏小白」 (置信度: low)。",
-            "sentiment": 0.0,
-            "intent": "neutral",
-            "intent_label": "⚪ 观望",
-            "key_signals": [
-              "「身份自述」明确自称小白/新手/刚入门/宝妈 (命中: 小白)"
-            ]
-          },
-          {
-            "title": "大哥能不能拉高一下",
+            "title": "不知道还要不要买入，会不会买到山顶",
             "score": 38.0,
             "level": "偏小白",
-            "reasoning": "帖子「大哥能不能拉高一下...」 命中1个小信号: 决策依赖(7分)。 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「不知道还要不要买入，会不会买到山顶...」 命中1个小信号: 决策依赖(7分)。 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 0.0,
-            "intent": "neutral",
-            "intent_label": "⚪ 观望",
-            "key_signals": [
-              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 能不能)"
-            ]
-          }
-        ],
-        "price": 2.112
-      },
-      "gold": {
-        "index": 36.7,
-        "interpretation": "🟢 正常区间 — 小白参与度适中，无需特别操作",
-        "details": {
-          "total_posts": 83,
-          "valid_posts": 83,
-          "spam_posts": 0,
-          "newbie_posts": 22,
-          "pure_newbie": 7,
-          "newbie_ratio": 26.5,
-          "avg_newbie_score": 45.2,
-          "avg_sentiment": 50.0,
-          "purity_signal": 31.8,
-          "activity": 100,
-          "mom_buy_index": 14.8,
-          "mom_sell_index": 24.7,
-          "buy_sell_ratio": 0.7,
-          "buy_count": 4,
-          "sell_count": 6
-        },
-        "top_newbie_posts": [
-          {
-            "title": "黄金亏了20%了要不要割肉啊😭",
-            "score": 100,
-            "level": "纯小白",
-            "reasoning": "帖子「黄金亏了20%了要不要割肉啊😭...」 命中5个小信号: 身份自述(8分), 知识求助(6分), 决策依赖(7分), 情绪恐慌(5分), 跟风行为(6分)。 综合得分100分， 判定为「纯小白」 (置信度: high)。",
-            "sentiment": -1.0,
-            "intent": "sell",
-            "intent_label": "🔴 卖出",
-            "key_signals": [
-              "「身份自述」明确自称小白/新手/刚入门/宝妈 (命中: 小白)",
-              "「知识求助」在问基础问题（怎么买/在哪看/什么意思） (命中: 大佬)"
-            ]
-          },
-          {
-            "title": "新手想抄底黄金可以吗",
-            "score": 100,
-            "level": "纯小白",
-            "reasoning": "帖子「新手想抄底黄金可以吗...」 命中3个小信号: 身份自述(8分), 知识求助(6分), 决策依赖(7分)。 以问句结尾，在寻求答案 综合得分100分， 判定为「纯小白」 (置信度: medium)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「身份自述」明确自称小白/新手/刚入门/宝妈 (命中: 新手, 第一次)",
-              "「知识求助」在问基础问题（怎么买/在哪看/什么意思） (命中: 大佬)"
-            ]
-          },
-          {
-            "title": "黄金到底还能不能买啊",
-            "score": 82.0,
-            "level": "纯小白",
-            "reasoning": "帖子「黄金到底还能不能买啊...」 命中2个小信号: 身份自述(8分), 决策依赖(7分)。 标题极短+情绪化，典型小白特征 综合得分82.0分， 判定为「纯小白」 (置信度: medium)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「身份自述」明确自称小白/新手/刚入门/宝妈 (命中: 新手)",
-              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 能不能)"
-            ]
-          },
-          {
-            "title": "黄金这是怎么了天天跌",
-            "score": 78.0,
-            "level": "纯小白",
-            "reasoning": "帖子「黄金这是怎么了天天跌...」 命中2个小信号: 身份自述(8分), 知识求助(6分)。 标题极短+情绪化，典型小白特征 综合得分78.0分， 判定为「纯小白」 (置信度: medium)。",
-            "sentiment": 0.0,
-            "intent": "neutral",
-            "intent_label": "⚪ 观望",
-            "key_signals": [
-              "「身份自述」明确自称小白/新手/刚入门/宝妈 (命中: 小白)",
-              "「知识求助」在问基础问题（怎么买/在哪看/什么意思） (命中: 不懂)"
-            ]
-          },
-          {
-            "title": "黄金怎么买啊，纯小白求教",
-            "score": 66.0,
-            "level": "纯小白",
-            "reasoning": "帖子「黄金怎么买啊，纯小白求教...」 命中2个小信号: 身份自述(8分), 知识求助(6分)。 综合得分66.0分， 判定为「纯小白」 (置信度: medium)。",
-            "sentiment": 0.0,
-            "intent": "neutral",
-            "intent_label": "⚪ 观望",
-            "key_signals": [
-              "「身份自述」明确自称小白/新手/刚入门/宝妈 (命中: 小白)",
-              "「知识求助」在问基础问题（怎么买/在哪看/什么意思） (命中: 大佬, 怎么买)"
-            ]
-          }
-        ],
-        "price": 8.433
-      },
-      "telecom": {
-        "index": 25.6,
-        "interpretation": "🟢 正常区间 — 小白参与度适中，无需特别操作",
-        "details": {
-          "total_posts": 85,
-          "valid_posts": 85,
-          "spam_posts": 0,
-          "newbie_posts": 15,
-          "pure_newbie": 3,
-          "newbie_ratio": 17.6,
-          "avg_newbie_score": 39.0,
-          "avg_sentiment": 28.9,
-          "purity_signal": 20.0,
-          "activity": 100,
-          "mom_buy_index": 39.7,
-          "mom_sell_index": 7.6,
-          "buy_sell_ratio": 9.0,
-          "buy_count": 9,
-          "sell_count": 1
-        },
-        "top_newbie_posts": [
-          {
-            "title": "CPO还能买吗？小白求教",
-            "score": 94.0,
-            "level": "纯小白",
-            "reasoning": "帖子「CPO还能买吗？小白求教...」 命中3个小信号: 身份自述(8分), 知识求助(6分), 决策依赖(7分)。 综合得分94.0分， 判定为「纯小白」 (置信度: medium)。",
-            "sentiment": 0.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「身份自述」明确自称小白/新手/刚入门/宝妈 (命中: 小白)",
-              "「知识求助」在问基础问题（怎么买/在哪看/什么意思） (命中: 不懂, 大佬)"
-            ]
-          },
-          {
-            "title": "通信ETF是一键买入CPO吗",
-            "score": 62.0,
-            "level": "纯小白",
-            "reasoning": "帖子「通信ETF是一键买入CPO吗...」 命中2个小信号: 身份自述(8分), 决策依赖(7分)。 命中1个专业信号: 专业术语(-5分)。 以问句结尾，在寻求答案 综合得分62.0分， 判定为「纯小白」 (置信度: medium)。",
-            "sentiment": 0.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「身份自述」明确自称小白/新手/刚入门/宝妈 (命中: 小白)",
-              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 能不能)"
-            ]
-          },
-          {
-            "title": "问了几个博主都说CPO要起飞",
-            "score": 54.0,
-            "level": "纯小白",
-            "reasoning": "帖子「问了几个博主都说CPO要起飞...」 命中2个小信号: 决策依赖(7分), 过度乐观(4分)。 综合得分54.0分， 判定为「纯小白」 (置信度: medium)。",
-            "sentiment": 1.0,
-            "intent": "neutral",
-            "intent_label": "⚪ 观望",
-            "key_signals": [
-              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 要不要)",
-              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 起飞)"
-            ]
-          },
-          {
-            "title": "满仓干就完了！冲冲冲！",
-            "score": 46.0,
-            "level": "偏小白",
-            "reasoning": "帖子「满仓干就完了！冲冲冲！...」 命中2个小信号: 情绪恐慌(5分), 过度乐观(4分)。 综合得分46.0分， 判定为「偏小白」 (置信度: medium)。",
-            "sentiment": 0.33,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「情绪恐慌」表达明显的恐惧/焦虑/后悔情绪 (命中: 完了)",
-              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 冲, 满仓干)"
-            ]
-          },
-          {
-            "title": "跟朋友买的CPO今天赚了两千块",
-            "score": 45.2,
-            "level": "偏小白",
-            "reasoning": "帖子「跟朋友买的CPO今天赚了两千块...」 命中3个小信号: 决策依赖(7分), 情绪恐慌(5分), 过度乐观(4分)。 命中2个专业信号: 专业术语(-5分), 策略思维(-4分)。 综合得分45.2分， 判定为「偏小白」 (置信度: high)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 要不要)",
-              "「情绪恐慌」表达明显的恐惧/焦虑/后悔情绪 (命中: 后悔)"
-            ]
-          }
-        ],
-        "price": 0.582
-      },
-      "semiconductor": {
-        "index": 30.5,
-        "interpretation": "🟢 正常区间 — 小白参与度适中，无需特别操作",
-        "details": {
-          "total_posts": 84,
-          "valid_posts": 84,
-          "spam_posts": 0,
-          "newbie_posts": 18,
-          "pure_newbie": 6,
-          "newbie_ratio": 21.4,
-          "avg_newbie_score": 41.2,
-          "avg_sentiment": 33.3,
-          "purity_signal": 33.3,
-          "activity": 100,
-          "mom_buy_index": 38.6,
-          "mom_sell_index": 0.0,
-          "buy_sell_ratio": 11.0,
-          "buy_count": 11,
-          "sell_count": 0
-        },
-        "top_newbie_posts": [
-          {
-            "title": "芯片半导体还能上车吗",
-            "score": 63.6,
-            "level": "纯小白",
-            "reasoning": "帖子「芯片半导体还能上车吗...」 命中2个小信号: 决策依赖(7分), 跟风行为(6分)。 命中1个专业信号: 冷静表达(-2分)。 以问句结尾，在寻求答案 综合得分63.6分， 判定为「纯小白」 (置信度: medium)。",
-            "sentiment": 0.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 能不能, 还能上车吗)",
-              "「跟风行为」提及跟别人买/听说/博主推荐/朋友说 (命中: 都在买)"
-            ]
-          },
-          {
-            "title": "现在不买芯片老了会后悔",
-            "score": 58.0,
-            "level": "纯小白",
-            "reasoning": "帖子「现在不买芯片老了会后悔...」 命中2个小信号: 情绪恐慌(5分), 过度乐观(4分)。 标题极短+情绪化，典型小白特征 综合得分58.0分， 判定为「纯小白」 (置信度: medium)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「情绪恐慌」表达明显的恐惧/焦虑/后悔情绪 (命中: 后悔)",
-              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 冲)"
-            ]
-          },
-          {
-            "title": "芯片这波能涨到什么时候",
-            "score": 54.0,
-            "level": "纯小白",
-            "reasoning": "帖子「芯片这波能涨到什么时候...」 命中1个小信号: 身份自述(8分)。 标题极短+情绪化，典型小白特征 综合得分54.0分， 判定为「纯小白」 (置信度: low)。",
-            "sentiment": 1.0,
-            "intent": "neutral",
-            "intent_label": "⚪ 观望",
-            "key_signals": [
-              "「身份自述」明确自称小白/新手/刚入门/宝妈 (命中: 刚入)"
-            ]
-          },
-          {
-            "title": "下周看能不能再买",
-            "score": 50.0,
-            "level": "纯小白",
-            "reasoning": "帖子「下周看能不能再买...」 命中1个小信号: 决策依赖(7分)。 标题极短+情绪化，典型小白特征 综合得分50.0分， 判定为「纯小白」 (置信度: low)。",
-            "sentiment": 0.0,
-            "intent": "neutral",
-            "intent_label": "⚪ 观望",
-            "key_signals": [
-              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 能不能)"
-            ]
-          },
-          {
-            "title": "芯片还能涨多久啊",
-            "score": 50.0,
-            "level": "纯小白",
-            "reasoning": "帖子「芯片还能涨多久啊...」 命中1个小信号: 决策依赖(7分)。 标题极短+情绪化，典型小白特征 综合得分50.0分， 判定为「纯小白」 (置信度: low)。",
-            "sentiment": -1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
             "key_signals": [
               "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 要不要)"
             ]
-          }
-        ],
-        "price": 0.992
-      },
-      "innovative_drug": {
-        "index": 29.4,
-        "interpretation": "🟢 正常区间 — 小白参与度适中，无需特别操作",
-        "details": {
-          "total_posts": 76,
-          "valid_posts": 76,
-          "spam_posts": 0,
-          "newbie_posts": 3,
-          "pure_newbie": 0,
-          "newbie_ratio": 3.9,
-          "avg_newbie_score": 31.3,
-          "avg_sentiment": 100.0,
-          "purity_signal": 0.0,
-          "activity": 95.0,
-          "mom_buy_index": 56.8,
-          "mom_sell_index": 0.0,
-          "buy_sell_ratio": 3.0,
-          "buy_count": 3,
-          "sell_count": 0
-        },
-        "top_newbie_posts": [
-          {
-            "title": "今天放量了，能冲上去么？",
-            "score": 34.0,
-            "level": "中间派",
-            "reasoning": "帖子「今天放量了，能冲上去么？...」 命中1个小信号: 过度乐观(4分)。 以问句结尾，在寻求答案 综合得分34.0分， 判定为「中间派」 (置信度: low)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 冲)"
-            ]
           },
           {
-            "title": "少有的一次开盘没冲高，结局会不同吗？",
-            "score": 34.0,
-            "level": "中间派",
-            "reasoning": "帖子「少有的一次开盘没冲高，结局会不同吗？...」 命中1个小信号: 过度乐观(4分)。 以问句结尾，在寻求答案 综合得分34.0分， 判定为「中间派」 (置信度: low)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 冲)"
-            ]
-          },
-          {
-            "title": "周线冲高回落，",
-            "score": 26.0,
-            "level": "中间派",
-            "reasoning": "帖子「周线冲高回落，...」 命中1个小信号: 过度乐观(4分)。 综合得分26.0分， 判定为「中间派」 (置信度: low)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 冲)"
-            ]
-          }
-        ],
-        "price": 0.843
-      },
-      "nonferrous_metals": {
-        "index": 16.4,
-        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
-        "details": {
-          "total_posts": 79,
-          "valid_posts": 79,
-          "spam_posts": 0,
-          "newbie_posts": 11,
-          "pure_newbie": 0,
-          "newbie_ratio": 13.9,
-          "avg_newbie_score": 28.9,
-          "avg_sentiment": 18.2,
-          "purity_signal": 0.0,
-          "activity": 98.8,
-          "mom_buy_index": 13.6,
-          "mom_sell_index": 0.0,
-          "buy_sell_ratio": 2.0,
-          "buy_count": 2,
-          "sell_count": 0
-        },
-        "top_newbie_posts": [
-          {
-            "title": "请问你是跳水冠军吗，下次奥运会选你好吗",
-            "score": 42.0,
+            "title": "看能不能创新高",
+            "score": 38.0,
             "level": "偏小白",
-            "reasoning": "帖子「请问你是跳水冠军吗，下次奥运会选你好吗...」 命中1个小信号: 知识求助(6分)。 以问句结尾，在寻求答案 综合得分42.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「看能不能创新高...」 命中1个小信号: 决策依赖(7分)。 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 0.0,
             "intent": "neutral",
             "intent_label": "⚪ 观望",
             "key_signals": [
-              "「知识求助」在问基础问题（怎么买/在哪看/什么意思） (命中: 请问)"
+              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 能不能)"
             ]
           },
           {
-            "title": "今天跑赢中证500行不行，跑不赢宽基有点难看。",
+            "title": "要暴跌吗？还是杀溢价？",
+            "score": 30.0,
+            "level": "中间派",
+            "reasoning": "帖子「要暴跌吗？还是杀溢价？...」 未命中明确的信号词，内容较短或信息不足。 根据有限信息判定为中间派。",
+            "sentiment": -1.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": []
+          },
+          {
+            "title": "真牛逼啊，后悔今天加少了，相信文明相信光就好了",
+            "score": 30.0,
+            "level": "中间派",
+            "reasoning": "帖子「真牛逼啊，后悔今天加少了，相信文明相信光就好了...」 命中1个小信号: 情绪恐慌(5分)。 综合得分30.0分， 判定为「中间派」 (置信度: low)。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「情绪恐慌」表达明显的恐惧/焦虑/后悔情绪 (命中: 后悔)"
+            ]
+          },
+          {
+            "title": "明天会跌吗",
+            "score": 30.0,
+            "level": "中间派",
+            "reasoning": "帖子「明天会跌吗...」 未命中明确的信号词，内容较短或信息不足。 根据有限信息判定为中间派。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": []
+          }
+        ],
+        "price": 2.266
+      },
+      "gold": {
+        "index": 17.4,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 165,
+          "valid_posts": 165,
+          "spam_posts": 0,
+          "newbie_posts": 24,
+          "pure_newbie": 0,
+          "newbie_ratio": 14.5,
+          "avg_newbie_score": 26.3,
+          "avg_sentiment": 25.0,
+          "purity_signal": 0.0,
+          "activity": 100,
+          "mom_buy_index": 14.9,
+          "mom_sell_index": 10.4,
+          "buy_sell_ratio": 2.5,
+          "buy_count": 5,
+          "sell_count": 2
+        },
+        "top_newbie_posts": [
+          {
+            "title": "现在这个价格要不要拿住",
             "score": 38.0,
             "level": "偏小白",
-            "reasoning": "帖子「今天跑赢中证500行不行，跑不赢宽基有点难看。...」 命中1个小信号: 决策依赖(7分)。 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「现在这个价格要不要拿住...」 命中1个小信号: 决策依赖(7分)。 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 要不要)"
+            ]
+          },
+          {
+            "title": "个腿，跟紧脚步行不行",
+            "score": 38.0,
+            "level": "偏小白",
+            "reasoning": "帖子「个腿，跟紧脚步行不行...」 命中1个小信号: 决策依赖(7分)。 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 0.0,
             "intent": "neutral",
             "intent_label": "⚪ 观望",
@@ -461,10 +130,239 @@
             ]
           },
           {
-            "title": "能不能把垃圾锂矿踢出去啊，拖后腿的垃圾金属",
+            "title": "什么意思",
+            "score": 34.0,
+            "level": "中间派",
+            "reasoning": "帖子「什么意思...」 命中1个小信号: 知识求助(6分)。 综合得分34.0分， 判定为「中间派」 (置信度: low)。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「知识求助」在问基础问题（怎么买/在哪看/什么意思） (命中: 什么意思)"
+            ]
+          },
+          {
+            "title": "不懂就问，这个应该比个股好上车吧",
+            "score": 34.0,
+            "level": "中间派",
+            "reasoning": "帖子「不懂就问，这个应该比个股好上车吧...」 命中1个小信号: 知识求助(6分)。 综合得分34.0分， 判定为「中间派」 (置信度: low)。",
+            "sentiment": 0.0,
+            "intent": "buy",
+            "intent_label": "🟢 买入",
+            "key_signals": [
+              "「知识求助」在问基础问题（怎么买/在哪看/什么意思） (命中: 不懂)"
+            ]
+          },
+          {
+            "title": "明天涨停",
+            "score": 34.0,
+            "level": "中间派",
+            "reasoning": "帖子「明天涨停...」 命中1个小信号: 短期思维(3分)。 标题极短+情绪化，典型小白特征 综合得分34.0分， 判定为「中间派」 (置信度: low)。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「短期思维」关注明天/后天/今天涨跌，非长期视角 (命中: 明天涨)"
+            ]
+          }
+        ],
+        "price": 8.892
+      },
+      "telecom": {
+        "index": 19.7,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 233,
+          "valid_posts": 233,
+          "spam_posts": 0,
+          "newbie_posts": 36,
+          "pure_newbie": 1,
+          "newbie_ratio": 15.5,
+          "avg_newbie_score": 28.1,
+          "avg_sentiment": 30.6,
+          "purity_signal": 2.8,
+          "activity": 100,
+          "mom_buy_index": 8.4,
+          "mom_sell_index": 13.7,
+          "buy_sell_ratio": 0.6,
+          "buy_count": 3,
+          "sell_count": 5
+        },
+        "top_newbie_posts": [
+          {
+            "title": "为啥有这么多人买，有大佬解答一下不。小白不太懂围观一下",
+            "score": 66.0,
+            "level": "纯小白",
+            "reasoning": "帖子「为啥有这么多人买，有大佬解答一下不。小白不太懂围观一下...」 命中2个小信号: 身份自述(8分), 知识求助(6分)。 综合得分66.0分， 判定为「纯小白」 (置信度: medium)。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「身份自述」明确自称小白/新手/刚入门/宝妈 (命中: 小白)",
+              "「知识求助」在问基础问题（怎么买/在哪看/什么意思） (命中: 大佬)"
+            ]
+          },
+          {
+            "title": "Cpo是不是下周一要完蛋？这盘中来回跳水的？有谁知道？",
+            "score": 42.0,
+            "level": "偏小白",
+            "reasoning": "帖子「Cpo是不是下周一要完蛋？这盘中来回跳水的？有谁知道？...」 命中1个小信号: 知识求助(6分)。 以问句结尾，在寻求答案 综合得分42.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「知识求助」在问基础问题（怎么买/在哪看/什么意思） (命中: 谁知道)"
+            ]
+          },
+          {
+            "title": "完了跌破开盘价了",
+            "score": 42.0,
+            "level": "偏小白",
+            "reasoning": "帖子「完了跌破开盘价了...」 命中1个小信号: 情绪恐慌(5分)。 标题极短+情绪化，典型小白特征 综合得分42.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": -1.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「情绪恐慌」表达明显的恐惧/焦虑/后悔情绪 (命中: 完了)"
+            ]
+          },
+          {
+            "title": "沃日，吓死人呢，我半导体没事吧？",
             "score": 38.0,
             "level": "偏小白",
-            "reasoning": "帖子「能不能把垃圾锂矿踢出去啊，拖后腿的垃圾金属...」 命中1个小信号: 决策依赖(7分)。 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「沃日，吓死人呢，我半导体没事吧？...」 命中1个小信号: 情绪恐慌(5分)。 以问句结尾，在寻求答案 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「情绪恐慌」表达明显的恐惧/焦虑/后悔情绪 (命中: 吓死)"
+            ]
+          },
+          {
+            "title": "能不能吧中际调整下去",
+            "score": 38.0,
+            "level": "偏小白",
+            "reasoning": "帖子「能不能吧中际调整下去...」 命中1个小信号: 决策依赖(7分)。 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 能不能)"
+            ]
+          }
+        ],
+        "price": 0.66
+      },
+      "semiconductor": {
+        "index": 21.3,
+        "interpretation": "🟢 正常区间 — 小白参与度适中，无需特别操作",
+        "details": {
+          "total_posts": 227,
+          "valid_posts": 227,
+          "spam_posts": 0,
+          "newbie_posts": 35,
+          "pure_newbie": 0,
+          "newbie_ratio": 15.4,
+          "avg_newbie_score": 26.1,
+          "avg_sentiment": 42.9,
+          "purity_signal": 0.0,
+          "activity": 100,
+          "mom_buy_index": 20.5,
+          "mom_sell_index": 13.9,
+          "buy_sell_ratio": 2.2,
+          "buy_count": 11,
+          "sell_count": 5
+        },
+        "top_newbie_posts": [
+          {
+            "title": "我是萌新，7月底进来的，11700本金亏了500了，回本不玩了呜呜呜",
+            "score": 42.0,
+            "level": "偏小白",
+            "reasoning": "帖子「我是萌新，7月底进来的，11700本金亏了500了，回本不玩了呜呜呜...」 命中1个小信号: 身份自述(8分)。 综合得分42.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": -1.0,
+            "intent": "sell",
+            "intent_label": "🔴 卖出",
+            "key_signals": [
+              "「身份自述」明确自称小白/新手/刚入门/宝妈 (命中: 萌新)"
+            ]
+          },
+          {
+            "title": "继续冲涨停",
+            "score": 38.0,
+            "level": "偏小白",
+            "reasoning": "帖子「继续冲涨停...」 命中1个小信号: 过度乐观(4分)。 标题极短+情绪化，典型小白特征 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 1.0,
+            "intent": "buy",
+            "intent_label": "🟢 买入",
+            "key_signals": [
+              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 冲)"
+            ]
+          },
+          {
+            "title": "听说明天要收网了",
+            "score": 34.0,
+            "level": "中间派",
+            "reasoning": "帖子「听说明天要收网了...」 命中1个小信号: 跟风行为(6分)。 综合得分34.0分， 判定为「中间派」 (置信度: low)。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「跟风行为」提及跟别人买/听说/博主推荐/朋友说 (命中: 听说)"
+            ]
+          },
+          {
+            "title": "亏22个点割肉不敢追高了",
+            "score": 30.0,
+            "level": "中间派",
+            "reasoning": "帖子「亏22个点割肉不敢追高了...」 命中1个小信号: 情绪恐慌(5分)。 综合得分30.0分， 判定为「中间派」 (置信度: low)。",
+            "sentiment": -1.0,
+            "intent": "sell",
+            "intent_label": "🔴 卖出",
+            "key_signals": [
+              "「情绪恐慌」表达明显的恐惧/焦虑/后悔情绪 (命中: 割肉)"
+            ]
+          },
+          {
+            "title": "1.07走完了，科技真猛，让我回本走感谢主力",
+            "score": 30.0,
+            "level": "中间派",
+            "reasoning": "帖子「1.07走完了，科技真猛，让我回本走感谢主力...」 命中1个小信号: 情绪恐慌(5分)。 综合得分30.0分， 判定为「中间派」 (置信度: low)。",
+            "sentiment": -1.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「情绪恐慌」表达明显的恐惧/焦虑/后悔情绪 (命中: 完了)"
+            ]
+          }
+        ],
+        "price": 1.083
+      },
+      "innovative_drug": {
+        "index": 18.8,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 219,
+          "valid_posts": 219,
+          "spam_posts": 0,
+          "newbie_posts": 24,
+          "pure_newbie": 0,
+          "newbie_ratio": 11.0,
+          "avg_newbie_score": 27.7,
+          "avg_sentiment": 37.5,
+          "purity_signal": 0.0,
+          "activity": 100,
+          "mom_buy_index": 19.3,
+          "mom_sell_index": 8.4,
+          "buy_sell_ratio": 3.5,
+          "buy_count": 7,
+          "sell_count": 2
+        },
+        "top_newbie_posts": [
+          {
+            "title": "这破玩意能不能涨到一块了？",
+            "score": 46.0,
+            "level": "偏小白",
+            "reasoning": "帖子「这破玩意能不能涨到一块了？...」 命中1个小信号: 决策依赖(7分)。 以问句结尾，在寻求答案 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 0.0,
             "intent": "neutral",
             "intent_label": "⚪ 观望",
@@ -473,49 +371,187 @@
             ]
           },
           {
-            "title": "明天还跌不？",
-            "score": 30.0,
-            "level": "中间派",
-            "reasoning": "帖子「明天还跌不？...」 未命中明确的信号词，内容较短或信息不足。 根据有限信息判定为中间派。",
+            "title": "今天要做避雷针K线吗？要不要跑？",
+            "score": 46.0,
+            "level": "偏小白",
+            "reasoning": "帖子「今天要做避雷针K线吗？要不要跑？...」 命中1个小信号: 决策依赖(7分)。 以问句结尾，在寻求答案 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 0.0,
             "intent": "neutral",
             "intent_label": "⚪ 观望",
-            "key_signals": []
+            "key_signals": [
+              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 要不要)"
+            ]
           },
           {
-            "title": "黄金涨了你也不跟了？？",
-            "score": 30.0,
-            "level": "中间派",
-            "reasoning": "帖子「黄金涨了你也不跟了？？...」 未命中明确的信号词，内容较短或信息不足。 根据有限信息判定为中间派。",
+            "title": "今天该不该减仓，有点犹豫",
+            "score": 38.0,
+            "level": "偏小白",
+            "reasoning": "帖子「今天该不该减仓，有点犹豫...」 命中1个小信号: 决策依赖(7分)。 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 0.0,
+            "intent": "sell",
+            "intent_label": "🔴 卖出",
+            "key_signals": [
+              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 该不该)"
+            ]
+          },
+          {
+            "title": "阴线买入，明天必涨！",
+            "score": 38.0,
+            "level": "偏小白",
+            "reasoning": "帖子「阴线买入，明天必涨！...」 命中1个小信号: 过度乐观(4分)。 标题极短+情绪化，典型小白特征 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 1.0,
+            "intent": "buy",
+            "intent_label": "🟢 买入",
+            "key_signals": [
+              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 必涨)"
+            ]
+          },
+          {
+            "title": "买进了，加油冲",
+            "score": 38.0,
+            "level": "偏小白",
+            "reasoning": "帖子「买进了，加油冲...」 命中1个小信号: 过度乐观(4分)。 标题极短+情绪化，典型小白特征 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 1.0,
+            "intent": "buy",
+            "intent_label": "🟢 买入",
+            "key_signals": [
+              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 冲)"
+            ]
+          }
+        ],
+        "price": 0.91
+      },
+      "nonferrous_metals": {
+        "index": 18.2,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 230,
+          "valid_posts": 230,
+          "spam_posts": 0,
+          "newbie_posts": 33,
+          "pure_newbie": 2,
+          "newbie_ratio": 14.3,
+          "avg_newbie_score": 29.3,
+          "avg_sentiment": 21.2,
+          "purity_signal": 6.1,
+          "activity": 100,
+          "mom_buy_index": 14.2,
+          "mom_sell_index": 7.2,
+          "buy_sell_ratio": 3.0,
+          "buy_count": 6,
+          "sell_count": 2
+        },
+        "top_newbie_posts": [
+          {
+            "title": "今天能不能冲两个点老登",
+            "score": 54.0,
+            "level": "纯小白",
+            "reasoning": "帖子「今天能不能冲两个点老登...」 命中2个小信号: 决策依赖(7分), 过度乐观(4分)。 综合得分54.0分， 判定为「纯小白」 (置信度: medium)。",
+            "sentiment": 1.0,
+            "intent": "buy",
+            "intent_label": "🟢 买入",
+            "key_signals": [
+              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 能不能)",
+              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 冲)"
+            ]
+          },
+          {
+            "title": "要不要卖，还亏九个点",
+            "score": 50.0,
+            "level": "纯小白",
+            "reasoning": "帖子「要不要卖，还亏九个点...」 命中1个小信号: 决策依赖(7分)。 标题极短+情绪化，典型小白特征 综合得分50.0分， 判定为「纯小白」 (置信度: low)。",
+            "sentiment": -1.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 要不要)"
+            ]
+          },
+          {
+            "title": "咱们能不能来个涨停板你都已经有几个跌停板了，咱们能不能来个硬气？",
+            "score": 46.0,
+            "level": "偏小白",
+            "reasoning": "帖子「咱们能不能来个涨停板你都已经有几个跌停板了，咱们能不能来个硬气？...」 命中1个小信号: 决策依赖(7分)。 以问句结尾，在寻求答案 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 0.0,
             "intent": "neutral",
             "intent_label": "⚪ 观望",
-            "key_signals": []
+            "key_signals": [
+              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 能不能)"
+            ]
+          },
+          {
+            "title": "早起怎么买了你",
+            "score": 46.0,
+            "level": "偏小白",
+            "reasoning": "帖子「早起怎么买了你...」 命中1个小信号: 知识求助(6分)。 标题极短+情绪化，典型小白特征 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 0.0,
+            "intent": "buy",
+            "intent_label": "🟢 买入",
+            "key_signals": [
+              "「知识求助」在问基础问题（怎么买/在哪看/什么意思） (命中: 怎么买)"
+            ]
+          },
+          {
+            "title": "我终于回本了，太难了，从几万一路补到22万。请教各位大神，现在咋整？",
+            "score": 42.0,
+            "level": "偏小白",
+            "reasoning": "帖子「我终于回本了，太难了，从几万一路补到22万。请教各位大神，现在咋整？...」 命中1个小信号: 知识求助(6分)。 以问句结尾，在寻求答案 综合得分42.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「知识求助」在问基础问题（怎么买/在哪看/什么意思） (命中: 请教)"
+            ]
           }
         ],
-        "price": 1.792
+        "price": 1.985
       },
       "new_energy": {
-        "index": 20.5,
-        "interpretation": "🟢 正常区间 — 小白参与度适中，无需特别操作",
+        "index": 17.3,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
         "details": {
-          "total_posts": 80,
-          "valid_posts": 80,
-          "spam_posts": 0,
-          "newbie_posts": 6,
-          "pure_newbie": 0,
-          "newbie_ratio": 7.5,
-          "avg_newbie_score": 30.0,
-          "avg_sentiment": 50.0,
-          "purity_signal": 0.0,
+          "total_posts": 214,
+          "valid_posts": 211,
+          "spam_posts": 3,
+          "newbie_posts": 17,
+          "pure_newbie": 1,
+          "newbie_ratio": 8.1,
+          "avg_newbie_score": 29.1,
+          "avg_sentiment": 29.4,
+          "purity_signal": 5.9,
           "activity": 100,
-          "mom_buy_index": 12.8,
+          "mom_buy_index": 16.4,
           "mom_sell_index": 0.0,
-          "buy_sell_ratio": 1.0,
-          "buy_count": 1,
+          "buy_sell_ratio": 4.0,
+          "buy_count": 4,
           "sell_count": 0
         },
         "top_newbie_posts": [
+          {
+            "title": "新能源这么垃跨吗？一直跌一直跌没完了？石油都涨价了，你还跌能不能争气点",
+            "score": 58.0,
+            "level": "纯小白",
+            "reasoning": "帖子「新能源这么垃跨吗？一直跌一直跌没完了？石油都涨价了，你还跌能不能争气点...」 命中2个小信号: 决策依赖(7分), 情绪恐慌(5分)。 综合得分58.0分， 判定为「纯小白」 (置信度: medium)。",
+            "sentiment": -1.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 能不能)",
+              "「情绪恐慌」表达明显的恐惧/焦虑/后悔情绪 (命中: 完了)"
+            ]
+          },
+          {
+            "title": "能不能下来我还没上车呢",
+            "score": 46.0,
+            "level": "偏小白",
+            "reasoning": "帖子「能不能下来我还没上车呢...」 命中1个小信号: 决策依赖(7分)。 以问句结尾，在寻求答案 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 0.0,
+            "intent": "buy",
+            "intent_label": "🟢 买入",
+            "key_signals": [
+              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 能不能)"
+            ]
+          },
           {
             "title": "人家涨了跌，你是没涨也跌，尾盘还放量砸盘，这是什么意思？",
             "score": 42.0,
@@ -547,215 +583,226 @@
             "intent": "neutral",
             "intent_label": "⚪ 观望",
             "key_signals": []
-          },
+          }
+        ],
+        "price": 2.56
+      },
+      "power": {
+        "index": 14.4,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 230,
+          "valid_posts": 230,
+          "spam_posts": 0,
+          "newbie_posts": 18,
+          "pure_newbie": 0,
+          "newbie_ratio": 7.8,
+          "avg_newbie_score": 27.3,
+          "avg_sentiment": 22.2,
+          "purity_signal": 0.0,
+          "activity": 100,
+          "mom_buy_index": 9.8,
+          "mom_sell_index": 6.9,
+          "buy_sell_ratio": 2.0,
+          "buy_count": 2,
+          "sell_count": 1
+        },
+        "top_newbie_posts": [
           {
-            "title": "新能源完了，大盘跌它跌，大盘涨它也跌",
-            "score": 30.0,
-            "level": "中间派",
-            "reasoning": "帖子「新能源完了，大盘跌它跌，大盘涨它也跌...」 命中1个小信号: 情绪恐慌(5分)。 综合得分30.0分， 判定为「中间派」 (置信度: low)。",
-            "sentiment": -1.0,
+            "title": "能不能学煤炭呢",
+            "score": 46.0,
+            "level": "偏小白",
+            "reasoning": "帖子「能不能学煤炭呢...」 命中1个小信号: 决策依赖(7分)。 以问句结尾，在寻求答案 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 0.0,
             "intent": "neutral",
             "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 能不能)"
+            ]
+          },
+          {
+            "title": "看看你在干什么？能不能看到外面一片红",
+            "score": 38.0,
+            "level": "偏小白",
+            "reasoning": "帖子「看看你在干什么？能不能看到外面一片红...」 命中1个小信号: 决策依赖(7分)。 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 能不能)"
+            ]
+          },
+          {
+            "title": "哎，天天都是这样子，还能不能行了。",
+            "score": 38.0,
+            "level": "偏小白",
+            "reasoning": "帖子「哎，天天都是这样子，还能不能行了。...」 命中1个小信号: 决策依赖(7分)。 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 能不能)"
+            ]
+          },
+          {
+            "title": "为什么买不上？",
+            "score": 30.0,
+            "level": "中间派",
+            "reasoning": "帖子「为什么买不上？...」 未命中明确的信号词，内容较短或信息不足。 根据有限信息判定为中间派。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": []
+          },
+          {
+            "title": "煤炭拉冒烟了他这个鸟样前几天看煤炭就很强跌几个点马上拉回去早知道全去煤炭",
+            "score": 30.0,
+            "level": "中间派",
+            "reasoning": "帖子「煤炭拉冒烟了他这个鸟样前几天看煤炭就很强跌几个点马上拉回去早知道全去煤炭...」 命中1个小信号: 情绪恐慌(5分)。 综合得分30.0分， 判定为「中间派」 (置信度: low)。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「情绪恐慌」表达明显的恐惧/焦虑/后悔情绪 (命中: 早知道)"
+            ]
+          }
+        ],
+        "price": 1.059
+      },
+      "chip": {
+        "index": 18.4,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 223,
+          "valid_posts": 223,
+          "spam_posts": 0,
+          "newbie_posts": 29,
+          "pure_newbie": 0,
+          "newbie_ratio": 13.0,
+          "avg_newbie_score": 25.2,
+          "avg_sentiment": 34.5,
+          "purity_signal": 0.0,
+          "activity": 100,
+          "mom_buy_index": 18.4,
+          "mom_sell_index": 9.6,
+          "buy_sell_ratio": 4.0,
+          "buy_count": 8,
+          "sell_count": 2
+        },
+        "top_newbie_posts": [
+          {
+            "title": "买房加杠杆冲了，哈哈",
+            "score": 38.0,
+            "level": "偏小白",
+            "reasoning": "帖子「买房加杠杆冲了，哈哈...」 命中1个小信号: 过度乐观(4分)。 标题极短+情绪化，典型小白特征 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 1.0,
+            "intent": "buy",
+            "intent_label": "🟢 买入",
+            "key_signals": [
+              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 冲)"
+            ]
+          },
+          {
+            "title": "还没回本，明天周四要不要卖",
+            "score": 38.0,
+            "level": "偏小白",
+            "reasoning": "帖子「还没回本，明天周四要不要卖...」 命中1个小信号: 决策依赖(7分)。 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 要不要)"
+            ]
+          },
+          {
+            "title": "现在梭哈有什么后果？",
+            "score": 34.0,
+            "level": "中间派",
+            "reasoning": "帖子「现在梭哈有什么后果？...」 命中1个小信号: 过度乐观(4分)。 以问句结尾，在寻求答案 综合得分34.0分， 判定为「中间派」 (置信度: low)。",
+            "sentiment": 1.0,
+            "intent": "buy",
+            "intent_label": "🟢 买入",
+            "key_signals": [
+              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 梭哈)"
+            ]
+          },
+          {
+            "title": "完了，被套了",
+            "score": 30.0,
+            "level": "中间派",
+            "reasoning": "帖子「完了，被套了...」 命中1个小信号: 情绪恐慌(5分)。 综合得分30.0分， 判定为「中间派」 (置信度: low)。",
+            "sentiment": -1.0,
+            "intent": "sell",
+            "intent_label": "🔴 卖出",
             "key_signals": [
               "「情绪恐慌」表达明显的恐惧/焦虑/后悔情绪 (命中: 完了)"
             ]
           },
           {
-            "title": "为了无人机和VR眼镜，冲榜了！",
-            "score": 26.0,
-            "level": "中间派",
-            "reasoning": "帖子「为了无人机和VR眼镜，冲榜了！...」 命中1个小信号: 过度乐观(4分)。 综合得分26.0分， 判定为「中间派」 (置信度: low)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 冲)"
-            ]
-          }
-        ],
-        "price": 2.436
-      },
-      "power": {
-        "index": 10.4,
-        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
-        "details": {
-          "total_posts": 78,
-          "valid_posts": 78,
-          "spam_posts": 0,
-          "newbie_posts": 3,
-          "pure_newbie": 0,
-          "newbie_ratio": 3.8,
-          "avg_newbie_score": 35.3,
-          "avg_sentiment": 0.0,
-          "purity_signal": 0.0,
-          "activity": 97.5,
-          "mom_buy_index": 0.0,
-          "mom_sell_index": 0.0,
-          "buy_sell_ratio": 0.0,
-          "buy_count": 0,
-          "sell_count": 0
-        },
-        "top_newbie_posts": [
-          {
-            "title": "今天能不能红",
-            "score": 38.0,
-            "level": "偏小白",
-            "reasoning": "帖子「今天能不能红...」 命中1个小信号: 决策依赖(7分)。 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
-            "sentiment": 0.0,
-            "intent": "neutral",
-            "intent_label": "⚪ 观望",
-            "key_signals": [
-              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 能不能)"
-            ]
-          },
-          {
-            "title": "下午能不能起来",
-            "score": 38.0,
-            "level": "偏小白",
-            "reasoning": "帖子「下午能不能起来...」 命中1个小信号: 决策依赖(7分)。 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
-            "sentiment": 0.0,
-            "intent": "neutral",
-            "intent_label": "⚪ 观望",
-            "key_signals": [
-              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 能不能)"
-            ]
-          },
-          {
-            "title": "都去卖了追半导体？",
+            "title": "有些人活该穷！昨天涨10个点，欢天喜地。今天跌2个点，哭天抢地。你不穷，谁穷？",
             "score": 30.0,
             "level": "中间派",
-            "reasoning": "帖子「都去卖了追半导体？...」 未命中明确的信号词，内容较短或信息不足。 根据有限信息判定为中间派。",
+            "reasoning": "帖子「有些人活该穷！昨天涨10个点，欢天喜地。今天跌2个点，哭天抢地。你不穷，谁穷？...」 命中1个小信号: 短期思维(3分)。 以问句结尾，在寻求答案 综合得分30.0分， 判定为「中间派」 (置信度: low)。",
             "sentiment": 0.0,
             "intent": "neutral",
             "intent_label": "⚪ 观望",
-            "key_signals": []
+            "key_signals": [
+              "「短期思维」关注明天/后天/今天涨跌，非长期视角 (命中: 今天跌)"
+            ]
           }
         ],
-        "price": 1.072
+        "price": 1.212
       },
-      "chip": {
-        "index": 18.8,
+      "robot": {
+        "index": 15.3,
         "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
         "details": {
-          "total_posts": 76,
-          "valid_posts": 76,
+          "total_posts": 211,
+          "valid_posts": 211,
           "spam_posts": 0,
-          "newbie_posts": 8,
+          "newbie_posts": 23,
           "pure_newbie": 0,
-          "newbie_ratio": 10.5,
-          "avg_newbie_score": 28.5,
-          "avg_sentiment": 37.5,
+          "newbie_ratio": 10.9,
+          "avg_newbie_score": 26.2,
+          "avg_sentiment": 21.7,
           "purity_signal": 0.0,
-          "activity": 95.0,
-          "mom_buy_index": 36.9,
-          "mom_sell_index": 17.1,
-          "buy_sell_ratio": 2.5,
-          "buy_count": 5,
-          "sell_count": 2
+          "activity": 100,
+          "mom_buy_index": 13.1,
+          "mom_sell_index": 12.2,
+          "buy_sell_ratio": 1.3,
+          "buy_count": 4,
+          "sell_count": 3
         },
         "top_newbie_posts": [
           {
-            "title": "早上涨停没减仓，好后悔啊，有跟我一样的吗",
-            "score": 38.0,
+            "title": "各位大佬，这个当天买，不能当天卖吗？",
+            "score": 42.0,
             "level": "偏小白",
-            "reasoning": "帖子「早上涨停没减仓，好后悔啊，有跟我一样的吗...」 命中1个小信号: 情绪恐慌(5分)。 以问句结尾，在寻求答案 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「各位大佬，这个当天买，不能当天卖吗？...」 命中1个小信号: 知识求助(6分)。 以问句结尾，在寻求答案 综合得分42.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 0.0,
-            "intent": "sell",
-            "intent_label": "🔴 卖出",
-            "key_signals": [
-              "「情绪恐慌」表达明显的恐惧/焦虑/后悔情绪 (命中: 后悔)"
-            ]
-          },
-          {
-            "title": "集合竞价买了3w，后续咋办？有大佬没求解",
-            "score": 34.0,
-            "level": "中间派",
-            "reasoning": "帖子「集合竞价买了3w，后续咋办？有大佬没求解...」 命中1个小信号: 知识求助(6分)。 综合得分34.0分， 判定为「中间派」 (置信度: low)。",
-            "sentiment": 0.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
             "key_signals": [
               "「知识求助」在问基础问题（怎么买/在哪看/什么意思） (命中: 大佬)"
             ]
           },
           {
-            "title": "有没有今天买入的",
-            "score": 34.0,
-            "level": "中间派",
-            "reasoning": "帖子「有没有今天买入的...」 命中1个小信号: 短期思维(3分)。 标题极短+情绪化，典型小白特征 综合得分34.0分， 判定为「中间派」 (置信度: low)。",
-            "sentiment": 0.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「短期思维」关注明天/后天/今天涨跌，非长期视角 (命中: 今天买)"
-            ]
-          },
-          {
-            "title": "周一有冲高机会的",
-            "score": 26.0,
-            "level": "中间派",
-            "reasoning": "帖子「周一有冲高机会的...」 命中1个小信号: 过度乐观(4分)。 综合得分26.0分， 判定为「中间派」 (置信度: low)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 冲)"
-            ]
-          },
-          {
-            "title": "有没有不长教训的，高开不跑反而冲进去的",
-            "score": 26.0,
-            "level": "中间派",
-            "reasoning": "帖子「有没有不长教训的，高开不跑反而冲进去的...」 命中1个小信号: 过度乐观(4分)。 综合得分26.0分， 判定为「中间派」 (置信度: low)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 冲)"
-            ]
-          }
-        ],
-        "price": 1.118
-      },
-      "robot": {
-        "index": 19.6,
-        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
-        "details": {
-          "total_posts": 77,
-          "valid_posts": 77,
-          "spam_posts": 0,
-          "newbie_posts": 13,
-          "pure_newbie": 0,
-          "newbie_ratio": 16.9,
-          "avg_newbie_score": 26.9,
-          "avg_sentiment": 30.8,
-          "purity_signal": 0.0,
-          "activity": 96.2,
-          "mom_buy_index": 16.1,
-          "mom_sell_index": 17.4,
-          "buy_sell_ratio": 1.0,
-          "buy_count": 3,
-          "sell_count": 3
-        },
-        "top_newbie_posts": [
-          {
-            "title": "除非明天涨5个点以上，不然可以割肉了",
-            "score": 42.0,
-            "level": "偏小白",
-            "reasoning": "帖子「除非明天涨5个点以上，不然可以割肉了...」 命中2个小信号: 情绪恐慌(5分), 短期思维(3分)。 综合得分42.0分， 判定为「偏小白」 (置信度: medium)。",
-            "sentiment": -1.0,
-            "intent": "sell",
-            "intent_label": "🔴 卖出",
-            "key_signals": [
-              "「情绪恐慌」表达明显的恐惧/焦虑/后悔情绪 (命中: 割肉)",
-              "「短期思维」关注明天/后天/今天涨跌，非长期视角 (命中: 明天涨)"
-            ]
-          },
-          {
-            "title": "能不能跟上，涨5个点不过分吧",
+            "title": "明天能不能接着上涨呢？有没有大神推测一下",
             "score": 38.0,
             "level": "偏小白",
-            "reasoning": "帖子「能不能跟上，涨5个点不过分吧...」 命中1个小信号: 决策依赖(7分)。 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「明天能不能接着上涨呢？有没有大神推测一下...」 命中1个小信号: 决策依赖(7分)。 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 能不能)"
+            ]
+          },
+          {
+            "title": "八月份的开盘第一天，能不能来个开门红",
+            "score": 38.0,
+            "level": "偏小白",
+            "reasoning": "帖子「八月份的开盘第一天，能不能来个开门红...」 命中1个小信号: 决策依赖(7分)。 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 0.0,
             "intent": "neutral",
             "intent_label": "⚪ 观望",
@@ -776,53 +823,65 @@
             ]
           },
           {
-            "title": "后悔昨天没有加仓",
+            "title": "连涨4天，该割肉吗？真怕又跌落山谷。",
             "score": 30.0,
             "level": "中间派",
-            "reasoning": "帖子「后悔昨天没有加仓...」 命中1个小信号: 情绪恐慌(5分)。 综合得分30.0分， 判定为「中间派」 (置信度: low)。",
+            "reasoning": "帖子「连涨4天，该割肉吗？真怕又跌落山谷。...」 命中1个小信号: 情绪恐慌(5分)。 综合得分30.0分， 判定为「中间派」 (置信度: low)。",
+            "sentiment": -1.0,
+            "intent": "sell",
+            "intent_label": "🔴 卖出",
+            "key_signals": [
+              "「情绪恐慌」表达明显的恐惧/焦虑/后悔情绪 (命中: 割肉)"
+            ]
+          }
+        ],
+        "price": 1.021
+      },
+      "petrochemical": {
+        "index": 21.8,
+        "interpretation": "🟢 正常区间 — 小白参与度适中，无需特别操作",
+        "details": {
+          "total_posts": 215,
+          "valid_posts": 214,
+          "spam_posts": 1,
+          "newbie_posts": 48,
+          "pure_newbie": 1,
+          "newbie_ratio": 22.4,
+          "avg_newbie_score": 28.2,
+          "avg_sentiment": 27.1,
+          "purity_signal": 2.1,
+          "activity": 100,
+          "mom_buy_index": 17.1,
+          "mom_sell_index": 8.2,
+          "buy_sell_ratio": 6.0,
+          "buy_count": 12,
+          "sell_count": 2
+        },
+        "top_newbie_posts": [
+          {
+            "title": "请问这个明天可以买吗",
+            "score": 54.0,
+            "level": "纯小白",
+            "reasoning": "帖子「请问这个明天可以买吗...」 命中1个小信号: 知识求助(6分)。 标题极短+情绪化，典型小白特征 以问句结尾，在寻求答案 综合得分54.0分， 判定为「纯小白」 (置信度: low)。",
             "sentiment": 0.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
             "key_signals": [
-              "「情绪恐慌」表达明显的恐惧/焦虑/后悔情绪 (命中: 后悔)"
+              "「知识求助」在问基础问题（怎么买/在哪看/什么意思） (命中: 请问)"
             ]
           },
           {
-            "title": "冲一冲，半导体都是臭弟弟",
-            "score": 26.0,
-            "level": "中间派",
-            "reasoning": "帖子「冲一冲，半导体都是臭弟弟...」 命中1个小信号: 过度乐观(4分)。 综合得分26.0分， 判定为「中间派」 (置信度: low)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
+            "title": "大佬们这个是T1吗",
+            "score": 42.0,
+            "level": "偏小白",
+            "reasoning": "帖子「大佬们这个是T1吗...」 命中1个小信号: 知识求助(6分)。 以问句结尾，在寻求答案 综合得分42.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
             "key_signals": [
-              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 冲)"
+              "「知识求助」在问基础问题（怎么买/在哪看/什么意思） (命中: 大佬)"
             ]
-          }
-        ],
-        "price": 0.956
-      },
-      "petrochemical": {
-        "index": 17.5,
-        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
-        "details": {
-          "total_posts": 69,
-          "valid_posts": 68,
-          "spam_posts": 1,
-          "newbie_posts": 11,
-          "pure_newbie": 0,
-          "newbie_ratio": 16.2,
-          "avg_newbie_score": 29.6,
-          "avg_sentiment": 18.2,
-          "purity_signal": 0.0,
-          "activity": 85.0,
-          "mom_buy_index": 8.8,
-          "mom_sell_index": 8.8,
-          "buy_sell_ratio": 1.0,
-          "buy_count": 1,
-          "sell_count": 1
-        },
-        "top_newbie_posts": [
+          },
           {
             "title": "能不能不要再卖了，涨得好好的",
             "score": 38.0,
@@ -848,63 +907,54 @@
             ]
           },
           {
-            "title": "听说国家队要来了，大家打算怎么做",
-            "score": 34.0,
-            "level": "中间派",
-            "reasoning": "帖子「听说国家队要来了，大家打算怎么做...」 命中1个小信号: 跟风行为(6分)。 综合得分34.0分， 判定为「中间派」 (置信度: low)。",
+            "title": "能不能不要晒单。",
+            "score": 38.0,
+            "level": "偏小白",
+            "reasoning": "帖子「能不能不要晒单。...」 命中1个小信号: 决策依赖(7分)。 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 0.0,
             "intent": "neutral",
             "intent_label": "⚪ 观望",
             "key_signals": [
-              "「跟风行为」提及跟别人买/听说/博主推荐/朋友说 (命中: 听说)"
+              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 能不能)"
             ]
-          },
-          {
-            "title": "明天涨回来",
-            "score": 34.0,
-            "level": "中间派",
-            "reasoning": "帖子「明天涨回来...」 命中1个小信号: 短期思维(3分)。 标题极短+情绪化，典型小白特征 综合得分34.0分， 判定为「中间派」 (置信度: low)。",
-            "sentiment": 0.0,
-            "intent": "neutral",
-            "intent_label": "⚪ 观望",
-            "key_signals": [
-              "「短期思维」关注明天/后天/今天涨跌，非长期视角 (命中: 明天涨)"
-            ]
-          },
-          {
-            "title": "涨这么多，疯了吗",
-            "score": 30.0,
-            "level": "中间派",
-            "reasoning": "帖子「涨这么多，疯了吗...」 未命中明确的信号词，内容较短或信息不足。 根据有限信息判定为中间派。",
-            "sentiment": 0.0,
-            "intent": "neutral",
-            "intent_label": "⚪ 观望",
-            "key_signals": []
           }
         ],
-        "price": 1.673
+        "price": 1.677
       },
       "aerospace": {
-        "index": 13.8,
+        "index": 14.1,
         "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
         "details": {
-          "total_posts": 80,
-          "valid_posts": 80,
+          "total_posts": 238,
+          "valid_posts": 238,
           "spam_posts": 0,
-          "newbie_posts": 8,
-          "pure_newbie": 0,
-          "newbie_ratio": 10.0,
-          "avg_newbie_score": 29.0,
-          "avg_sentiment": 12.5,
-          "purity_signal": 0.0,
+          "newbie_posts": 14,
+          "pure_newbie": 1,
+          "newbie_ratio": 5.9,
+          "avg_newbie_score": 31.1,
+          "avg_sentiment": 14.3,
+          "purity_signal": 7.1,
           "activity": 100,
-          "mom_buy_index": 10.6,
-          "mom_sell_index": 10.6,
+          "mom_buy_index": 7.8,
+          "mom_sell_index": 7.8,
           "buy_sell_ratio": 1.0,
           "buy_count": 1,
           "sell_count": 1
         },
         "top_newbie_posts": [
+          {
+            "title": "小白请教，A股分红少得可怜，基民如何价值投资？",
+            "score": 74.0,
+            "level": "纯小白",
+            "reasoning": "帖子「小白请教，A股分红少得可怜，基民如何价值投资？...」 命中2个小信号: 身份自述(8分), 知识求助(6分)。 以问句结尾，在寻求答案 综合得分74.0分， 判定为「纯小白」 (置信度: medium)。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「身份自述」明确自称小白/新手/刚入门/宝妈 (命中: 小白)",
+              "「知识求助」在问基础问题（怎么买/在哪看/什么意思） (命中: 请教)"
+            ]
+          },
           {
             "title": "听说卖了就会涨，谁卖点？",
             "score": 42.0,
@@ -930,6 +980,18 @@
             ]
           },
           {
+            "title": "红了好几天了，要不要跑",
+            "score": 38.0,
+            "level": "偏小白",
+            "reasoning": "帖子「红了好几天了，要不要跑...」 命中1个小信号: 决策依赖(7分)。 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 要不要)"
+            ]
+          },
+          {
             "title": "请问，你是科技吗，蹭什么热点",
             "score": 34.0,
             "level": "中间派",
@@ -940,835 +1002,789 @@
             "key_signals": [
               "「知识求助」在问基础问题（怎么买/在哪看/什么意思） (命中: 请问)"
             ]
-          },
-          {
-            "title": "建军节来了冲啊",
-            "score": 26.0,
-            "level": "中间派",
-            "reasoning": "帖子「建军节来了冲啊...」 命中1个小信号: 过度乐观(4分)。 综合得分26.0分， 判定为「中间派」 (置信度: low)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 冲)"
-            ]
-          },
-          {
-            "title": "桶，死不涨",
-            "score": 22.0,
-            "level": "中间派",
-            "reasoning": "帖子「桶，死不涨...」 未命中明确的信号词，内容较短或信息不足。 根据有限信息判定为中间派。",
-            "sentiment": 0.0,
-            "intent": "neutral",
-            "intent_label": "⚪ 观望",
-            "key_signals": []
           }
         ],
-        "price": 0.605
+        "price": 0.625
       }
     }
   },
   "sector_history": {
     "nasdaq": [
       {
-        "date": "2026-07-03",
+        "date": "2026-07-09",
         "index": 34.3
       },
       {
-        "date": "2026-07-04",
+        "date": "2026-07-10",
         "index": 28.8
       },
       {
-        "date": "2026-07-05",
+        "date": "2026-07-11",
         "index": 30.3
       },
       {
-        "date": "2026-07-06",
+        "date": "2026-07-12",
         "index": 39.4
       },
       {
-        "date": "2026-07-07",
+        "date": "2026-07-13",
         "index": 40.4
       },
       {
-        "date": "2026-07-08",
+        "date": "2026-07-14",
         "index": 46.9
       },
       {
-        "date": "2026-07-09",
+        "date": "2026-07-15",
         "index": 45.2
       },
       {
-        "date": "2026-07-10",
+        "date": "2026-07-16",
         "index": 40.1
       },
       {
-        "date": "2026-07-11",
+        "date": "2026-07-17",
         "index": 48.3
       },
       {
-        "date": "2026-07-12",
+        "date": "2026-07-18",
         "index": 45.6
       },
       {
-        "date": "2026-07-13",
-        "index": 48.0
-      },
-      {
-        "date": "2026-07-14",
-        "index": 42.1
-      },
-      {
-        "date": "2026-07-15",
-        "index": 42.0
-      },
-      {
-        "date": "2026-07-16",
-        "index": 47.0
-      },
-      {
-        "date": "2026-07-17",
-        "index": 47.8
-      },
-      {
-        "date": "2026-07-18",
-        "index": 45.7
-      },
-      {
         "date": "2026-07-19",
-        "index": 42.3
+        "index": 48.0
       },
       {
         "date": "2026-07-20",
-        "index": 48.0
+        "index": 42.1
       },
       {
         "date": "2026-07-21",
-        "index": 46.1
+        "index": 42.0
       },
       {
         "date": "2026-07-22",
-        "index": 44.8
+        "index": 47.0
       },
       {
         "date": "2026-07-23",
-        "index": 38.6
+        "index": 47.8
       },
       {
         "date": "2026-07-24",
-        "index": 35.9
+        "index": 45.7
       },
       {
         "date": "2026-07-25",
-        "index": 36.4
+        "index": 42.3
       },
       {
         "date": "2026-07-26",
-        "index": 44.2
+        "index": 48.0
       },
       {
         "date": "2026-07-27",
-        "index": 36.2
+        "index": 46.1
       },
       {
         "date": "2026-07-28",
-        "index": 36.8
+        "index": 44.8
       },
       {
         "date": "2026-07-29",
-        "index": 38.2
+        "index": 38.6
       },
       {
         "date": "2026-07-30",
-        "index": 32.9
+        "index": 35.9
       },
       {
         "date": "2026-07-31",
-        "index": 31.2
+        "index": 36.4
       },
       {
         "date": "2026-08-01",
-        "index": 35.3
+        "index": 44.2
       },
       {
         "date": "2026-08-02",
         "index": 23.7
+      },
+      {
+        "date": "2026-08-03",
+        "index": 36.8
+      },
+      {
+        "date": "2026-08-04",
+        "index": 38.2
+      },
+      {
+        "date": "2026-08-05",
+        "index": 32.9
+      },
+      {
+        "date": "2026-08-06",
+        "index": 31.2
+      },
+      {
+        "date": "2026-08-07",
+        "index": 21.2
+      },
+      {
+        "date": "2026-08-08",
+        "index": 10.8
       }
     ],
     "gold": [
       {
-        "date": "2026-07-03",
+        "date": "2026-07-09",
         "index": 27.6
       },
       {
-        "date": "2026-07-04",
+        "date": "2026-07-10",
         "index": 32.5
       },
       {
-        "date": "2026-07-05",
+        "date": "2026-07-11",
         "index": 39.0
       },
       {
-        "date": "2026-07-06",
+        "date": "2026-07-12",
         "index": 41.9
       },
       {
-        "date": "2026-07-07",
+        "date": "2026-07-13",
         "index": 38.6
       },
       {
-        "date": "2026-07-08",
+        "date": "2026-07-14",
         "index": 45.2
       },
       {
-        "date": "2026-07-09",
+        "date": "2026-07-15",
         "index": 49.3
       },
       {
-        "date": "2026-07-10",
+        "date": "2026-07-16",
         "index": 41.2
       },
       {
-        "date": "2026-07-11",
+        "date": "2026-07-17",
         "index": 44.0
       },
       {
-        "date": "2026-07-12",
+        "date": "2026-07-18",
         "index": 38.7
       },
       {
-        "date": "2026-07-13",
+        "date": "2026-07-19",
         "index": 47.7
       },
       {
-        "date": "2026-07-14",
+        "date": "2026-07-20",
         "index": 42.2
       },
       {
-        "date": "2026-07-15",
+        "date": "2026-07-21",
         "index": 47.3
       },
       {
-        "date": "2026-07-16",
+        "date": "2026-07-22",
         "index": 48.9
       },
       {
-        "date": "2026-07-17",
+        "date": "2026-07-23",
         "index": 48.2
       },
       {
-        "date": "2026-07-18",
+        "date": "2026-07-24",
         "index": 39.2
       },
       {
-        "date": "2026-07-19",
+        "date": "2026-07-25",
         "index": 40.4
       },
       {
-        "date": "2026-07-20",
+        "date": "2026-07-26",
         "index": 53.8
       },
       {
-        "date": "2026-07-21",
+        "date": "2026-07-27",
         "index": 44.9
       },
       {
-        "date": "2026-07-22",
+        "date": "2026-07-28",
         "index": 42.4
       },
       {
-        "date": "2026-07-23",
+        "date": "2026-07-29",
         "index": 46.0
       },
       {
-        "date": "2026-07-24",
+        "date": "2026-07-30",
         "index": 50.5
       },
       {
-        "date": "2026-07-25",
+        "date": "2026-07-31",
         "index": 47.6
       },
       {
-        "date": "2026-07-26",
-        "index": 49.6
-      },
-      {
-        "date": "2026-07-27",
-        "index": 48.4
-      },
-      {
-        "date": "2026-07-28",
-        "index": 34.0
-      },
-      {
-        "date": "2026-07-29",
-        "index": 32.6
-      },
-      {
-        "date": "2026-07-30",
-        "index": 28.7
-      },
-      {
-        "date": "2026-07-31",
-        "index": 41.6
-      },
-      {
         "date": "2026-08-01",
-        "index": 35.2
+        "index": 49.6
       },
       {
         "date": "2026-08-02",
         "index": 36.7
+      },
+      {
+        "date": "2026-08-03",
+        "index": 34.0
+      },
+      {
+        "date": "2026-08-04",
+        "index": 32.6
+      },
+      {
+        "date": "2026-08-05",
+        "index": 28.7
+      },
+      {
+        "date": "2026-08-06",
+        "index": 41.6
+      },
+      {
+        "date": "2026-08-07",
+        "index": 42.0
+      },
+      {
+        "date": "2026-08-08",
+        "index": 17.4
       }
     ],
     "telecom": [
       {
-        "date": "2026-07-03",
+        "date": "2026-07-09",
         "index": 20.2
       },
       {
-        "date": "2026-07-04",
+        "date": "2026-07-10",
         "index": 24.2
       },
       {
-        "date": "2026-07-05",
+        "date": "2026-07-11",
         "index": 25.5
       },
       {
-        "date": "2026-07-06",
+        "date": "2026-07-12",
         "index": 36.4
       },
       {
-        "date": "2026-07-07",
+        "date": "2026-07-13",
         "index": 39.0
       },
       {
-        "date": "2026-07-08",
+        "date": "2026-07-14",
         "index": 31.7
       },
       {
-        "date": "2026-07-09",
+        "date": "2026-07-15",
         "index": 28.2
       },
       {
-        "date": "2026-07-10",
+        "date": "2026-07-16",
         "index": 43.8
       },
       {
-        "date": "2026-07-11",
+        "date": "2026-07-17",
         "index": 38.8
       },
       {
-        "date": "2026-07-12",
+        "date": "2026-07-18",
         "index": 41.2
       },
       {
-        "date": "2026-07-13",
+        "date": "2026-07-19",
         "index": 32.2
       },
       {
-        "date": "2026-07-14",
+        "date": "2026-07-20",
         "index": 34.6
       },
       {
-        "date": "2026-07-15",
+        "date": "2026-07-21",
         "index": 44.2
       },
       {
-        "date": "2026-07-16",
+        "date": "2026-07-22",
         "index": 39.5
       },
       {
-        "date": "2026-07-17",
+        "date": "2026-07-23",
         "index": 42.2
       },
       {
-        "date": "2026-07-18",
+        "date": "2026-07-24",
         "index": 39.4
       },
       {
-        "date": "2026-07-19",
+        "date": "2026-07-25",
         "index": 33.7
       },
       {
-        "date": "2026-07-20",
+        "date": "2026-07-26",
         "index": 39.7
       },
       {
-        "date": "2026-07-21",
+        "date": "2026-07-27",
         "index": 36.7
       },
       {
-        "date": "2026-07-22",
+        "date": "2026-07-28",
         "index": 42.7
       },
       {
-        "date": "2026-07-23",
+        "date": "2026-07-29",
         "index": 39.1
       },
       {
-        "date": "2026-07-24",
+        "date": "2026-07-30",
         "index": 32.0
       },
       {
-        "date": "2026-07-25",
+        "date": "2026-07-31",
         "index": 36.8
       },
       {
-        "date": "2026-07-26",
-        "index": 39.3
-      },
-      {
-        "date": "2026-07-27",
-        "index": 30.3
-      },
-      {
-        "date": "2026-07-28",
-        "index": 38.5
-      },
-      {
-        "date": "2026-07-29",
-        "index": 27.9
-      },
-      {
-        "date": "2026-07-30",
-        "index": 23.2
-      },
-      {
-        "date": "2026-07-31",
-        "index": 36.6
-      },
-      {
         "date": "2026-08-01",
-        "index": 26.1
+        "index": 39.3
       },
       {
         "date": "2026-08-02",
         "index": 25.6
+      },
+      {
+        "date": "2026-08-03",
+        "index": 38.5
+      },
+      {
+        "date": "2026-08-04",
+        "index": 27.9
+      },
+      {
+        "date": "2026-08-05",
+        "index": 23.2
+      },
+      {
+        "date": "2026-08-06",
+        "index": 36.6
+      },
+      {
+        "date": "2026-08-07",
+        "index": 26.5
+      },
+      {
+        "date": "2026-08-08",
+        "index": 19.7
       }
     ],
     "semiconductor": [
       {
-        "date": "2026-07-03",
+        "date": "2026-07-09",
         "index": 27.6
       },
       {
-        "date": "2026-07-04",
+        "date": "2026-07-10",
         "index": 38.0
       },
       {
-        "date": "2026-07-05",
+        "date": "2026-07-11",
         "index": 27.2
       },
       {
-        "date": "2026-07-06",
+        "date": "2026-07-12",
         "index": 33.5
       },
       {
-        "date": "2026-07-07",
+        "date": "2026-07-13",
         "index": 39.8
       },
       {
-        "date": "2026-07-08",
+        "date": "2026-07-14",
         "index": 42.9
       },
       {
-        "date": "2026-07-09",
+        "date": "2026-07-15",
         "index": 38.9
       },
       {
-        "date": "2026-07-10",
+        "date": "2026-07-16",
         "index": 32.4
       },
       {
-        "date": "2026-07-11",
+        "date": "2026-07-17",
         "index": 42.4
       },
       {
-        "date": "2026-07-12",
+        "date": "2026-07-18",
         "index": 35.2
       },
       {
-        "date": "2026-07-13",
+        "date": "2026-07-19",
         "index": 34.3
       },
       {
-        "date": "2026-07-14",
+        "date": "2026-07-20",
         "index": 34.6
       },
       {
-        "date": "2026-07-15",
+        "date": "2026-07-21",
         "index": 49.9
       },
       {
-        "date": "2026-07-16",
+        "date": "2026-07-22",
         "index": 36.0
       },
       {
-        "date": "2026-07-17",
+        "date": "2026-07-23",
         "index": 49.0
       },
       {
-        "date": "2026-07-18",
+        "date": "2026-07-24",
         "index": 46.5
       },
       {
-        "date": "2026-07-19",
+        "date": "2026-07-25",
         "index": 50.6
       },
       {
-        "date": "2026-07-20",
+        "date": "2026-07-26",
         "index": 38.8
       },
       {
-        "date": "2026-07-21",
+        "date": "2026-07-27",
         "index": 36.3
       },
       {
-        "date": "2026-07-22",
+        "date": "2026-07-28",
         "index": 40.2
       },
       {
-        "date": "2026-07-23",
+        "date": "2026-07-29",
         "index": 34.8
       },
       {
-        "date": "2026-07-24",
+        "date": "2026-07-30",
         "index": 45.8
       },
       {
-        "date": "2026-07-25",
-        "index": 39.6
-      },
-      {
-        "date": "2026-07-26",
-        "index": 39.6
-      },
-      {
-        "date": "2026-07-27",
-        "index": 29.6
-      },
-      {
-        "date": "2026-07-28",
-        "index": 27.4
-      },
-      {
-        "date": "2026-07-29",
-        "index": 36.2
-      },
-      {
-        "date": "2026-07-30",
-        "index": 30.2
-      },
-      {
         "date": "2026-07-31",
-        "index": 34.9
+        "index": 39.6
       },
       {
         "date": "2026-08-01",
-        "index": 31.5
+        "index": 39.6
       },
       {
         "date": "2026-08-02",
         "index": 30.5
+      },
+      {
+        "date": "2026-08-03",
+        "index": 27.4
+      },
+      {
+        "date": "2026-08-04",
+        "index": 36.2
+      },
+      {
+        "date": "2026-08-05",
+        "index": 30.2
+      },
+      {
+        "date": "2026-08-06",
+        "index": 34.9
+      },
+      {
+        "date": "2026-08-07",
+        "index": 29.4
+      },
+      {
+        "date": "2026-08-08",
+        "index": 21.3
       }
     ],
     "innovative_drug": [
       {
-        "date": "2026-07-03",
+        "date": "2026-07-09",
         "index": 33.9
       },
       {
-        "date": "2026-07-04",
+        "date": "2026-07-10",
         "index": 25.3
       },
       {
-        "date": "2026-07-05",
+        "date": "2026-07-11",
         "index": 31.1
       },
       {
-        "date": "2026-07-06",
+        "date": "2026-07-12",
         "index": 36.4
       },
       {
-        "date": "2026-07-07",
+        "date": "2026-07-13",
         "index": 38.0
       },
       {
-        "date": "2026-07-08",
+        "date": "2026-07-14",
         "index": 40.1
       },
       {
-        "date": "2026-07-09",
+        "date": "2026-07-15",
         "index": 37.0
       },
       {
-        "date": "2026-07-10",
+        "date": "2026-07-16",
         "index": 33.0
       },
       {
-        "date": "2026-07-11",
+        "date": "2026-07-17",
         "index": 43.1
       },
       {
-        "date": "2026-07-12",
+        "date": "2026-07-18",
         "index": 35.9
       },
       {
-        "date": "2026-07-13",
+        "date": "2026-07-19",
         "index": 37.1
       },
       {
-        "date": "2026-07-14",
+        "date": "2026-07-20",
         "index": 39.7
       },
       {
-        "date": "2026-07-15",
+        "date": "2026-07-21",
         "index": 42.3
       },
       {
-        "date": "2026-07-16",
+        "date": "2026-07-22",
         "index": 38.4
       },
       {
-        "date": "2026-07-17",
+        "date": "2026-07-23",
         "index": 40.3
       },
       {
-        "date": "2026-07-18",
+        "date": "2026-07-24",
         "index": 47.2
       },
       {
-        "date": "2026-07-19",
+        "date": "2026-07-25",
         "index": 40.7
       },
       {
-        "date": "2026-07-20",
+        "date": "2026-07-26",
         "index": 35.5
       },
       {
-        "date": "2026-07-21",
+        "date": "2026-07-27",
         "index": 39.3
       },
       {
-        "date": "2026-07-22",
+        "date": "2026-07-28",
         "index": 40.8
       },
       {
-        "date": "2026-07-23",
+        "date": "2026-07-29",
         "index": 44.1
       },
       {
-        "date": "2026-07-24",
+        "date": "2026-07-30",
         "index": 33.6
       },
       {
-        "date": "2026-07-25",
+        "date": "2026-07-31",
         "index": 31.9
       },
       {
-        "date": "2026-07-26",
-        "index": 36.1
-      },
-      {
-        "date": "2026-07-27",
-        "index": 32.1
-      },
-      {
-        "date": "2026-07-28",
-        "index": 26.9
-      },
-      {
-        "date": "2026-07-29",
-        "index": 39.1
-      },
-      {
-        "date": "2026-07-30",
-        "index": 28.3
-      },
-      {
-        "date": "2026-07-31",
-        "index": 31.6
-      },
-      {
         "date": "2026-08-01",
-        "index": 31.7
+        "index": 36.1
       },
       {
         "date": "2026-08-02",
         "index": 29.4
+      },
+      {
+        "date": "2026-08-03",
+        "index": 26.9
+      },
+      {
+        "date": "2026-08-04",
+        "index": 39.1
+      },
+      {
+        "date": "2026-08-05",
+        "index": 28.3
+      },
+      {
+        "date": "2026-08-06",
+        "index": 31.6
+      },
+      {
+        "date": "2026-08-07",
+        "index": 9.8
+      },
+      {
+        "date": "2026-08-08",
+        "index": 18.8
       }
     ],
     "nonferrous_metals": [
       {
-        "date": "2026-07-03",
+        "date": "2026-07-09",
         "index": 23.4
       },
       {
-        "date": "2026-07-04",
+        "date": "2026-07-10",
         "index": 25.2
       },
       {
-        "date": "2026-07-05",
+        "date": "2026-07-11",
         "index": 26.1
       },
       {
-        "date": "2026-07-06",
+        "date": "2026-07-12",
         "index": 34.6
       },
       {
-        "date": "2026-07-07",
-        "index": 37.1
-      },
-      {
-        "date": "2026-07-08",
-        "index": 31.9
-      },
-      {
-        "date": "2026-07-09",
-        "index": 39.8
-      },
-      {
-        "date": "2026-07-10",
-        "index": 37.1
-      },
-      {
-        "date": "2026-07-11",
-        "index": 36.7
-      },
-      {
-        "date": "2026-07-12",
-        "index": 34.7
-      },
-      {
         "date": "2026-07-13",
-        "index": 42.3
+        "index": 37.1
       },
       {
         "date": "2026-07-14",
-        "index": 33.0
+        "index": 31.9
       },
       {
         "date": "2026-07-15",
-        "index": 29.0
+        "index": 39.8
       },
       {
         "date": "2026-07-16",
-        "index": 33.5
+        "index": 37.1
       },
       {
         "date": "2026-07-17",
-        "index": 33.8
+        "index": 36.7
       },
       {
         "date": "2026-07-18",
-        "index": 38.7
+        "index": 34.7
       },
       {
         "date": "2026-07-19",
-        "index": 32.6
+        "index": 42.3
       },
       {
         "date": "2026-07-20",
-        "index": 41.7
+        "index": 33.0
       },
       {
         "date": "2026-07-21",
-        "index": 43.6
+        "index": 29.0
       },
       {
         "date": "2026-07-22",
-        "index": 32.6
+        "index": 33.5
       },
       {
         "date": "2026-07-23",
-        "index": 34.9
+        "index": 33.8
       },
       {
         "date": "2026-07-24",
-        "index": 38.0
+        "index": 38.7
       },
       {
         "date": "2026-07-25",
-        "index": 24.9
+        "index": 32.6
       },
       {
         "date": "2026-07-26",
-        "index": 29.9
+        "index": 41.7
       },
       {
         "date": "2026-07-27",
-        "index": 26.6
+        "index": 43.6
       },
       {
         "date": "2026-07-28",
-        "index": 27.6
+        "index": 32.6
       },
       {
         "date": "2026-07-29",
-        "index": 31.4
+        "index": 34.9
       },
       {
         "date": "2026-07-30",
-        "index": 19.2
+        "index": 38.0
       },
       {
         "date": "2026-07-31",
-        "index": 18.2
+        "index": 24.9
       },
       {
         "date": "2026-08-01",
-        "index": 15.7
+        "index": 29.9
       },
       {
         "date": "2026-08-02",
         "index": 16.4
+      },
+      {
+        "date": "2026-08-03",
+        "index": 27.6
+      },
+      {
+        "date": "2026-08-04",
+        "index": 31.4
+      },
+      {
+        "date": "2026-08-05",
+        "index": 19.2
+      },
+      {
+        "date": "2026-08-06",
+        "index": 18.2
+      },
+      {
+        "date": "2026-08-07",
+        "index": 20.3
+      },
+      {
+        "date": "2026-08-08",
+        "index": 18.2
       }
     ],
     "new_energy": [
       {
-        "date": "2026-07-03",
+        "date": "2026-07-09",
         "index": 27.8
       },
       {
-        "date": "2026-07-04",
+        "date": "2026-07-10",
         "index": 28.0
       },
       {
-        "date": "2026-07-05",
+        "date": "2026-07-11",
         "index": 21.1
       },
       {
-        "date": "2026-07-06",
+        "date": "2026-07-12",
         "index": 22.1
       },
       {
-        "date": "2026-07-07",
-        "index": 34.6
-      },
-      {
-        "date": "2026-07-08",
-        "index": 32.1
-      },
-      {
-        "date": "2026-07-09",
-        "index": 30.8
-      },
-      {
-        "date": "2026-07-10",
-        "index": 36.7
-      },
-      {
-        "date": "2026-07-11",
-        "index": 27.1
-      },
-      {
-        "date": "2026-07-12",
-        "index": 27.7
-      },
-      {
         "date": "2026-07-13",
-        "index": 32.2
+        "index": 34.6
       },
       {
         "date": "2026-07-14",
@@ -1776,1615 +1792,2187 @@
       },
       {
         "date": "2026-07-15",
-        "index": 44.6
+        "index": 30.8
       },
       {
         "date": "2026-07-16",
-        "index": 36.3
+        "index": 36.7
       },
       {
         "date": "2026-07-17",
-        "index": 40.5
+        "index": 27.1
       },
       {
         "date": "2026-07-18",
-        "index": 37.4
+        "index": 27.7
       },
       {
         "date": "2026-07-19",
-        "index": 34.1
+        "index": 32.2
       },
       {
         "date": "2026-07-20",
-        "index": 36.5
+        "index": 32.1
       },
       {
         "date": "2026-07-21",
-        "index": 35.8
+        "index": 44.6
       },
       {
         "date": "2026-07-22",
-        "index": 34.7
+        "index": 36.3
       },
       {
         "date": "2026-07-23",
-        "index": 37.2
+        "index": 40.5
       },
       {
         "date": "2026-07-24",
-        "index": 30.3
+        "index": 37.4
       },
       {
         "date": "2026-07-25",
-        "index": 27.0
+        "index": 34.1
       },
       {
         "date": "2026-07-26",
-        "index": 39.2
+        "index": 36.5
       },
       {
         "date": "2026-07-27",
-        "index": 36.8
+        "index": 35.8
       },
       {
         "date": "2026-07-28",
-        "index": 35.5
+        "index": 34.7
       },
       {
         "date": "2026-07-29",
-        "index": 31.3
+        "index": 37.2
       },
       {
         "date": "2026-07-30",
-        "index": 29.0
+        "index": 30.3
       },
       {
         "date": "2026-07-31",
-        "index": 29.8
+        "index": 27.0
       },
       {
         "date": "2026-08-01",
-        "index": 28.9
+        "index": 39.2
       },
       {
         "date": "2026-08-02",
         "index": 20.5
+      },
+      {
+        "date": "2026-08-03",
+        "index": 35.5
+      },
+      {
+        "date": "2026-08-04",
+        "index": 31.3
+      },
+      {
+        "date": "2026-08-05",
+        "index": 29.0
+      },
+      {
+        "date": "2026-08-06",
+        "index": 29.8
+      },
+      {
+        "date": "2026-08-07",
+        "index": 17.1
+      },
+      {
+        "date": "2026-08-08",
+        "index": 17.3
       }
     ],
     "power": [
       {
-        "date": "2026-07-03",
-        "index": 25.0
-      },
-      {
-        "date": "2026-07-04",
-        "index": 17.6
-      },
-      {
-        "date": "2026-07-05",
-        "index": 25.0
-      },
-      {
-        "date": "2026-07-06",
-        "index": 27.1
-      },
-      {
-        "date": "2026-07-07",
-        "index": 30.9
-      },
-      {
-        "date": "2026-07-08",
-        "index": 25.5
-      },
-      {
         "date": "2026-07-09",
-        "index": 28.7
+        "index": 25.0
       },
       {
         "date": "2026-07-10",
-        "index": 35.7
+        "index": 17.6
       },
       {
         "date": "2026-07-11",
-        "index": 30.5
+        "index": 25.0
       },
       {
         "date": "2026-07-12",
-        "index": 30.9
+        "index": 27.1
       },
       {
         "date": "2026-07-13",
-        "index": 29.9
+        "index": 30.9
       },
       {
         "date": "2026-07-14",
-        "index": 39.4
+        "index": 25.5
       },
       {
         "date": "2026-07-15",
-        "index": 30.2
+        "index": 28.7
       },
       {
         "date": "2026-07-16",
-        "index": 34.4
+        "index": 35.7
       },
       {
         "date": "2026-07-17",
-        "index": 36.4
+        "index": 30.5
       },
       {
         "date": "2026-07-18",
-        "index": 35.8
+        "index": 30.9
       },
       {
         "date": "2026-07-19",
-        "index": 25.9
-      },
-      {
-        "date": "2026-07-20",
-        "index": 28.8
-      },
-      {
-        "date": "2026-07-21",
-        "index": 36.3
-      },
-      {
-        "date": "2026-07-22",
-        "index": 34.5
-      },
-      {
-        "date": "2026-07-23",
-        "index": 31.4
-      },
-      {
-        "date": "2026-07-24",
         "index": 29.9
       },
       {
+        "date": "2026-07-20",
+        "index": 39.4
+      },
+      {
+        "date": "2026-07-21",
+        "index": 30.2
+      },
+      {
+        "date": "2026-07-22",
+        "index": 34.4
+      },
+      {
+        "date": "2026-07-23",
+        "index": 36.4
+      },
+      {
+        "date": "2026-07-24",
+        "index": 35.8
+      },
+      {
         "date": "2026-07-25",
-        "index": 31.0
+        "index": 25.9
       },
       {
         "date": "2026-07-26",
-        "index": 25.3
+        "index": 28.8
       },
       {
         "date": "2026-07-27",
-        "index": 30.0
+        "index": 36.3
       },
       {
         "date": "2026-07-28",
-        "index": 29.1
+        "index": 34.5
       },
       {
         "date": "2026-07-29",
-        "index": 17.4
+        "index": 31.4
       },
       {
         "date": "2026-07-30",
-        "index": 27.0
+        "index": 29.9
       },
       {
         "date": "2026-07-31",
-        "index": 26.2
+        "index": 31.0
       },
       {
         "date": "2026-08-01",
-        "index": 23.4
+        "index": 25.3
       },
       {
         "date": "2026-08-02",
         "index": 10.4
+      },
+      {
+        "date": "2026-08-03",
+        "index": 29.1
+      },
+      {
+        "date": "2026-08-04",
+        "index": 17.4
+      },
+      {
+        "date": "2026-08-05",
+        "index": 27.0
+      },
+      {
+        "date": "2026-08-06",
+        "index": 26.2
+      },
+      {
+        "date": "2026-08-07",
+        "index": 12.7
+      },
+      {
+        "date": "2026-08-08",
+        "index": 14.4
       }
     ],
     "chip": [
       {
-        "date": "2026-07-03",
+        "date": "2026-07-09",
         "index": 18.4
       },
       {
-        "date": "2026-07-04",
+        "date": "2026-07-10",
         "index": 21.4
       },
       {
-        "date": "2026-07-05",
+        "date": "2026-07-11",
         "index": 30.8
       },
       {
-        "date": "2026-07-06",
+        "date": "2026-07-12",
         "index": 34.2
       },
       {
-        "date": "2026-07-07",
+        "date": "2026-07-13",
         "index": 30.3
       },
       {
-        "date": "2026-07-08",
+        "date": "2026-07-14",
         "index": 35.6
       },
       {
-        "date": "2026-07-09",
+        "date": "2026-07-15",
         "index": 37.8
       },
       {
-        "date": "2026-07-10",
+        "date": "2026-07-16",
         "index": 39.8
       },
       {
-        "date": "2026-07-11",
+        "date": "2026-07-17",
         "index": 35.9
       },
       {
-        "date": "2026-07-12",
+        "date": "2026-07-18",
         "index": 27.6
       },
       {
-        "date": "2026-07-13",
+        "date": "2026-07-19",
         "index": 38.6
       },
       {
-        "date": "2026-07-14",
+        "date": "2026-07-20",
         "index": 33.9
       },
       {
-        "date": "2026-07-15",
+        "date": "2026-07-21",
         "index": 44.4
       },
       {
-        "date": "2026-07-16",
+        "date": "2026-07-22",
         "index": 34.7
       },
       {
-        "date": "2026-07-17",
-        "index": 38.8
-      },
-      {
-        "date": "2026-07-18",
-        "index": 41.9
-      },
-      {
-        "date": "2026-07-19",
-        "index": 43.8
-      },
-      {
-        "date": "2026-07-20",
-        "index": 40.5
-      },
-      {
-        "date": "2026-07-21",
-        "index": 38.7
-      },
-      {
-        "date": "2026-07-22",
-        "index": 30.1
-      },
-      {
         "date": "2026-07-23",
-        "index": 29.1
+        "index": 38.8
       },
       {
         "date": "2026-07-24",
-        "index": 32.7
+        "index": 41.9
       },
       {
         "date": "2026-07-25",
-        "index": 36.0
+        "index": 43.8
       },
       {
         "date": "2026-07-26",
-        "index": 38.8
+        "index": 40.5
       },
       {
         "date": "2026-07-27",
-        "index": 22.5
+        "index": 38.7
       },
       {
         "date": "2026-07-28",
-        "index": 33.3
+        "index": 30.1
       },
       {
         "date": "2026-07-29",
-        "index": 26.6
+        "index": 29.1
       },
       {
         "date": "2026-07-30",
-        "index": 29.4
+        "index": 32.7
       },
       {
         "date": "2026-07-31",
-        "index": 20.5
+        "index": 36.0
       },
       {
         "date": "2026-08-01",
-        "index": 20.5
+        "index": 38.8
       },
       {
         "date": "2026-08-02",
         "index": 18.8
+      },
+      {
+        "date": "2026-08-03",
+        "index": 33.3
+      },
+      {
+        "date": "2026-08-04",
+        "index": 26.6
+      },
+      {
+        "date": "2026-08-05",
+        "index": 29.4
+      },
+      {
+        "date": "2026-08-06",
+        "index": 20.5
+      },
+      {
+        "date": "2026-08-07",
+        "index": 24.5
+      },
+      {
+        "date": "2026-08-08",
+        "index": 18.4
       }
     ],
     "robot": [
       {
-        "date": "2026-07-03",
+        "date": "2026-07-09",
         "index": 15.6
       },
       {
-        "date": "2026-07-04",
+        "date": "2026-07-10",
         "index": 22.4
       },
       {
-        "date": "2026-07-05",
+        "date": "2026-07-11",
         "index": 21.9
       },
       {
-        "date": "2026-07-06",
+        "date": "2026-07-12",
         "index": 23.8
       },
       {
-        "date": "2026-07-07",
+        "date": "2026-07-13",
         "index": 27.2
       },
       {
-        "date": "2026-07-08",
+        "date": "2026-07-14",
         "index": 23.6
       },
       {
-        "date": "2026-07-09",
+        "date": "2026-07-15",
         "index": 22.7
       },
       {
-        "date": "2026-07-10",
+        "date": "2026-07-16",
         "index": 34.0
       },
       {
-        "date": "2026-07-11",
+        "date": "2026-07-17",
         "index": 31.0
       },
       {
-        "date": "2026-07-12",
+        "date": "2026-07-18",
         "index": 27.7
       },
       {
-        "date": "2026-07-13",
+        "date": "2026-07-19",
         "index": 28.7
       },
       {
-        "date": "2026-07-14",
+        "date": "2026-07-20",
         "index": 39.2
       },
       {
-        "date": "2026-07-15",
+        "date": "2026-07-21",
         "index": 28.0
       },
       {
-        "date": "2026-07-16",
+        "date": "2026-07-22",
         "index": 36.8
       },
       {
-        "date": "2026-07-17",
+        "date": "2026-07-23",
         "index": 39.3
       },
       {
-        "date": "2026-07-18",
+        "date": "2026-07-24",
         "index": 41.3
       },
       {
-        "date": "2026-07-19",
+        "date": "2026-07-25",
         "index": 32.9
       },
       {
-        "date": "2026-07-20",
+        "date": "2026-07-26",
         "index": 38.5
       },
       {
-        "date": "2026-07-21",
+        "date": "2026-07-27",
         "index": 32.4
       },
       {
-        "date": "2026-07-22",
+        "date": "2026-07-28",
         "index": 31.5
       },
       {
-        "date": "2026-07-23",
+        "date": "2026-07-29",
         "index": 25.9
       },
       {
-        "date": "2026-07-24",
+        "date": "2026-07-30",
         "index": 26.6
       },
       {
-        "date": "2026-07-25",
+        "date": "2026-07-31",
         "index": 30.0
       },
       {
-        "date": "2026-07-26",
-        "index": 29.3
-      },
-      {
-        "date": "2026-07-27",
-        "index": 22.3
-      },
-      {
-        "date": "2026-07-28",
-        "index": 22.0
-      },
-      {
-        "date": "2026-07-29",
-        "index": 19.0
-      },
-      {
-        "date": "2026-07-30",
-        "index": 24.6
-      },
-      {
-        "date": "2026-07-31",
-        "index": 15.0
-      },
-      {
         "date": "2026-08-01",
-        "index": 24.9
+        "index": 29.3
       },
       {
         "date": "2026-08-02",
         "index": 19.6
+      },
+      {
+        "date": "2026-08-03",
+        "index": 22.0
+      },
+      {
+        "date": "2026-08-04",
+        "index": 19.0
+      },
+      {
+        "date": "2026-08-05",
+        "index": 24.6
+      },
+      {
+        "date": "2026-08-06",
+        "index": 15.0
+      },
+      {
+        "date": "2026-08-07",
+        "index": 22.4
+      },
+      {
+        "date": "2026-08-08",
+        "index": 15.3
       }
     ],
     "petrochemical": [
       {
-        "date": "2026-07-03",
+        "date": "2026-07-09",
         "index": 27.7
       },
       {
-        "date": "2026-07-04",
+        "date": "2026-07-10",
         "index": 25.6
       },
       {
-        "date": "2026-07-05",
+        "date": "2026-07-11",
         "index": 23.2
       },
       {
-        "date": "2026-07-06",
+        "date": "2026-07-12",
         "index": 23.1
       },
       {
-        "date": "2026-07-07",
+        "date": "2026-07-13",
         "index": 29.0
       },
       {
-        "date": "2026-07-08",
+        "date": "2026-07-14",
         "index": 26.0
       },
       {
-        "date": "2026-07-09",
-        "index": 22.6
-      },
-      {
-        "date": "2026-07-10",
-        "index": 30.5
-      },
-      {
-        "date": "2026-07-11",
-        "index": 28.5
-      },
-      {
-        "date": "2026-07-12",
-        "index": 27.9
-      },
-      {
-        "date": "2026-07-13",
-        "index": 35.9
-      },
-      {
-        "date": "2026-07-14",
-        "index": 28.9
-      },
-      {
         "date": "2026-07-15",
-        "index": 31.8
+        "index": 22.6
       },
       {
         "date": "2026-07-16",
-        "index": 25.5
+        "index": 30.5
       },
       {
         "date": "2026-07-17",
-        "index": 39.5
+        "index": 28.5
       },
       {
         "date": "2026-07-18",
-        "index": 40.8
+        "index": 27.9
       },
       {
         "date": "2026-07-19",
-        "index": 29.9
+        "index": 35.9
       },
       {
         "date": "2026-07-20",
-        "index": 36.8
+        "index": 28.9
       },
       {
         "date": "2026-07-21",
-        "index": 28.0
+        "index": 31.8
       },
       {
         "date": "2026-07-22",
-        "index": 35.5
+        "index": 25.5
       },
       {
         "date": "2026-07-23",
-        "index": 22.6
+        "index": 39.5
       },
       {
         "date": "2026-07-24",
-        "index": 23.8
+        "index": 40.8
       },
       {
         "date": "2026-07-25",
-        "index": 34.0
+        "index": 29.9
       },
       {
         "date": "2026-07-26",
-        "index": 30.9
+        "index": 36.8
       },
       {
         "date": "2026-07-27",
-        "index": 19.2
+        "index": 28.0
       },
       {
         "date": "2026-07-28",
-        "index": 23.5
+        "index": 35.5
       },
       {
         "date": "2026-07-29",
-        "index": 22.4
+        "index": 22.6
       },
       {
         "date": "2026-07-30",
-        "index": 15.1
+        "index": 23.8
       },
       {
         "date": "2026-07-31",
-        "index": 24.9
+        "index": 34.0
       },
       {
         "date": "2026-08-01",
-        "index": 14.5
+        "index": 30.9
       },
       {
         "date": "2026-08-02",
         "index": 17.5
+      },
+      {
+        "date": "2026-08-03",
+        "index": 23.5
+      },
+      {
+        "date": "2026-08-04",
+        "index": 22.4
+      },
+      {
+        "date": "2026-08-05",
+        "index": 15.1
+      },
+      {
+        "date": "2026-08-06",
+        "index": 24.9
+      },
+      {
+        "date": "2026-08-07",
+        "index": 17.6
+      },
+      {
+        "date": "2026-08-08",
+        "index": 21.8
       }
     ],
     "aerospace": [
       {
-        "date": "2026-07-03",
+        "date": "2026-07-09",
         "index": 12.6
       },
       {
-        "date": "2026-07-04",
+        "date": "2026-07-10",
         "index": 25.4
       },
       {
-        "date": "2026-07-05",
+        "date": "2026-07-11",
         "index": 24.7
       },
       {
-        "date": "2026-07-06",
+        "date": "2026-07-12",
         "index": 26.5
       },
       {
-        "date": "2026-07-07",
+        "date": "2026-07-13",
         "index": 23.6
       },
       {
-        "date": "2026-07-08",
+        "date": "2026-07-14",
         "index": 17.3
       },
       {
-        "date": "2026-07-09",
+        "date": "2026-07-15",
         "index": 23.2
       },
       {
-        "date": "2026-07-10",
+        "date": "2026-07-16",
         "index": 20.2
       },
       {
-        "date": "2026-07-11",
+        "date": "2026-07-17",
         "index": 21.6
       },
       {
-        "date": "2026-07-12",
+        "date": "2026-07-18",
         "index": 36.3
       },
       {
-        "date": "2026-07-13",
+        "date": "2026-07-19",
         "index": 32.5
       },
       {
-        "date": "2026-07-14",
+        "date": "2026-07-20",
         "index": 26.8
       },
       {
-        "date": "2026-07-15",
+        "date": "2026-07-21",
         "index": 24.6
       },
       {
-        "date": "2026-07-16",
+        "date": "2026-07-22",
         "index": 29.2
       },
       {
-        "date": "2026-07-17",
+        "date": "2026-07-23",
         "index": 35.6
       },
       {
-        "date": "2026-07-18",
+        "date": "2026-07-24",
         "index": 29.3
       },
       {
-        "date": "2026-07-19",
+        "date": "2026-07-25",
         "index": 27.5
       },
       {
-        "date": "2026-07-20",
+        "date": "2026-07-26",
         "index": 29.4
       },
       {
-        "date": "2026-07-21",
+        "date": "2026-07-27",
         "index": 28.9
       },
       {
-        "date": "2026-07-22",
+        "date": "2026-07-28",
         "index": 30.5
       },
       {
-        "date": "2026-07-23",
+        "date": "2026-07-29",
         "index": 31.7
       },
       {
-        "date": "2026-07-24",
+        "date": "2026-07-30",
         "index": 21.0
       },
       {
-        "date": "2026-07-25",
+        "date": "2026-07-31",
         "index": 31.9
       },
       {
-        "date": "2026-07-26",
-        "index": 33.3
-      },
-      {
-        "date": "2026-07-27",
-        "index": 23.1
-      },
-      {
-        "date": "2026-07-28",
-        "index": 17.8
-      },
-      {
-        "date": "2026-07-29",
-        "index": 13.9
-      },
-      {
-        "date": "2026-07-30",
-        "index": 22.8
-      },
-      {
-        "date": "2026-07-31",
-        "index": 12.7
-      },
-      {
         "date": "2026-08-01",
-        "index": 17.0
+        "index": 33.3
       },
       {
         "date": "2026-08-02",
         "index": 13.8
+      },
+      {
+        "date": "2026-08-03",
+        "index": 17.8
+      },
+      {
+        "date": "2026-08-04",
+        "index": 13.9
+      },
+      {
+        "date": "2026-08-05",
+        "index": 22.8
+      },
+      {
+        "date": "2026-08-06",
+        "index": 12.7
+      },
+      {
+        "date": "2026-08-07",
+        "index": 18.6
+      },
+      {
+        "date": "2026-08-08",
+        "index": 14.1
       }
     ]
   },
   "price_history": {
     "nasdaq": [
       {
+        "date": "2026-06-29",
+        "price": 2.178
+      },
+      {
+        "date": "2026-06-30",
+        "price": 2.204
+      },
+      {
+        "date": "2026-07-01",
+        "price": 2.209
+      },
+      {
+        "date": "2026-07-02",
+        "price": 2.158
+      },
+      {
         "date": "2026-07-03",
-        "price": 2.052
-      },
-      {
-        "date": "2026-07-04",
-        "price": 2.096
-      },
-      {
-        "date": "2026-07-05",
-        "price": 2.139
+        "price": 2.167
       },
       {
         "date": "2026-07-06",
-        "price": 2.168
+        "price": 2.171
       },
       {
         "date": "2026-07-07",
-        "price": 2.15
-      },
-      {
-        "date": "2026-07-08",
-        "price": 2.118
-      },
-      {
-        "date": "2026-07-09",
-        "price": 2.171
-      },
-      {
-        "date": "2026-07-10",
-        "price": 2.061
-      },
-      {
-        "date": "2026-07-11",
-        "price": 2.066
-      },
-      {
-        "date": "2026-07-12",
-        "price": 2.144
-      },
-      {
-        "date": "2026-07-13",
-        "price": 2.111
-      },
-      {
-        "date": "2026-07-14",
         "price": 2.169
       },
       {
+        "date": "2026-07-08",
+        "price": 2.141
+      },
+      {
+        "date": "2026-07-09",
+        "price": 2.201
+      },
+      {
+        "date": "2026-07-10",
+        "price": 2.249
+      },
+      {
+        "date": "2026-07-11",
+        "price": 2.295
+      },
+      {
+        "date": "2026-07-12",
+        "price": 2.326
+      },
+      {
+        "date": "2026-07-13",
+        "price": 2.307
+      },
+      {
+        "date": "2026-07-14",
+        "price": 2.273
+      },
+      {
         "date": "2026-07-15",
-        "price": 2.072
+        "price": 2.33
       },
       {
         "date": "2026-07-16",
-        "price": 2.118
+        "price": 2.211
       },
       {
         "date": "2026-07-17",
-        "price": 2.173
+        "price": 2.216
       },
       {
         "date": "2026-07-18",
-        "price": 2.111
+        "price": 2.3
       },
       {
         "date": "2026-07-19",
-        "price": 2.084
+        "price": 2.265
       },
       {
         "date": "2026-07-20",
-        "price": 2.142
+        "price": 2.327
       },
       {
         "date": "2026-07-21",
-        "price": 2.142
+        "price": 2.223
       },
       {
         "date": "2026-07-22",
-        "price": 2.112
+        "price": 2.273
       },
       {
         "date": "2026-07-23",
-        "price": 2.159
+        "price": 2.331
       },
       {
         "date": "2026-07-24",
-        "price": 2.174
+        "price": 2.265
       },
       {
         "date": "2026-07-25",
-        "price": 2.113
+        "price": 2.235
       },
       {
         "date": "2026-07-26",
-        "price": 2.077
+        "price": 2.299
       },
       {
         "date": "2026-07-27",
-        "price": 2.133
+        "price": 2.299
       },
       {
         "date": "2026-07-28",
-        "price": 2.059
+        "price": 2.266
       },
       {
         "date": "2026-07-29",
-        "price": 2.135
+        "price": 2.317
       },
       {
         "date": "2026-07-30",
-        "price": 2.171
+        "price": 2.333
       },
       {
         "date": "2026-07-31",
-        "price": 2.156
+        "price": 2.267
       },
       {
         "date": "2026-08-01",
-        "price": 2.119
+        "price": 2.228
       },
       {
         "date": "2026-08-02",
         "price": 2.112
+      },
+      {
+        "date": "2026-08-03",
+        "price": 2.209
+      },
+      {
+        "date": "2026-08-04",
+        "price": 2.29
+      },
+      {
+        "date": "2026-08-05",
+        "price": 2.329
+      },
+      {
+        "date": "2026-08-06",
+        "price": 2.314
+      },
+      {
+        "date": "2026-08-07",
+        "price": 2.266
+      },
+      {
+        "date": "2026-08-08",
+        "price": 2.266
       }
     ],
     "gold": [
       {
+        "date": "2026-06-29",
+        "price": 8.449
+      },
+      {
+        "date": "2026-06-30",
+        "price": 8.378
+      },
+      {
+        "date": "2026-07-01",
+        "price": 8.271
+      },
+      {
+        "date": "2026-07-02",
+        "price": 8.475
+      },
+      {
         "date": "2026-07-03",
-        "price": 8.298
-      },
-      {
-        "date": "2026-07-04",
-        "price": 8.209
-      },
-      {
-        "date": "2026-07-05",
-        "price": 8.465
+        "price": 8.672
       },
       {
         "date": "2026-07-06",
-        "price": 8.332
+        "price": 8.631
       },
       {
         "date": "2026-07-07",
-        "price": 8.619
+        "price": 8.597
       },
       {
         "date": "2026-07-08",
-        "price": 8.274
+        "price": 8.589
       },
       {
         "date": "2026-07-09",
-        "price": 8.592
+        "price": 8.749
       },
       {
         "date": "2026-07-10",
-        "price": 8.254
+        "price": 8.656
       },
       {
         "date": "2026-07-11",
-        "price": 8.387
+        "price": 8.926
       },
       {
         "date": "2026-07-12",
-        "price": 8.608
+        "price": 8.785
       },
       {
         "date": "2026-07-13",
-        "price": 8.256
+        "price": 9.088
       },
       {
         "date": "2026-07-14",
-        "price": 8.504
+        "price": 8.724
       },
       {
         "date": "2026-07-15",
-        "price": 8.343
+        "price": 9.059
       },
       {
         "date": "2026-07-16",
-        "price": 8.636
+        "price": 8.703
       },
       {
         "date": "2026-07-17",
-        "price": 8.545
+        "price": 8.843
       },
       {
         "date": "2026-07-18",
-        "price": 8.351
+        "price": 9.076
       },
       {
         "date": "2026-07-19",
-        "price": 8.197
+        "price": 8.706
       },
       {
         "date": "2026-07-20",
-        "price": 8.445
+        "price": 8.967
       },
       {
         "date": "2026-07-21",
-        "price": 8.462
+        "price": 8.797
       },
       {
         "date": "2026-07-22",
-        "price": 8.41
+        "price": 9.106
       },
       {
         "date": "2026-07-23",
-        "price": 8.357
+        "price": 9.01
       },
       {
         "date": "2026-07-24",
-        "price": 8.492
+        "price": 8.805
       },
       {
         "date": "2026-07-25",
-        "price": 8.541
+        "price": 8.643
       },
       {
         "date": "2026-07-26",
-        "price": 8.28
+        "price": 8.905
       },
       {
         "date": "2026-07-27",
-        "price": 8.668
+        "price": 8.922
       },
       {
         "date": "2026-07-28",
-        "price": 8.678
+        "price": 8.868
       },
       {
         "date": "2026-07-29",
-        "price": 8.585
+        "price": 8.812
       },
       {
         "date": "2026-07-30",
-        "price": 8.182
+        "price": 8.954
       },
       {
         "date": "2026-07-31",
-        "price": 8.424
+        "price": 9.006
       },
       {
         "date": "2026-08-01",
-        "price": 8.343
+        "price": 8.731
       },
       {
         "date": "2026-08-02",
         "price": 8.433
+      },
+      {
+        "date": "2026-08-03",
+        "price": 9.15
+      },
+      {
+        "date": "2026-08-04",
+        "price": 9.053
+      },
+      {
+        "date": "2026-08-05",
+        "price": 8.627
+      },
+      {
+        "date": "2026-08-06",
+        "price": 8.883
+      },
+      {
+        "date": "2026-08-07",
+        "price": 8.892
+      },
+      {
+        "date": "2026-08-08",
+        "price": 8.892
       }
     ],
     "telecom": [
       {
+        "date": "2026-06-29",
+        "price": 0.858
+      },
+      {
+        "date": "2026-06-30",
+        "price": 0.898
+      },
+      {
+        "date": "2026-07-01",
+        "price": 0.859
+      },
+      {
+        "date": "2026-07-02",
+        "price": 0.788
+      },
+      {
         "date": "2026-07-03",
-        "price": 0.593
-      },
-      {
-        "date": "2026-07-04",
-        "price": 0.583
-      },
-      {
-        "date": "2026-07-05",
-        "price": 0.594
+        "price": 0.79
       },
       {
         "date": "2026-07-06",
-        "price": 0.571
+        "price": 0.757
       },
       {
         "date": "2026-07-07",
-        "price": 0.573
+        "price": 0.761
       },
       {
         "date": "2026-07-08",
-        "price": 0.577
+        "price": 0.757
       },
       {
         "date": "2026-07-09",
-        "price": 0.595
+        "price": 0.672
       },
       {
         "date": "2026-07-10",
-        "price": 0.57
+        "price": 0.661
       },
       {
         "date": "2026-07-11",
-        "price": 0.599
+        "price": 0.673
       },
       {
         "date": "2026-07-12",
-        "price": 0.565
+        "price": 0.647
       },
       {
         "date": "2026-07-13",
-        "price": 0.577
+        "price": 0.65
       },
       {
         "date": "2026-07-14",
-        "price": 0.58
+        "price": 0.654
       },
       {
         "date": "2026-07-15",
-        "price": 0.596
+        "price": 0.675
       },
       {
         "date": "2026-07-16",
-        "price": 0.587
+        "price": 0.646
       },
       {
         "date": "2026-07-17",
-        "price": 0.589
+        "price": 0.679
       },
       {
         "date": "2026-07-18",
-        "price": 0.568
+        "price": 0.641
       },
       {
         "date": "2026-07-19",
-        "price": 0.582
+        "price": 0.655
       },
       {
         "date": "2026-07-20",
-        "price": 0.567
+        "price": 0.658
       },
       {
         "date": "2026-07-21",
-        "price": 0.578
+        "price": 0.676
       },
       {
         "date": "2026-07-22",
-        "price": 0.565
+        "price": 0.666
       },
       {
         "date": "2026-07-23",
-        "price": 0.585
+        "price": 0.668
       },
       {
         "date": "2026-07-24",
-        "price": 0.574
+        "price": 0.644
       },
       {
         "date": "2026-07-25",
-        "price": 0.596
+        "price": 0.66
       },
       {
         "date": "2026-07-26",
-        "price": 0.582
+        "price": 0.643
       },
       {
         "date": "2026-07-27",
-        "price": 0.599
+        "price": 0.656
       },
       {
         "date": "2026-07-28",
-        "price": 0.574
+        "price": 0.641
       },
       {
         "date": "2026-07-29",
-        "price": 0.581
+        "price": 0.664
       },
       {
         "date": "2026-07-30",
-        "price": 0.598
+        "price": 0.651
       },
       {
         "date": "2026-07-31",
-        "price": 0.569
+        "price": 0.676
       },
       {
         "date": "2026-08-01",
-        "price": 0.589
+        "price": 0.66
       },
       {
         "date": "2026-08-02",
         "price": 0.582
+      },
+      {
+        "date": "2026-08-03",
+        "price": 0.65
+      },
+      {
+        "date": "2026-08-04",
+        "price": 0.659
+      },
+      {
+        "date": "2026-08-05",
+        "price": 0.678
+      },
+      {
+        "date": "2026-08-06",
+        "price": 0.645
+      },
+      {
+        "date": "2026-08-07",
+        "price": 0.66
+      },
+      {
+        "date": "2026-08-08",
+        "price": 0.66
       }
     ],
     "semiconductor": [
       {
+        "date": "2026-06-29",
+        "price": 1.455
+      },
+      {
+        "date": "2026-06-30",
+        "price": 1.503
+      },
+      {
+        "date": "2026-07-01",
+        "price": 1.472
+      },
+      {
+        "date": "2026-07-02",
+        "price": 1.35
+      },
+      {
         "date": "2026-07-03",
-        "price": 0.978
-      },
-      {
-        "date": "2026-07-04",
-        "price": 0.989
-      },
-      {
-        "date": "2026-07-05",
-        "price": 0.969
+        "price": 1.331
       },
       {
         "date": "2026-07-06",
-        "price": 1.002
+        "price": 1.334
       },
       {
         "date": "2026-07-07",
-        "price": 1.019
+        "price": 1.336
       },
       {
         "date": "2026-07-08",
-        "price": 0.991
+        "price": 1.339
       },
       {
         "date": "2026-07-09",
-        "price": 1.017
+        "price": 1.068
       },
       {
         "date": "2026-07-10",
-        "price": 1.019
+        "price": 1.08
       },
       {
         "date": "2026-07-11",
-        "price": 1.02
+        "price": 1.058
       },
       {
         "date": "2026-07-12",
-        "price": 1.001
+        "price": 1.094
       },
       {
         "date": "2026-07-13",
-        "price": 1.016
+        "price": 1.112
       },
       {
         "date": "2026-07-14",
-        "price": 1.018
+        "price": 1.082
       },
       {
         "date": "2026-07-15",
-        "price": 0.971
+        "price": 1.111
       },
       {
         "date": "2026-07-16",
-        "price": 0.966
+        "price": 1.112
       },
       {
         "date": "2026-07-17",
-        "price": 1.006
+        "price": 1.114
       },
       {
         "date": "2026-07-18",
-        "price": 0.963
+        "price": 1.093
       },
       {
         "date": "2026-07-19",
-        "price": 0.993
+        "price": 1.11
       },
       {
         "date": "2026-07-20",
-        "price": 1.02
+        "price": 1.111
       },
       {
         "date": "2026-07-21",
-        "price": 0.972
+        "price": 1.06
       },
       {
         "date": "2026-07-22",
-        "price": 0.99
+        "price": 1.054
       },
       {
         "date": "2026-07-23",
-        "price": 1.007
+        "price": 1.098
       },
       {
         "date": "2026-07-24",
-        "price": 0.974
+        "price": 1.051
       },
       {
         "date": "2026-07-25",
-        "price": 0.963
+        "price": 1.084
       },
       {
         "date": "2026-07-26",
-        "price": 0.977
+        "price": 1.114
       },
       {
         "date": "2026-07-27",
-        "price": 0.978
+        "price": 1.061
       },
       {
         "date": "2026-07-28",
-        "price": 1.004
+        "price": 1.081
       },
       {
         "date": "2026-07-29",
-        "price": 0.998
+        "price": 1.099
       },
       {
         "date": "2026-07-30",
-        "price": 0.973
+        "price": 1.064
       },
       {
         "date": "2026-07-31",
-        "price": 1.005
+        "price": 1.051
       },
       {
         "date": "2026-08-01",
-        "price": 0.98
+        "price": 1.066
       },
       {
         "date": "2026-08-02",
         "price": 0.992
+      },
+      {
+        "date": "2026-08-03",
+        "price": 1.096
+      },
+      {
+        "date": "2026-08-04",
+        "price": 1.09
+      },
+      {
+        "date": "2026-08-05",
+        "price": 1.063
+      },
+      {
+        "date": "2026-08-06",
+        "price": 1.098
+      },
+      {
+        "date": "2026-08-07",
+        "price": 1.083
+      },
+      {
+        "date": "2026-08-08",
+        "price": 1.083
       }
     ],
     "innovative_drug": [
       {
+        "date": "2026-06-29",
+        "price": 0.818
+      },
+      {
+        "date": "2026-06-30",
+        "price": 0.804
+      },
+      {
+        "date": "2026-07-01",
+        "price": 0.839
+      },
+      {
+        "date": "2026-07-02",
+        "price": 0.84
+      },
+      {
         "date": "2026-07-03",
-        "price": 0.847
-      },
-      {
-        "date": "2026-07-04",
-        "price": 0.864
-      },
-      {
-        "date": "2026-07-05",
-        "price": 0.83
+        "price": 0.862
       },
       {
         "date": "2026-07-06",
-        "price": 0.852
+        "price": 0.87
       },
       {
         "date": "2026-07-07",
-        "price": 0.826
+        "price": 0.831
       },
       {
         "date": "2026-07-08",
-        "price": 0.838
+        "price": 0.812
       },
       {
         "date": "2026-07-09",
-        "price": 0.822
+        "price": 0.914
       },
       {
         "date": "2026-07-10",
-        "price": 0.847
+        "price": 0.932
       },
       {
         "date": "2026-07-11",
-        "price": 0.829
+        "price": 0.896
       },
       {
         "date": "2026-07-12",
-        "price": 0.834
+        "price": 0.919
       },
       {
         "date": "2026-07-13",
-        "price": 0.854
+        "price": 0.892
       },
       {
         "date": "2026-07-14",
-        "price": 0.849
+        "price": 0.905
       },
       {
         "date": "2026-07-15",
-        "price": 0.852
+        "price": 0.888
       },
       {
         "date": "2026-07-16",
-        "price": 0.838
+        "price": 0.914
       },
       {
         "date": "2026-07-17",
-        "price": 0.845
+        "price": 0.895
       },
       {
         "date": "2026-07-18",
-        "price": 0.857
+        "price": 0.9
       },
       {
         "date": "2026-07-19",
-        "price": 0.867
+        "price": 0.922
       },
       {
         "date": "2026-07-20",
-        "price": 0.844
+        "price": 0.916
       },
       {
         "date": "2026-07-21",
-        "price": 0.825
+        "price": 0.92
       },
       {
         "date": "2026-07-22",
-        "price": 0.837
+        "price": 0.904
       },
       {
         "date": "2026-07-23",
-        "price": 0.838
+        "price": 0.912
       },
       {
         "date": "2026-07-24",
-        "price": 0.85
+        "price": 0.925
       },
       {
         "date": "2026-07-25",
-        "price": 0.863
+        "price": 0.936
       },
       {
         "date": "2026-07-26",
-        "price": 0.85
+        "price": 0.911
       },
       {
         "date": "2026-07-27",
-        "price": 0.837
+        "price": 0.89
       },
       {
         "date": "2026-07-28",
-        "price": 0.857
+        "price": 0.904
       },
       {
         "date": "2026-07-29",
-        "price": 0.851
+        "price": 0.904
       },
       {
         "date": "2026-07-30",
-        "price": 0.851
+        "price": 0.918
       },
       {
         "date": "2026-07-31",
-        "price": 0.85
+        "price": 0.932
       },
       {
         "date": "2026-08-01",
-        "price": 0.846
+        "price": 0.917
       },
       {
         "date": "2026-08-02",
         "price": 0.843
+      },
+      {
+        "date": "2026-08-03",
+        "price": 0.925
+      },
+      {
+        "date": "2026-08-04",
+        "price": 0.918
+      },
+      {
+        "date": "2026-08-05",
+        "price": 0.918
+      },
+      {
+        "date": "2026-08-06",
+        "price": 0.918
+      },
+      {
+        "date": "2026-08-07",
+        "price": 0.91
+      },
+      {
+        "date": "2026-08-08",
+        "price": 0.91
       }
     ],
     "nonferrous_metals": [
       {
+        "date": "2026-06-29",
+        "price": 1.864
+      },
+      {
+        "date": "2026-06-30",
+        "price": 1.854
+      },
+      {
+        "date": "2026-07-01",
+        "price": 1.848
+      },
+      {
+        "date": "2026-07-02",
+        "price": 1.88
+      },
+      {
         "date": "2026-07-03",
-        "price": 1.828
-      },
-      {
-        "date": "2026-07-04",
-        "price": 1.823
-      },
-      {
-        "date": "2026-07-05",
-        "price": 1.814
+        "price": 1.892
       },
       {
         "date": "2026-07-06",
-        "price": 1.8
+        "price": 1.865
       },
       {
         "date": "2026-07-07",
-        "price": 1.781
+        "price": 1.803
       },
       {
         "date": "2026-07-08",
-        "price": 1.783
+        "price": 1.75
       },
       {
         "date": "2026-07-09",
-        "price": 1.764
+        "price": 2.025
       },
       {
         "date": "2026-07-10",
-        "price": 1.744
+        "price": 2.019
       },
       {
         "date": "2026-07-11",
-        "price": 1.741
+        "price": 2.009
       },
       {
         "date": "2026-07-12",
-        "price": 1.786
+        "price": 1.994
       },
       {
         "date": "2026-07-13",
-        "price": 1.78
+        "price": 1.973
       },
       {
         "date": "2026-07-14",
-        "price": 1.743
+        "price": 1.975
       },
       {
         "date": "2026-07-15",
-        "price": 1.758
+        "price": 1.954
       },
       {
         "date": "2026-07-16",
-        "price": 1.78
+        "price": 1.931
       },
       {
         "date": "2026-07-17",
-        "price": 1.839
+        "price": 1.929
       },
       {
         "date": "2026-07-18",
-        "price": 1.783
+        "price": 1.978
       },
       {
         "date": "2026-07-19",
-        "price": 1.762
+        "price": 1.972
       },
       {
         "date": "2026-07-20",
-        "price": 1.747
+        "price": 1.931
       },
       {
         "date": "2026-07-21",
-        "price": 1.753
+        "price": 1.948
       },
       {
         "date": "2026-07-22",
-        "price": 1.787
+        "price": 1.971
       },
       {
         "date": "2026-07-23",
-        "price": 1.768
+        "price": 2.038
       },
       {
         "date": "2026-07-24",
-        "price": 1.841
+        "price": 1.975
       },
       {
         "date": "2026-07-25",
-        "price": 1.774
+        "price": 1.952
       },
       {
         "date": "2026-07-26",
-        "price": 1.758
+        "price": 1.935
       },
       {
         "date": "2026-07-27",
-        "price": 1.75
+        "price": 1.942
       },
       {
         "date": "2026-07-28",
-        "price": 1.805
+        "price": 1.98
       },
       {
         "date": "2026-07-29",
-        "price": 1.809
+        "price": 1.959
       },
       {
         "date": "2026-07-30",
-        "price": 1.751
+        "price": 2.039
       },
       {
         "date": "2026-07-31",
-        "price": 1.791
+        "price": 1.965
       },
       {
         "date": "2026-08-01",
-        "price": 1.75
+        "price": 1.947
       },
       {
         "date": "2026-08-02",
         "price": 1.792
+      },
+      {
+        "date": "2026-08-03",
+        "price": 1.999
+      },
+      {
+        "date": "2026-08-04",
+        "price": 2.004
+      },
+      {
+        "date": "2026-08-05",
+        "price": 1.939
+      },
+      {
+        "date": "2026-08-06",
+        "price": 1.984
+      },
+      {
+        "date": "2026-08-07",
+        "price": 1.985
+      },
+      {
+        "date": "2026-08-08",
+        "price": 1.985
       }
     ],
     "new_energy": [
       {
+        "date": "2026-06-29",
+        "price": 2.912
+      },
+      {
+        "date": "2026-06-30",
+        "price": 2.991
+      },
+      {
+        "date": "2026-07-01",
+        "price": 2.955
+      },
+      {
+        "date": "2026-07-02",
+        "price": 2.868
+      },
+      {
         "date": "2026-07-03",
-        "price": 2.387
-      },
-      {
-        "date": "2026-07-04",
-        "price": 2.457
-      },
-      {
-        "date": "2026-07-05",
-        "price": 2.408
+        "price": 2.854
       },
       {
         "date": "2026-07-06",
-        "price": 2.425
+        "price": 2.799
       },
       {
         "date": "2026-07-07",
-        "price": 2.479
+        "price": 2.76
       },
       {
         "date": "2026-07-08",
-        "price": 2.372
+        "price": 2.635
       },
       {
         "date": "2026-07-09",
-        "price": 2.499
+        "price": 2.508
       },
       {
         "date": "2026-07-10",
-        "price": 2.459
+        "price": 2.582
       },
       {
         "date": "2026-07-11",
-        "price": 2.428
+        "price": 2.531
       },
       {
         "date": "2026-07-12",
-        "price": 2.421
+        "price": 2.549
       },
       {
         "date": "2026-07-13",
-        "price": 2.469
+        "price": 2.606
       },
       {
         "date": "2026-07-14",
-        "price": 2.384
+        "price": 2.492
       },
       {
         "date": "2026-07-15",
-        "price": 2.392
+        "price": 2.627
       },
       {
         "date": "2026-07-16",
-        "price": 2.491
+        "price": 2.584
       },
       {
         "date": "2026-07-17",
-        "price": 2.405
+        "price": 2.552
       },
       {
         "date": "2026-07-18",
-        "price": 2.416
+        "price": 2.544
       },
       {
         "date": "2026-07-19",
-        "price": 2.374
+        "price": 2.594
       },
       {
         "date": "2026-07-20",
-        "price": 2.426
+        "price": 2.505
       },
       {
         "date": "2026-07-21",
-        "price": 2.447
+        "price": 2.514
       },
       {
         "date": "2026-07-22",
-        "price": 2.388
+        "price": 2.618
       },
       {
         "date": "2026-07-23",
-        "price": 2.415
+        "price": 2.527
       },
       {
         "date": "2026-07-24",
-        "price": 2.467
+        "price": 2.539
       },
       {
         "date": "2026-07-25",
-        "price": 2.404
+        "price": 2.495
       },
       {
         "date": "2026-07-26",
-        "price": 2.378
+        "price": 2.55
       },
       {
         "date": "2026-07-27",
-        "price": 2.466
+        "price": 2.572
       },
       {
         "date": "2026-07-28",
-        "price": 2.366
+        "price": 2.51
       },
       {
         "date": "2026-07-29",
-        "price": 2.463
+        "price": 2.538
       },
       {
         "date": "2026-07-30",
-        "price": 2.46
+        "price": 2.593
       },
       {
         "date": "2026-07-31",
-        "price": 2.428
+        "price": 2.526
       },
       {
         "date": "2026-08-01",
-        "price": 2.464
+        "price": 2.499
       },
       {
         "date": "2026-08-02",
         "price": 2.436
+      },
+      {
+        "date": "2026-08-03",
+        "price": 2.486
+      },
+      {
+        "date": "2026-08-04",
+        "price": 2.589
+      },
+      {
+        "date": "2026-08-05",
+        "price": 2.585
+      },
+      {
+        "date": "2026-08-06",
+        "price": 2.552
+      },
+      {
+        "date": "2026-08-07",
+        "price": 2.56
+      },
+      {
+        "date": "2026-08-08",
+        "price": 2.56
       }
     ],
     "power": [
       {
+        "date": "2026-06-29",
+        "price": 1.038
+      },
+      {
+        "date": "2026-06-30",
+        "price": 1.032
+      },
+      {
+        "date": "2026-07-01",
+        "price": 1.048
+      },
+      {
+        "date": "2026-07-02",
+        "price": 1.038
+      },
+      {
         "date": "2026-07-03",
-        "price": 1.066
-      },
-      {
-        "date": "2026-07-04",
-        "price": 1.099
-      },
-      {
-        "date": "2026-07-05",
-        "price": 1.05
+        "price": 1.04
       },
       {
         "date": "2026-07-06",
-        "price": 1.103
+        "price": 1.034
       },
       {
         "date": "2026-07-07",
-        "price": 1.047
+        "price": 1.011
+      },
+      {
+        "date": "2026-07-08",
+        "price": 1.009
+      },
+      {
+        "date": "2026-07-09",
+        "price": 1.053
+      },
+      {
+        "date": "2026-07-10",
+        "price": 1.086
+      },
+      {
+        "date": "2026-07-11",
+        "price": 1.037
+      },
+      {
+        "date": "2026-07-12",
+        "price": 1.09
+      },
+      {
+        "date": "2026-07-13",
+        "price": 1.034
+      },
+      {
+        "date": "2026-07-14",
+        "price": 1.071
+      },
+      {
+        "date": "2026-07-15",
+        "price": 1.049
+      },
+      {
+        "date": "2026-07-16",
+        "price": 1.048
+      },
+      {
+        "date": "2026-07-17",
+        "price": 1.056
+      },
+      {
+        "date": "2026-07-18",
+        "price": 1.055
+      },
+      {
+        "date": "2026-07-19",
+        "price": 1.065
+      },
+      {
+        "date": "2026-07-20",
+        "price": 1.062
+      },
+      {
+        "date": "2026-07-21",
+        "price": 1.031
+      },
+      {
+        "date": "2026-07-22",
+        "price": 1.081
+      },
+      {
+        "date": "2026-07-23",
+        "price": 1.049
+      },
+      {
+        "date": "2026-07-24",
+        "price": 1.073
+      },
+      {
+        "date": "2026-07-25",
+        "price": 1.078
+      },
+      {
+        "date": "2026-07-26",
+        "price": 1.086
+      },
+      {
+        "date": "2026-07-27",
+        "price": 1.029
+      },
+      {
+        "date": "2026-07-28",
+        "price": 1.06
+      },
+      {
+        "date": "2026-07-29",
+        "price": 1.036
+      },
+      {
+        "date": "2026-07-30",
+        "price": 1.04
+      },
+      {
+        "date": "2026-07-31",
+        "price": 1.052
+      },
+      {
+        "date": "2026-08-01",
+        "price": 1.081
+      },
+      {
+        "date": "2026-08-02",
+        "price": 1.072
+      },
+      {
+        "date": "2026-08-03",
+        "price": 1.076
+      },
+      {
+        "date": "2026-08-04",
+        "price": 1.035
+      },
+      {
+        "date": "2026-08-05",
+        "price": 1.059
+      },
+      {
+        "date": "2026-08-06",
+        "price": 1.078
+      },
+      {
+        "date": "2026-08-07",
+        "price": 1.059
+      },
+      {
+        "date": "2026-08-08",
+        "price": 1.059
+      }
+    ],
+    "chip": [
+      {
+        "date": "2026-06-29",
+        "price": 1.649
+      },
+      {
+        "date": "2026-06-30",
+        "price": 1.695
+      },
+      {
+        "date": "2026-07-01",
+        "price": 1.661
+      },
+      {
+        "date": "2026-07-02",
+        "price": 1.51
+      },
+      {
+        "date": "2026-07-03",
+        "price": 1.5
+      },
+      {
+        "date": "2026-07-06",
+        "price": 1.505
+      },
+      {
+        "date": "2026-07-07",
+        "price": 1.501
+      },
+      {
+        "date": "2026-07-08",
+        "price": 1.493
+      },
+      {
+        "date": "2026-07-09",
+        "price": 1.23
+      },
+      {
+        "date": "2026-07-10",
+        "price": 1.205
+      },
+      {
+        "date": "2026-07-11",
+        "price": 1.194
+      },
+      {
+        "date": "2026-07-12",
+        "price": 1.208
+      },
+      {
+        "date": "2026-07-13",
+        "price": 1.211
+      },
+      {
+        "date": "2026-07-14",
+        "price": 1.221
+      },
+      {
+        "date": "2026-07-15",
+        "price": 1.206
+      },
+      {
+        "date": "2026-07-16",
+        "price": 1.244
+      },
+      {
+        "date": "2026-07-17",
+        "price": 1.18
+      },
+      {
+        "date": "2026-07-18",
+        "price": 1.177
+      },
+      {
+        "date": "2026-07-19",
+        "price": 1.214
+      },
+      {
+        "date": "2026-07-20",
+        "price": 1.181
+      },
+      {
+        "date": "2026-07-21",
+        "price": 1.233
+      },
+      {
+        "date": "2026-07-22",
+        "price": 1.205
+      },
+      {
+        "date": "2026-07-23",
+        "price": 1.218
+      },
+      {
+        "date": "2026-07-24",
+        "price": 1.228
+      },
+      {
+        "date": "2026-07-25",
+        "price": 1.246
+      },
+      {
+        "date": "2026-07-26",
+        "price": 1.227
+      },
+      {
+        "date": "2026-07-27",
+        "price": 1.186
+      },
+      {
+        "date": "2026-07-28",
+        "price": 1.188
+      },
+      {
+        "date": "2026-07-29",
+        "price": 1.209
+      },
+      {
+        "date": "2026-07-30",
+        "price": 1.245
+      },
+      {
+        "date": "2026-07-31",
+        "price": 1.229
+      },
+      {
+        "date": "2026-08-01",
+        "price": 1.217
+      },
+      {
+        "date": "2026-08-02",
+        "price": 1.118
+      },
+      {
+        "date": "2026-08-03",
+        "price": 1.239
+      },
+      {
+        "date": "2026-08-04",
+        "price": 1.24
+      },
+      {
+        "date": "2026-08-05",
+        "price": 1.211
+      },
+      {
+        "date": "2026-08-06",
+        "price": 1.209
+      },
+      {
+        "date": "2026-08-07",
+        "price": 1.212
+      },
+      {
+        "date": "2026-08-08",
+        "price": 1.212
+      }
+    ],
+    "robot": [
+      {
+        "date": "2026-06-29",
+        "price": 1.091
+      },
+      {
+        "date": "2026-06-30",
+        "price": 1.15
+      },
+      {
+        "date": "2026-07-01",
+        "price": 1.152
+      },
+      {
+        "date": "2026-07-02",
+        "price": 1.127
+      },
+      {
+        "date": "2026-07-03",
+        "price": 1.203
+      },
+      {
+        "date": "2026-07-06",
+        "price": 1.151
+      },
+      {
+        "date": "2026-07-07",
+        "price": 1.135
       },
       {
         "date": "2026-07-08",
@@ -3392,417 +3980,197 @@
       },
       {
         "date": "2026-07-09",
-        "price": 1.062
+        "price": 0.993
       },
       {
         "date": "2026-07-10",
-        "price": 1.061
+        "price": 1.049
       },
       {
         "date": "2026-07-11",
-        "price": 1.069
+        "price": 1.039
       },
       {
         "date": "2026-07-12",
-        "price": 1.068
+        "price": 1.045
       },
       {
         "date": "2026-07-13",
-        "price": 1.078
+        "price": 1.028
       },
       {
         "date": "2026-07-14",
-        "price": 1.075
+        "price": 1.009
       },
       {
         "date": "2026-07-15",
+        "price": 1.021
+      },
+      {
+        "date": "2026-07-16",
+        "price": 1.015
+      },
+      {
+        "date": "2026-07-17",
+        "price": 1.039
+      },
+      {
+        "date": "2026-07-18",
+        "price": 1.048
+      },
+      {
+        "date": "2026-07-19",
+        "price": 1.052
+      },
+      {
+        "date": "2026-07-20",
+        "price": 1.001
+      },
+      {
+        "date": "2026-07-21",
+        "price": 1.009
+      },
+      {
+        "date": "2026-07-22",
+        "price": 1.028
+      },
+      {
+        "date": "2026-07-23",
+        "price": 0.991
+      },
+      {
+        "date": "2026-07-24",
+        "price": 1.051
+      },
+      {
+        "date": "2026-07-25",
+        "price": 1.023
+      },
+      {
+        "date": "2026-07-26",
+        "price": 0.999
+      },
+      {
+        "date": "2026-07-27",
+        "price": 1.021
+      },
+      {
+        "date": "2026-07-28",
+        "price": 1.025
+      },
+      {
+        "date": "2026-07-29",
+        "price": 1.031
+      },
+      {
+        "date": "2026-07-30",
+        "price": 0.991
+      },
+      {
+        "date": "2026-07-31",
+        "price": 1.01
+      },
+      {
+        "date": "2026-08-01",
+        "price": 1.011
+      },
+      {
+        "date": "2026-08-02",
+        "price": 0.956
+      },
+      {
+        "date": "2026-08-03",
         "price": 1.044
       },
       {
-        "date": "2026-07-16",
-        "price": 1.094
+        "date": "2026-08-04",
+        "price": 1.045
       },
       {
-        "date": "2026-07-17",
-        "price": 1.062
+        "date": "2026-08-05",
+        "price": 1.035
       },
       {
-        "date": "2026-07-18",
-        "price": 1.086
+        "date": "2026-08-06",
+        "price": 1.012
       },
       {
-        "date": "2026-07-19",
-        "price": 1.092
+        "date": "2026-08-07",
+        "price": 1.021
       },
       {
-        "date": "2026-07-20",
-        "price": 1.099
-      },
-      {
-        "date": "2026-07-21",
-        "price": 1.042
-      },
-      {
-        "date": "2026-07-22",
-        "price": 1.073
-      },
-      {
-        "date": "2026-07-23",
-        "price": 1.048
-      },
-      {
-        "date": "2026-07-24",
-        "price": 1.053
-      },
-      {
-        "date": "2026-07-25",
-        "price": 1.065
-      },
-      {
-        "date": "2026-07-26",
-        "price": 1.094
-      },
-      {
-        "date": "2026-07-27",
-        "price": 1.087
-      },
-      {
-        "date": "2026-07-28",
-        "price": 1.09
-      },
-      {
-        "date": "2026-07-29",
-        "price": 1.048
-      },
-      {
-        "date": "2026-07-30",
-        "price": 1.072
-      },
-      {
-        "date": "2026-07-31",
-        "price": 1.091
-      },
-      {
-        "date": "2026-08-01",
-        "price": 1.076
-      },
-      {
-        "date": "2026-08-02",
-        "price": 1.072
-      }
-    ],
-    "chip": [
-      {
-        "date": "2026-07-03",
-        "price": 1.134
-      },
-      {
-        "date": "2026-07-04",
-        "price": 1.112
-      },
-      {
-        "date": "2026-07-05",
-        "price": 1.101
-      },
-      {
-        "date": "2026-07-06",
-        "price": 1.115
-      },
-      {
-        "date": "2026-07-07",
-        "price": 1.117
-      },
-      {
-        "date": "2026-07-08",
-        "price": 1.126
-      },
-      {
-        "date": "2026-07-09",
-        "price": 1.112
-      },
-      {
-        "date": "2026-07-10",
-        "price": 1.148
-      },
-      {
-        "date": "2026-07-11",
-        "price": 1.089
-      },
-      {
-        "date": "2026-07-12",
-        "price": 1.086
-      },
-      {
-        "date": "2026-07-13",
-        "price": 1.12
-      },
-      {
-        "date": "2026-07-14",
-        "price": 1.089
-      },
-      {
-        "date": "2026-07-15",
-        "price": 1.138
-      },
-      {
-        "date": "2026-07-16",
-        "price": 1.111
-      },
-      {
-        "date": "2026-07-17",
-        "price": 1.124
-      },
-      {
-        "date": "2026-07-18",
-        "price": 1.133
-      },
-      {
-        "date": "2026-07-19",
-        "price": 1.149
-      },
-      {
-        "date": "2026-07-20",
-        "price": 1.132
-      },
-      {
-        "date": "2026-07-21",
-        "price": 1.094
-      },
-      {
-        "date": "2026-07-22",
-        "price": 1.096
-      },
-      {
-        "date": "2026-07-23",
-        "price": 1.115
-      },
-      {
-        "date": "2026-07-24",
-        "price": 1.148
-      },
-      {
-        "date": "2026-07-25",
-        "price": 1.134
-      },
-      {
-        "date": "2026-07-26",
-        "price": 1.122
-      },
-      {
-        "date": "2026-07-27",
-        "price": 1.09
-      },
-      {
-        "date": "2026-07-28",
-        "price": 1.143
-      },
-      {
-        "date": "2026-07-29",
-        "price": 1.144
-      },
-      {
-        "date": "2026-07-30",
-        "price": 1.117
-      },
-      {
-        "date": "2026-07-31",
-        "price": 1.115
-      },
-      {
-        "date": "2026-08-01",
-        "price": 1.121
-      },
-      {
-        "date": "2026-08-02",
-        "price": 1.118
-      }
-    ],
-    "robot": [
-      {
-        "date": "2026-07-03",
-        "price": 0.93
-      },
-      {
-        "date": "2026-07-04",
-        "price": 0.982
-      },
-      {
-        "date": "2026-07-05",
-        "price": 0.973
-      },
-      {
-        "date": "2026-07-06",
-        "price": 0.979
-      },
-      {
-        "date": "2026-07-07",
-        "price": 0.962
-      },
-      {
-        "date": "2026-07-08",
-        "price": 0.945
-      },
-      {
-        "date": "2026-07-09",
-        "price": 0.956
-      },
-      {
-        "date": "2026-07-10",
-        "price": 0.95
-      },
-      {
-        "date": "2026-07-11",
-        "price": 0.973
-      },
-      {
-        "date": "2026-07-12",
-        "price": 0.982
-      },
-      {
-        "date": "2026-07-13",
-        "price": 0.985
-      },
-      {
-        "date": "2026-07-14",
-        "price": 0.937
-      },
-      {
-        "date": "2026-07-15",
-        "price": 0.945
-      },
-      {
-        "date": "2026-07-16",
-        "price": 0.962
-      },
-      {
-        "date": "2026-07-17",
-        "price": 0.928
-      },
-      {
-        "date": "2026-07-18",
-        "price": 0.984
-      },
-      {
-        "date": "2026-07-19",
-        "price": 0.958
-      },
-      {
-        "date": "2026-07-20",
-        "price": 0.935
-      },
-      {
-        "date": "2026-07-21",
-        "price": 0.956
-      },
-      {
-        "date": "2026-07-22",
-        "price": 0.96
-      },
-      {
-        "date": "2026-07-23",
-        "price": 0.965
-      },
-      {
-        "date": "2026-07-24",
-        "price": 0.928
-      },
-      {
-        "date": "2026-07-25",
-        "price": 0.945
-      },
-      {
-        "date": "2026-07-26",
-        "price": 0.946
-      },
-      {
-        "date": "2026-07-27",
-        "price": 0.972
-      },
-      {
-        "date": "2026-07-28",
-        "price": 0.978
-      },
-      {
-        "date": "2026-07-29",
-        "price": 0.978
-      },
-      {
-        "date": "2026-07-30",
-        "price": 0.969
-      },
-      {
-        "date": "2026-07-31",
-        "price": 0.948
-      },
-      {
-        "date": "2026-08-01",
-        "price": 0.948
-      },
-      {
-        "date": "2026-08-02",
-        "price": 0.956
+        "date": "2026-08-08",
+        "price": 1.021
       }
     ],
     "petrochemical": [
       {
+        "date": "2026-06-29",
+        "price": 1.495
+      },
+      {
+        "date": "2026-06-30",
+        "price": 1.469
+      },
+      {
+        "date": "2026-07-01",
+        "price": 1.491
+      },
+      {
+        "date": "2026-07-02",
+        "price": 1.499
+      },
+      {
         "date": "2026-07-03",
-        "price": 1.709
-      },
-      {
-        "date": "2026-07-04",
-        "price": 1.629
-      },
-      {
-        "date": "2026-07-05",
-        "price": 1.691
+        "price": 1.53
       },
       {
         "date": "2026-07-06",
-        "price": 1.644
+        "price": 1.588
       },
       {
         "date": "2026-07-07",
-        "price": 1.651
+        "price": 1.561
       },
       {
         "date": "2026-07-08",
-        "price": 1.683
+        "price": 1.572
       },
       {
         "date": "2026-07-09",
-        "price": 1.67
+        "price": 1.713
       },
       {
         "date": "2026-07-10",
-        "price": 1.705
+        "price": 1.632
       },
       {
         "date": "2026-07-11",
-        "price": 1.696
+        "price": 1.695
       },
       {
         "date": "2026-07-12",
-        "price": 1.657
+        "price": 1.648
       },
       {
         "date": "2026-07-13",
-        "price": 1.636
+        "price": 1.654
       },
       {
         "date": "2026-07-14",
-        "price": 1.627
+        "price": 1.687
       },
       {
         "date": "2026-07-15",
-        "price": 1.691
+        "price": 1.674
       },
       {
         "date": "2026-07-16",
-        "price": 1.627
+        "price": 1.709
       },
       {
         "date": "2026-07-17",
-        "price": 1.632
+        "price": 1.7
       },
       {
         "date": "2026-07-18",
@@ -3810,195 +4178,404 @@
       },
       {
         "date": "2026-07-19",
-        "price": 1.643
+        "price": 1.64
       },
       {
         "date": "2026-07-20",
-        "price": 1.719
+        "price": 1.631
       },
       {
         "date": "2026-07-21",
-        "price": 1.69
+        "price": 1.695
       },
       {
         "date": "2026-07-22",
-        "price": 1.652
+        "price": 1.631
       },
       {
         "date": "2026-07-23",
-        "price": 1.671
+        "price": 1.636
       },
       {
         "date": "2026-07-24",
-        "price": 1.701
+        "price": 1.665
       },
       {
         "date": "2026-07-25",
-        "price": 1.693
+        "price": 1.647
       },
       {
         "date": "2026-07-26",
-        "price": 1.637
+        "price": 1.723
       },
       {
         "date": "2026-07-27",
-        "price": 1.667
+        "price": 1.694
       },
       {
         "date": "2026-07-28",
-        "price": 1.715
+        "price": 1.656
       },
       {
         "date": "2026-07-29",
-        "price": 1.68
+        "price": 1.675
       },
       {
         "date": "2026-07-30",
-        "price": 1.652
+        "price": 1.705
       },
       {
         "date": "2026-07-31",
-        "price": 1.664
+        "price": 1.697
       },
       {
         "date": "2026-08-01",
-        "price": 1.64
+        "price": 1.641
       },
       {
         "date": "2026-08-02",
         "price": 1.673
+      },
+      {
+        "date": "2026-08-03",
+        "price": 1.72
+      },
+      {
+        "date": "2026-08-04",
+        "price": 1.684
+      },
+      {
+        "date": "2026-08-05",
+        "price": 1.656
+      },
+      {
+        "date": "2026-08-06",
+        "price": 1.668
+      },
+      {
+        "date": "2026-08-07",
+        "price": 1.677
+      },
+      {
+        "date": "2026-08-08",
+        "price": 1.677
       }
     ],
     "aerospace": [
       {
+        "date": "2026-06-29",
+        "price": 0.661
+      },
+      {
+        "date": "2026-06-30",
+        "price": 0.686
+      },
+      {
+        "date": "2026-07-01",
+        "price": 0.69
+      },
+      {
+        "date": "2026-07-02",
+        "price": 0.674
+      },
+      {
         "date": "2026-07-03",
-        "price": 0.587
-      },
-      {
-        "date": "2026-07-04",
-        "price": 0.602
-      },
-      {
-        "date": "2026-07-05",
-        "price": 0.598
+        "price": 0.692
       },
       {
         "date": "2026-07-06",
-        "price": 0.618
+        "price": 0.683
       },
       {
         "date": "2026-07-07",
-        "price": 0.616
+        "price": 0.666
       },
       {
         "date": "2026-07-08",
-        "price": 0.615
+        "price": 0.65
       },
       {
         "date": "2026-07-09",
-        "price": 0.613
+        "price": 0.606
       },
       {
         "date": "2026-07-10",
-        "price": 0.617
+        "price": 0.621
       },
       {
         "date": "2026-07-11",
-        "price": 0.59
-      },
-      {
-        "date": "2026-07-12",
-        "price": 0.61
-      },
-      {
-        "date": "2026-07-13",
-        "price": 0.595
-      },
-      {
-        "date": "2026-07-14",
         "price": 0.618
       },
       {
+        "date": "2026-07-12",
+        "price": 0.638
+      },
+      {
+        "date": "2026-07-13",
+        "price": 0.636
+      },
+      {
+        "date": "2026-07-14",
+        "price": 0.635
+      },
+      {
         "date": "2026-07-15",
-        "price": 0.592
+        "price": 0.633
       },
       {
         "date": "2026-07-16",
-        "price": 0.609
+        "price": 0.637
       },
       {
         "date": "2026-07-17",
-        "price": 0.594
+        "price": 0.61
       },
       {
         "date": "2026-07-18",
-        "price": 0.591
+        "price": 0.63
       },
       {
         "date": "2026-07-19",
-        "price": 0.594
+        "price": 0.615
       },
       {
         "date": "2026-07-20",
-        "price": 0.612
+        "price": 0.639
       },
       {
         "date": "2026-07-21",
-        "price": 0.587
+        "price": 0.612
       },
       {
         "date": "2026-07-22",
-        "price": 0.597
+        "price": 0.629
       },
       {
         "date": "2026-07-23",
-        "price": 0.604
-      },
-      {
-        "date": "2026-07-24",
-        "price": 0.603
-      },
-      {
-        "date": "2026-07-25",
-        "price": 0.593
-      },
-      {
-        "date": "2026-07-26",
         "price": 0.613
       },
       {
-        "date": "2026-07-27",
+        "date": "2026-07-24",
+        "price": 0.611
+      },
+      {
+        "date": "2026-07-25",
         "price": 0.614
       },
       {
+        "date": "2026-07-26",
+        "price": 0.632
+      },
+      {
+        "date": "2026-07-27",
+        "price": 0.607
+      },
+      {
         "date": "2026-07-28",
-        "price": 0.619
+        "price": 0.616
       },
       {
         "date": "2026-07-29",
-        "price": 0.597
+        "price": 0.624
       },
       {
         "date": "2026-07-30",
-        "price": 0.599
+        "price": 0.623
       },
       {
         "date": "2026-07-31",
-        "price": 0.602
+        "price": 0.613
       },
       {
         "date": "2026-08-01",
-        "price": 0.621
+        "price": 0.634
       },
       {
         "date": "2026-08-02",
         "price": 0.605
+      },
+      {
+        "date": "2026-08-03",
+        "price": 0.64
+      },
+      {
+        "date": "2026-08-04",
+        "price": 0.617
+      },
+      {
+        "date": "2026-08-05",
+        "price": 0.619
+      },
+      {
+        "date": "2026-08-06",
+        "price": 0.622
+      },
+      {
+        "date": "2026-08-07",
+        "price": 0.625
+      },
+      {
+        "date": "2026-08-08",
+        "price": 0.625
       }
     ]
   },
   "record_count": 31,
-  "real_record_count": 1,
+  "real_record_count": 3,
   "real_dates": [
-    "2026-08-02"
+    "2026-08-02",
+    "2026-08-07",
+    "2026-08-08"
+  ],
+  "price_real_dates": [
+    "2026-06-29",
+    "2026-06-30",
+    "2026-07-01",
+    "2026-07-02",
+    "2026-07-03",
+    "2026-07-06",
+    "2026-07-07",
+    "2026-07-08",
+    "2026-07-09",
+    "2026-07-10",
+    "2026-07-11",
+    "2026-07-12",
+    "2026-07-13",
+    "2026-07-14",
+    "2026-07-15",
+    "2026-07-16",
+    "2026-07-17",
+    "2026-07-18",
+    "2026-07-19",
+    "2026-07-20",
+    "2026-07-21",
+    "2026-07-22",
+    "2026-07-23",
+    "2026-07-24",
+    "2026-07-25",
+    "2026-07-26",
+    "2026-07-27",
+    "2026-07-28",
+    "2026-07-29",
+    "2026-07-30",
+    "2026-07-31",
+    "2026-08-01",
+    "2026-08-02",
+    "2026-08-03",
+    "2026-08-04",
+    "2026-08-05",
+    "2026-08-06",
+    "2026-08-07",
+    "2026-08-08"
+  ],
+  "signals": [
+    {
+      "sector": "petrochemical",
+      "name": "石油石化",
+      "index": 21.8,
+      "delta": 4.2,
+      "level": "normal",
+      "action": "✅ 正常区间：情绪平稳，维持原策略",
+      "extras": "较前日 +4.2"
+    },
+    {
+      "sector": "semiconductor",
+      "name": "半导体",
+      "index": 21.3,
+      "delta": -8.1,
+      "level": "normal",
+      "action": "✅ 正常区间：情绪平稳，维持原策略",
+      "extras": "较前日 -8.1"
+    },
+    {
+      "sector": "telecom",
+      "name": "通信",
+      "index": 19.7,
+      "delta": -6.8,
+      "level": "cold",
+      "action": "🧊 极度冷清：小白沉默，列入左侧观察池",
+      "extras": "较前日 -6.8"
+    },
+    {
+      "sector": "innovative_drug",
+      "name": "创新药",
+      "index": 18.8,
+      "delta": 9.0,
+      "level": "cold",
+      "action": "🧊 极度冷清：小白沉默，列入左侧观察池",
+      "extras": "较前日 +9.0"
+    },
+    {
+      "sector": "chip",
+      "name": "芯片",
+      "index": 18.4,
+      "delta": -6.1,
+      "level": "cold",
+      "action": "🧊 极度冷清：小白沉默，列入左侧观察池",
+      "extras": "较前日 -6.1"
+    },
+    {
+      "sector": "nonferrous_metals",
+      "name": "有色金属",
+      "index": 18.2,
+      "delta": -2.1,
+      "level": "cold",
+      "action": "🧊 极度冷清：小白沉默，列入左侧观察池",
+      "extras": "较前日 -2.1"
+    },
+    {
+      "sector": "gold",
+      "name": "黄金",
+      "index": 17.4,
+      "delta": -24.6,
+      "level": "cold",
+      "action": "🧊 极度冷清：小白沉默，列入左侧观察池",
+      "extras": "较前日 -24.6"
+    },
+    {
+      "sector": "new_energy",
+      "name": "新能源",
+      "index": 17.3,
+      "delta": 0.2,
+      "level": "cold",
+      "action": "🧊 极度冷清：小白沉默，列入左侧观察池",
+      "extras": "较前日 +0.2"
+    },
+    {
+      "sector": "robot",
+      "name": "机器人",
+      "index": 15.3,
+      "delta": -7.1,
+      "level": "cold",
+      "action": "🧊 极度冷清：小白沉默，列入左侧观察池",
+      "extras": "较前日 -7.1"
+    },
+    {
+      "sector": "power",
+      "name": "电力",
+      "index": 14.4,
+      "delta": 1.7,
+      "level": "cold",
+      "action": "🧊 极度冷清：小白沉默，列入左侧观察池",
+      "extras": "较前日 +1.7"
+    },
+    {
+      "sector": "aerospace",
+      "name": "商业航天",
+      "index": 14.1,
+      "delta": -4.5,
+      "level": "cold",
+      "action": "🧊 极度冷清：小白沉默，列入左侧观察池",
+      "extras": "较前日 -4.5"
+    },
+    {
+      "sector": "nasdaq",
+      "name": "纳斯达克",
+      "index": 10.8,
+      "delta": -10.4,
+      "level": "cold",
+      "action": "🧊 极度冷清：小白沉默，列入左侧观察池",
+      "extras": "较前日 -10.4"
+    }
   ]
 }
