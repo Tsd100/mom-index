@@ -6,6 +6,7 @@ from datetime import datetime, date
 from typing import Dict, List
 import json
 import os
+from mom_index.provenance import verified_record, now_local, SCHEMA_VERSION
 
 DATA_DIR = os.environ.get("MOM_INDEX_DATA_DIR",
     os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data"))
@@ -38,7 +39,7 @@ def compute_sector_index(analysis_results: List) -> Dict:
     """
     if not analysis_results:
         return {
-            "index": 0, 
+            "index": None,
             "interpretation": "无数据",
             "details": {}
         }
@@ -50,8 +51,8 @@ def compute_sector_index(analysis_results: List) -> Dict:
     spam_count = total - len(valid_posts)
     
     # 小白帖（分数 >= 20）
-    newbie_posts = [r for r in analysis_results if r.newbie_score >= 20]
-    pure_newbie = [r for r in analysis_results if r.newbie_score >= 50]
+    newbie_posts = [r for r in valid_posts if r.newbie_score >= 20]
+    pure_newbie = [r for r in valid_posts if r.newbie_score >= 50]
     newbie_count = len(newbie_posts)
     
     # 维度1: 小白占比 (0-100) — 基于有效帖子
@@ -155,53 +156,62 @@ def interpret_index(index: float) -> str:
 
 
 def load_history() -> Dict:
-    """加载历史数据"""
-    history_file = os.path.join(DATA_DIR, "history.json")
-    if os.path.exists(history_file):
-        with open(history_file, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    return {"records": []}
+    """合并读取旧历史与独立生产历史；是否核验由消费者明确筛选。"""
+    records = []
+    for relative in ('history.json', 'production/history.json'):
+        path = os.path.join(DATA_DIR, relative)
+        if os.path.exists(path):
+            with open(path, encoding='utf-8') as handle:
+                records.extend(json.load(handle).get('records', []))
+    return {'records': sorted(records, key=lambda r: r['date'])}
 
 
-def save_history(history: Dict):
-    """保存历史数据"""
-    history_file = os.path.join(DATA_DIR, "history.json")
-    os.makedirs(DATA_DIR, exist_ok=True)
-    with open(history_file, 'w', encoding='utf-8') as f:
-        json.dump(history, f, ensure_ascii=False, indent=2)
+def save_history(history: Dict, production=False):
+    """原子保存。新生产记录与旧历史、演示历史分目录存放。"""
+    directory = os.path.join(DATA_DIR, 'production') if production else DATA_DIR
+    os.makedirs(directory, exist_ok=True)
+    history_file = os.path.join(directory, 'history.json')
+    temporary = history_file + '.tmp'
+    with open(temporary, 'w', encoding='utf-8') as handle:
+        json.dump(history, handle, ensure_ascii=False, indent=2)
+    os.replace(temporary, history_file)
 
 
-def add_record(sector_indices: Dict[str, Dict], analysis_results: Dict, prices: Dict[str, float] = None):
+def add_record(sector_indices: Dict[str, Dict], analysis_results: Dict, prices: Dict[str, float] = None, provenance: Dict = None):
     """添加一条历史记录"""
     if prices:
         for sid, price in prices.items():
             if sid in sector_indices:
                 sector_indices[sid]["price"] = price
     
-    history = load_history()
+    history = {"records": [r for r in load_history()["records"] if verified_record(r)]}
     
     record = {
-        "date": datetime.now().strftime("%Y-%m-%d"),
-        "timestamp": datetime.now().isoformat(),
+        "date": now_local().strftime("%Y-%m-%d"),
+        "timestamp": now_local().isoformat(),
+        "provenance": provenance or {},
         "source": "real",
         "sectors": sector_indices,
     }
     
     # 如果今天已有记录，更新而非新增
     today = record["date"]
-    existing = [r for r in history["records"] if r["date"] == today]
+    existing = [r for r in history["records"] if r["date"] == today and verified_record(r)]
     if existing:
-        history["records"] = [r for r in history["records"] if r["date"] != today]
+        history["records"] = [r for r in history["records"] if r["date"] != today or not verified_record(r)]
     
     history["records"].append(record)
     history["records"].sort(key=lambda r: r["date"])
-    save_history(history)
+    save_history(history, production=True)
 
 
 def get_dashboard_data() -> Dict:
     """获取前端所需的完整数据"""
     history = load_history()
-    records = history.get("records", [])
+    all_records = history.get("records", [])
+    records = sorted((r for r in all_records if verified_record(r)), key=lambda r: r["date"])
+    excluded = {"mock": sum(r.get("source") == "mock" for r in all_records),
+                "unverified": sum(r.get("source") != "mock" and not verified_record(r) for r in all_records)}
     
     # 最新一条
     latest = records[-1] if records else None
@@ -220,7 +230,8 @@ def get_dashboard_data() -> Dict:
             if sector in sector_history:
                 sector_history[sector].append({
                     "date": r["date"],
-                    "index": data["index"],
+                    "index": data["index"] if data.get("quality", {}).get("status") == "ok" else None,
+                    "definition_id": data.get("definition_id"),
                 })
             if sector in price_history and "price" in data:
                 price_history[sector].append({
@@ -248,6 +259,9 @@ def get_dashboard_data() -> Dict:
             pass  # 回填文件损坏时静默忽略，不影响主流程
     
     return {
+        "schema_version": SCHEMA_VERSION,
+        "mode": "production",
+        "excluded_records": excluded,
         "latest": latest,
         "sector_history": sector_history,
         "price_history": price_history,

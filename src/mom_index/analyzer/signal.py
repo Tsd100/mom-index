@@ -8,15 +8,16 @@
 from typing import Dict, List
 
 from mom_index.analyzer.index_calculator import SECTOR_NAMES
+from mom_index.provenance import record_expired
 
 # 信号优先级（用于排序展示）
-_ORDER = {"danger": 0, "warning": 1, "watch": 2, "normal": 3, "cold": 4}
+_ORDER = {"danger": 0, "warning": 1, "watch": 2, "normal": 3, "cold": 4, "unavailable": 5}
 
 
 def _prev_real_index(sector_history: List[Dict], real_dates) -> float | None:
     """该板块上一个真实交易日的指数（真实记录之间比较，排除模拟点）"""
     pts = sorted(
-        (r["date"], r["index"]) for r in sector_history if r["date"] in real_dates
+        (r["date"], r["index"]) for r in sector_history if r["date"] in real_dates and r.get("index") is not None
     )
     if len(pts) < 2:
         return None
@@ -31,9 +32,20 @@ def generate_signals(dashboard: Dict) -> List[Dict]:
     signals = []
 
     for key, s in sectors.items():
-        idx = s.get("index", 0) or 0
+        quality = s.get("quality", {})
+        if s.get("index") is None or quality.get("status") != "ok" or record_expired(latest):
+            signals.append({"sector": key, "name": SECTOR_NAMES.get(key, key),
+                            "index": s.get("index"), "delta": None, "level": "unavailable",
+                            "action": "数据不足，暂停情绪判断",
+                            "extras": '采集结果过期或时间未核验' if record_expired(latest) else "；".join(quality.get("reasons", ["样本质量未核验"]))})
+            continue
+        idx = s["index"]
         prev = _prev_real_index(dashboard.get("sector_history", {}).get(key, []), real_dates)
-        delta = (idx - prev) if prev is not None else None
+        points = sorted(dashboard.get("sector_history", {}).get(key, []), key=lambda p: p["date"])
+        comparable = (len(points) >= 2 and points[-2].get("index") is not None
+                      and points[-1].get("definition_id")
+                      and points[-1].get("definition_id") == points[-2].get("definition_id"))
+        delta = (idx - prev) if prev is not None and comparable else None
         d = s.get("details") or {}
         ratio = d.get("buy_sell_ratio") or 0
 
@@ -58,7 +70,7 @@ def generate_signals(dashboard: Dict) -> List[Dict]:
             level, action = "cold", "🧊 极度冷清：小白沉默，列入左侧观察池"
 
         # 补充条件
-        extras = []
+        extras = [] if comparable else ["无可比上期记录或采集口径已变化"]
         if delta is not None:
             extras.append(f"较前日 {delta:+.1f}")
         if ratio >= 3 and idx >= 40:
@@ -80,5 +92,5 @@ def generate_signals(dashboard: Dict) -> List[Dict]:
             "extras": "；".join(extras),
         })
 
-    signals.sort(key=lambda s: (_ORDER.get(s["level"], 9), -s["index"]))
+    signals.sort(key=lambda s: (_ORDER.get(s["level"], 9), -(s["index"] or 0)))
     return signals

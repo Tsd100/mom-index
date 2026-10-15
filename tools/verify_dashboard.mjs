@@ -1,0 +1,117 @@
+// 使用已有 Chromium 与原生 CDP，无额外 npm 依赖。截图只放 output/。
+import {spawn} from 'node:child_process';
+import {readFile, writeFile, mkdir, mkdtemp} from 'node:fs/promises';
+import {createServer} from 'node:http';
+import {resolve, join} from 'node:path';
+import assert from 'node:assert/strict';
+
+const browser = process.argv[2] || process.env.CHROME_PATH;
+assert(browser, '提供已有 Chromium 可执行文件路径');
+const out = resolve('output');
+await mkdir(out, {recursive: true});
+const profile = await mkdtemp(join(out, 'qa-browser-'));
+const html = await readFile('src/mom_index/frontend/dashboard.html', 'utf8');
+const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]);
+await writeFile(join(out, 'dashboard-check.js'), scripts.join('\n'));
+const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]));
+for (const script of scripts) {
+  for (const match of script.matchAll(/getElementById\(['"]([^'"]+)['"]\)/g)) {
+    assert(ids.has(match[1]), `缺少 ID ${match[1]}`);
+  }
+}
+const fixture = {
+  schema_version: 2, mode: 'production', real_record_count: 3, record_count: 3,
+  excluded_records: {mock: 29, unverified: 3}, real_dates: ['2026-10-13', '2026-10-14', '2026-10-15'],
+  price_real_dates: ['2026-10-13', '2026-10-14', '2026-10-15'],
+  latest: {date: '2026-10-15', provenance: {schema_version: 2, run_id: 'browser-test', mock_excluded: true,
+    finished_at: new Date().toISOString(), definition: {id: 'browser-test-definition'}},
+    sectors: {gold: {index: 45, interpretation: '开始升温', quality: {status: 'ok', sample_count: 50,
+      valid_count: 45, fresh_count: 40, newly_seen_count: 20, previously_seen_count: 30},
+      details: {}, top_newbie_posts: [{title: '<img src=x onerror="window.injected=true">', score: 50,
+        reasoning: '测试转义', key_signals: ['小白'], intent_label: '买入'}]}}},
+  signals: [{sector: 'gold', name: '黄金', index: 45, delta: 1, level: 'watch', action: '开始升温', extras: ''}],
+  sector_history: {gold: [{date: '2026-10-13', index: 30}, {date: '2026-10-14', index: 44}, {date: '2026-10-15', index: 45}]},
+  price_history: {gold: [{date: '2026-10-13', price: 8}, {date: '2026-10-14', price: 9}, {date: '2026-10-15', price: 8.5}]},
+};
+const server = createServer((req, res) => {
+  if (req.url?.startsWith('/data/')) {
+    res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(fixture));
+  } else {res.setHeader('Content-Type', 'text/html; charset=utf-8'); res.end(html);}
+});
+await new Promise(r => server.listen(0, '127.0.0.1', r));
+const chrome = spawn(browser, ['--headless=new', '--no-first-run', '--no-default-browser-check',
+  '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank'], {stdio: 'ignore', windowsHide: true});
+let ws;
+try {
+  let port;
+  for (let i = 0; i < 100; i++) {
+    try {port = (await readFile(join(profile, 'DevToolsActivePort'), 'utf8')).split('\n')[0]; break;} catch {}
+    await new Promise(r => setTimeout(r, 100));
+  }
+  assert(port, 'Chromium 未启动');
+  const tabs = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
+  ws = new WebSocket(tabs.find(t => t.type === 'page').webSocketDebuggerUrl);
+  await new Promise((r, reject) => {ws.onopen = r; ws.onerror = reject;});
+  let sequence = 0;
+  const pending = new Map(), errors = [];
+  ws.onmessage = event => {
+    const message = JSON.parse(event.data);
+    if (message.id) {
+      const p = pending.get(message.id);
+      if (p) {clearTimeout(p.timer); pending.delete(message.id); message.error ? p.reject(message.error) : p.resolve(message.result);}
+    } else if (message.method === 'Runtime.exceptionThrown') errors.push(message.params.exceptionDetails.text);
+  };
+  const call = (method, params = {}) => new Promise((resolve, reject) => {
+    const id = ++sequence;
+    const timer = setTimeout(() => reject(new Error(`CDP timeout: ${method}`)), 15000);
+    pending.set(id, {resolve, reject, timer}); ws.send(JSON.stringify({id, method, params}));
+  });
+  const evaluate = async expression => {
+    const result = await call('Runtime.evaluate', {expression, returnByValue: true, awaitPromise: true});
+    assert(!result.exceptionDetails, JSON.stringify(result.exceptionDetails));
+    return result.result.value;
+  };
+  await call('Runtime.enable');
+  await call('Page.enable');
+  for (const dpr of [1, 2]) {
+    await call('Emulation.setDeviceMetricsOverride', {width: 1280, height: 960, deviceScaleFactor: dpr, mobile: false});
+    await call('Page.navigate', {url: `http://127.0.0.1:${server.address().port}/`});
+    let ready = false;
+    for (let i = 0; i < 100; i++) {
+      ready = await evaluate(`typeof Chart !== 'undefined' && document.querySelectorAll('canvas').length === 1`);
+      if (ready) break;
+      await new Promise(r => setTimeout(r, 100));
+    }
+    assert(ready, 'Chart.js 未加载或画布没有生成');
+    await new Promise(r => setTimeout(r, 1200));
+    const pixels = await evaluate(`Array.from(document.querySelectorAll('canvas')).map(canvas => {
+      const rgba=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
+      let painted=0,colorful=0; for(let i=0;i<rgba.length;i+=4){if(rgba[i+3])painted++; if(Math.max(rgba[i],rgba[i+1],rgba[i+2])-Math.min(rgba[i],rgba[i+1],rgba[i+2])>30&&rgba[i+3])colorful++;}
+      return {painted,colorful,ratio:colorful/(canvas.width*canvas.height),dpr:canvas.width/canvas.clientWidth};
+    })`);
+    assert(pixels.every(p => p.painted > 500 && p.ratio > .01 && Math.abs(p.dpr-dpr) < .1), JSON.stringify(pixels));
+    await evaluate('loadData(); new Promise(r=>setTimeout(r,300))');
+    assert.equal(await evaluate(`document.querySelectorAll('.post-item').length`), 1, '刷新重复追加帖子');
+    assert.equal(await evaluate('window.injected === true'), false, '帖子 HTML 未转义');
+    assert.equal(await evaluate(`Object.keys(Chart.instances).length`), 1, '刷新泄漏图表');
+    const stale = structuredClone(fixture); stale.latest.provenance.finished_at = '2026-08-08T00:00:00+08:00';
+    const view = await evaluate(`productionView(${JSON.stringify(stale)})`);
+    assert.equal(view.latest.sectors.gold.index, null);
+    assert.equal(view.signals[0].delta, null);
+    assert.equal((await evaluate(`productionView({latest:{sectors:{gold:{index:99}}},record_count:31})`)).latest, null);
+    const shot = await call('Page.captureScreenshot', {format: 'png'});
+    await writeFile(join(out, `dashboard-dpr${dpr}.png`), Buffer.from(shot.data, 'base64'));
+    console.log(`DPR ${dpr}: PASS`, JSON.stringify(pixels));
+  }
+  await call('Emulation.setDeviceMetricsOverride', {width: 390, height: 844, deviceScaleFactor: 2, mobile: true});
+  assert(await evaluate('document.documentElement.scrollWidth <= innerWidth + 1'), '手机横向溢出');
+  const empty = {schema_version: 2, mode: 'production', latest: null, sector_history: {}, price_history: {}, signals: []};
+  await evaluate(`{const d=${JSON.stringify(empty)};renderCards(d);renderCharts(d);renderTopPosts(d);renderSignals(d);renderDataNotice(d);}`);
+  assert.equal(await evaluate(`document.querySelectorAll('canvas').length`), 0);
+  assert.equal(errors.length, 0, JSON.stringify(errors));
+  console.log('PASS: 语法对应的 DOM ID、刷新、过期、旧 JSON 拒绝、转义、空数据、移动端与运行时检查');
+} finally {
+  if (ws) ws.close();
+  chrome.kill();
+  server.close();
+}

@@ -5,9 +5,13 @@
 import os
 import json
 from datetime import datetime
+from uuid import uuid4
+from dataclasses import asdict
+from pathlib import Path
+from mom_index.provenance import (prepare_posts, build_definition, now_local, SCHEMA_VERSION, digest, assess_valid_quality)
 from typing import Dict
 
-from mom_index.collectors.guba_collector import collect_all as collect_guba, SECTORS
+from mom_index.collectors.guba_collector import collect_all as collect_guba, SECTORS, MAX_PAGES
 from mom_index.collectors.xhs_collector import collect_all as collect_xhs
 from mom_index.collectors.xueqiu_collector import collect_all as collect_xueqiu
 from mom_index.analyzer.llm_analyzer import analyze_all
@@ -16,166 +20,96 @@ from mom_index.analyzer.index_calculator import (
     compute_sector_index, add_record, get_dashboard_data, save_history, load_history, SECTOR_NAMES
 )
 from mom_index.collectors.price_collector import fetch_all_prices
-from mom_index.storage import save_posts, count_posts
+from mom_index.storage import save_posts, count_posts, seen_post_ids
 
 DATA_DIR = os.environ.get("MOM_INDEX_DATA_DIR",
     os.path.join(os.path.dirname(os.path.dirname(__file__)), "data"))
 
 
-def run_pipeline():
-    """执行完整的数据采集→分析→指数计算流程"""
-    print("=" * 65)
-    print("   👩‍👧 宝妈指数 · 数据采集与分析")
-    print(f"   {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print("=" * 65)
-    
-    # ===== 第1步: 数据采集 =====
-    print("\n📡 第1步: 数据采集")
-    
-    all_posts = {}
-    
-    # 东方财富股吧
-    print("  [东方财富股吧]")
-    guba_data = collect_guba()
-    for sector, posts in guba_data.items():
-        all_posts[sector] = all_posts.get(sector, []) + posts
-        saved = save_posts(sector, posts, platform="guba")
-        if saved:
-            print(f"    ↳ 已存档 {saved} 条原始帖子")
-    
-    # 小红书 (如果有API Key)
-    print("  [小红书]")
-    try:
-        xhs_data = collect_xhs()
-        for sector, posts in xhs_data.items():
-            all_posts[sector] = all_posts.get(sector, []) + posts
-            saved = save_posts(sector, posts, platform="xhs")
-            if saved:
-                print(f"    ↳ 已存档 {saved} 条原始帖子")
-    except Exception as e:
-        print(f"  小红书采集跳过: {e}")
+def publish_dashboard(dashboard, frontend_dir=None):
+    """仅发布经过过滤的生产 JSON；不向前端复制历史原件与原始帖子。"""
+    target = Path(frontend_dir or Path(__file__).parent / "frontend" / "data")
+    target.mkdir(parents=True, exist_ok=True)
+    (target / "dashboard_data.json").write_text(
+        json.dumps(dashboard, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    # 雪球（可选，需 MOM_INDEX_ENABLE_XUEQIU=1 + 登录 Cookie）
-    print("  [雪球]")
-    try:
-        xueqiu_data = collect_xueqiu()
-        for sector, posts in xueqiu_data.items():
-            all_posts[sector] = all_posts.get(sector, []) + posts
-            saved = save_posts(sector, posts, platform="xueqiu")
-            if saved:
-                print(f"    ↳ 已存档 {saved} 条原始帖子")
-    except Exception as e:
-        print(f"  雪球采集跳过: {e}")
-    
-    total_collected = sum(len(v) for v in all_posts.values())
-    print(f"\n  共采集 {total_collected} 条帖子（累计存档 {count_posts()} 条）\n")
-    
-    # ===== 第2步: LLM分析 =====
-    print("🧠 第2步: LLM 多维度分析")
+
+def run_pipeline(publish=True):
+    """执行生产采集；无论演示开关如何设置，模拟帖子均不可进入分析。"""
+    started = now_local()
+    run_id = uuid4().hex
+    definition = build_definition(MAX_PAGES)
+    all_posts = {key: [] for key in SECTORS}
+    reports = {}
+    for source, collector in [('guba', collect_guba), ('xhs', collect_xhs), ('xueqiu', collect_xueqiu)]:
+        state = {'status': 'ok', 'sectors': {}}
+        if source == 'xhs' and not os.environ.get('RNODE_API_KEY'):
+            state['status'] = 'demo_only' if os.environ.get('XHS_ALLOW_MOCK') == '1' else 'disabled'
+        if source == 'xueqiu' and os.environ.get('MOM_INDEX_ENABLE_XUEQIU') != '1':
+            state['status'] = 'disabled'
+        try:
+            data = collector(report=state['sectors'])
+            if state['status'] == 'ok' and not any(data.values()):
+                state['status'] = 'empty'
+            for sector, posts in data.items():
+                if sector in all_posts:
+                    all_posts[sector].extend(posts)
+        except Exception as exc:
+            state.update(status='failed', error_type=type(exc).__name__)
+        reports[source] = state
+
+    assessed_at = now_local()
+    qualities = {}
+    for sector, posts in all_posts.items():
+        # 必须先查已见身份，再追加本轮原始存档。
+        accepted, quality = prepare_posts(posts, assessed_at, seen_post_ids(sector))
+        save_posts(sector, posts, run_id=run_id)
+        all_posts[sector] = accepted
+        state = reports['guba']['sectors'].get(sector, {})
+        quality['collector_duplicates'] = state.get('duplicate_count', 0)
+        quality['collector_parsed_count'] = state.get('parsed_count', 0)
+        quality['collection_status'] = state.get('status', reports['guba']['status'])
+        source_failures = [source for source, report in reports.items()
+                           if report['status'] == 'failed' or report['sectors'].get(sector, {}).get('status') in ('failed', 'partial')]
+        quality['failed_sources'] = source_failures
+        if quality['collection_status'] in ('failed', 'partial', 'empty') or source_failures:
+            quality.update(status='collection_failed', reasons=['启用来源采集失败、不完整或无有效响应'])
+        qualities[sector] = quality
+
     analysis_results = analyze_all(all_posts)
-    
-    # 打印每个板块的 top 小白帖
-    for sector, results in analysis_results.items():
-        top_newbie = [r for r in results if r.newbie_score >= 30][:3]
-        print(f"\n  [{SECTOR_NAMES.get(sector, sector)}] 共分析 {len(results)} 条")
-        if top_newbie:
-            print(f"  🔥 典型小白帖:")
-            for r in top_newbie:
-                print(f"     [{r.level} {r.newbie_score}分] {r.title[:50]}...")
-    
-    # ===== 第3步: 指数计算 =====
-    print("\n📊 第3步: 指数计算")
-    
-    sector_indices = {}
-    for sector, results in analysis_results.items():
-        result = compute_sector_index(results)
-        sector_indices[sector] = result
-        name = SECTOR_NAMES.get(sector, sector)
-        d = result["details"]
-        bar = "█" * int(result["index"] / 5) + "░" * (20 - int(result["index"] / 5))
-        print(f"  {name:6s} {bar} {result['index']:5.1f}  [{d.get('newbie_posts', 0)}/{d.get('total_posts', 0)}小白, {d.get('newbie_ratio', 0)}%]")
-    
-    # ===== 第4步: 存储历史 =====
-    # ===== 价格采集 =====
-    print("\n💰 价格采集")
+    indices = {}
+    for sector in SECTORS:
+        results = analysis_results.get(sector, [])
+        value = compute_sector_index(results)
+        quality = assess_valid_quality(all_posts[sector], results, qualities[sector], assessed_at)
+        qualities[sector] = quality
+        sector_definition_id = digest([definition['id'], sorted({p.get('platform', 'unknown') for p in all_posts[sector]})])
+        value.update(quality=quality, definition_id=sector_definition_id)
+        if quality['status'] != 'ok':
+            value['index'] = None
+            value['interpretation'] = '数据不足，暂停情绪判断'
+        indices[sector] = value
+
     prices = fetch_all_prices(SECTORS)
-    
-    # ===== 第4步: 存储历史 =====
-    print("\n💾 第4步: 存储历史记录")
-    add_record(sector_indices, analysis_results, prices)
-    
-    # ===== 第5步: 输出前端数据 =====
+    provenance = {'schema_version': SCHEMA_VERSION, 'run_id': run_id,
+                  'started_at': started.isoformat(), 'finished_at': now_local().isoformat(),
+                  'mock_excluded': True, 'definition': definition, 'sources': reports,
+                  'sampling_window': {'kind': 'board_snapshot', 'fresh_hours': 24},
+                  'price_status': {key: 'available' if key in prices else 'missing' for key in SECTORS}}
+    add_record(indices, analysis_results, prices, provenance=provenance)
     dashboard = get_dashboard_data()
-
-    # 真实数据不足时，补充稳定的模拟历史（仅用于前端曲线预览；source=mock 会被回测忽略）
-    real_count = dashboard.get("real_record_count", dashboard["record_count"])
-    if real_count < 5:
-        latest = dashboard.get("latest") or {}
-        real_prices = {
-            k: v.get("price")
-            for k, v in (latest.get("sectors") or {}).items()
-            if v.get("price") is not None
-        }
-        sample = generate_sample_history(30, real_prices)
-        real_dates = set(dashboard.get("real_dates", []))
-        merged = {"records": []}
-        for rec in sample["records"]:
-            if rec["date"] not in real_dates:
-                merged["records"].append(rec)
-        history = load_history()
-        merged["records"].extend(
-            r for r in history["records"] if r.get("source") == "real"
-        )
-        merged["records"].sort(key=lambda r: r["date"])
-        save_history(merged)
-        dashboard = get_dashboard_data()  # 重新读取（含模拟历史）
-        print(f"\n📝 已补充 30 天模拟历史用于前端展示（真实记录 {real_count} 条）")
-    else:
-        # 真实记录已充足：清除模拟历史，只保留真实记录
-        history = load_history()
-        real_records = [r for r in history["records"] if r.get("source") == "real"]
-        if len(real_records) != len(history["records"]):
-            save_history({"records": real_records})
-            dashboard = get_dashboard_data()
-            print(f"\n✅ 真实记录已满 {real_count} 天，已移除模拟历史")
-
-    # 生成每日操作信号清单
-    dashboard["signals"] = generate_signals(dashboard)
-
-    os.makedirs(DATA_DIR, exist_ok=True)
-    dashboard_file = os.path.join(DATA_DIR, "dashboard_data.json")
-    with open(dashboard_file, 'w', encoding='utf-8') as f:
-        json.dump(dashboard, f, ensure_ascii=False, indent=2)
-    print(f"  数据已保存: {dashboard_file}")
-    
-    # 同步到 frontend/data/（前端服务器从这里读取）
-    frontend_data_dir = os.path.join(os.path.dirname(__file__), "frontend", "data")
-    os.makedirs(frontend_data_dir, exist_ok=True)
-    for fname in ["dashboard_data.json", "history.json", "xhs_posts.json"]:
-        src = os.path.join(DATA_DIR, fname)
-        dst = os.path.join(frontend_data_dir, fname)
-        if os.path.exists(src):
-            import shutil
-            shutil.copy2(src, dst)
-    print(f"  已同步到: {frontend_data_dir}")
-    
-    # ===== 总结 =====
-    print("\n" + "=" * 65)
-    print("   ✅ 分析完成!")
-    print(f"   历史记录: {dashboard['record_count']} 条")
-    if dashboard["latest"]:
-        for sector, data in dashboard["latest"]["sectors"].items():
-            name = SECTOR_NAMES.get(sector, sector)
-            print(f"   {name}: {data['index']} — {data['interpretation']}")
-    print("=" * 65)
-
-    # 信号清单摘要
-    if dashboard.get("signals"):
-        print("\n🚦 今日操作信号:")
-        for s in dashboard["signals"][:5]:
-            extra = f"（{s['extras']}）" if s["extras"] else ""
-            print(f"   {s['name']:6s} {s['index']:5.1f}  {s['action']}{extra}")
-    
+    dashboard['signals'] = generate_signals(dashboard)
+    root = Path(DATA_DIR)
+    root.mkdir(parents=True, exist_ok=True)
+    (root / 'runs').mkdir(exist_ok=True)
+    (root / 'runs' / f'{run_id}.json').write_text(
+        json.dumps({'provenance': provenance, 'quality': qualities, 'sectors': indices,
+                    'analysis': {key: [asdict(r) for r in rows]
+                                 for key, rows in analysis_results.items()}}, ensure_ascii=False, indent=2), encoding='utf-8')
+    (root / 'dashboard_data.json').write_text(json.dumps(dashboard, ensure_ascii=False, indent=2), encoding='utf-8')
+    if publish:
+        publish_dashboard(dashboard)
+    print(f"生产运行 {run_id} 完成；{dashboard['record_count']} 条已核验历史；未核验旧记录 {dashboard['excluded_records']['unverified']} 条")
     return dashboard
 
 
@@ -250,7 +184,14 @@ def interpret(idx):
 
 
 if __name__ == "__main__":
-    # 先跑真实采集
-    dashboard = run_pipeline()
-    print(f"\n📊 看板数据已就绪: {dashboard['record_count']} 条历史记录"
-          f"（真实 {dashboard.get('real_record_count', 0)} 条）")
+    import argparse
+    parser = argparse.ArgumentParser(description="宝妈指数生产采集或隔离演示数据")
+    parser.add_argument('--demo', action='store_true', help='只生成 demo/history.json，不采集、不更新生产看板')
+    args = parser.parse_args()
+    if args.demo:
+        target = Path(DATA_DIR) / 'demo'
+        target.mkdir(parents=True, exist_ok=True)
+        (target / 'history.json').write_text(json.dumps(generate_sample_history(), ensure_ascii=False, indent=2), encoding='utf-8')
+        print(f'演示历史已保存到 {target}，未修改生产数据')
+    else:
+        run_pipeline()

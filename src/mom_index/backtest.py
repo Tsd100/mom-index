@@ -16,6 +16,7 @@ import json
 import math
 import os
 import statistics
+from mom_index.provenance import verified_record, eligible_sector
 from datetime import datetime
 
 DATA_DIR = os.environ.get(
@@ -33,14 +34,17 @@ BANDS = [
 
 
 def load_history(include_mock: bool = False):
-    path = os.path.join(DATA_DIR, "history.json")
-    if not os.path.exists(path):
-        print(f"错误: 找不到历史数据 {path}，请先运行 python -m mom_index.pipeline")
-        return []
-    with open(path, "r", encoding="utf-8") as f:
-        records = json.load(f).get("records", [])
+    records = []
+    paths = [os.path.join(DATA_DIR, 'history.json'), os.path.join(DATA_DIR, 'production', 'history.json')]
+    if include_mock:
+        paths.append(os.path.join(DATA_DIR, 'demo', 'history.json'))
+    for path in paths:
+        if os.path.exists(path):
+            with open(path, encoding='utf-8') as handle:
+                records.extend(json.load(handle).get('records', []))
+    records.sort(key=lambda r: r['date'])
     if not include_mock:
-        records = [r for r in records if r.get("source") == "real"]
+        records = [r for r in records if verified_record(r)]
     return records
 
 
@@ -126,6 +130,8 @@ def calibrate(samples, horizons):
 
 
 def run(horizons=(5, 10, 20), include_mock=False, do_calibrate=False):
+    report_dir = os.path.join(DATA_DIR, 'demo' if include_mock else 'production')
+    os.makedirs(report_dir, exist_ok=True)
     records = load_history(include_mock)
     if not records:
         print("暂无可用记录。"
@@ -139,6 +145,8 @@ def run(horizons=(5, 10, 20), include_mock=False, do_calibrate=False):
     for r in records:
         date = r["date"]
         for sector, data in (r.get("sectors") or {}).items():
+            if not include_mock and not eligible_sector(r, data):
+                continue
             idx = data.get("index")
             if idx is None or sector not in prices:
                 continue
@@ -148,16 +156,16 @@ def run(horizons=(5, 10, 20), include_mock=False, do_calibrate=False):
 
     mode = "含模拟数据" if include_mock else "仅真实数据"
     if not samples:
-        print(f"[{mode}] 没有可回测的样本：真实记录需要至少 2 个交易日才能计算前瞻收益。"
-              "等 NAS 定时采集攒够数据后会自动生效。")
-        report_path = os.path.join(DATA_DIR, "backtest_report.md")
+        print(f"[{mode}] 没有可回测的样本：所选周期尚无完整前瞻收益或没有质量合格的指数记录。"
+              "请持续积累交易日数据后重新运行回测。")
+        report_path = os.path.join(report_dir, "backtest_report.md")
         with open(report_path, "w", encoding="utf-8") as f:
             f.write(
                 f"# 宝妈指数回测报告\n\n"
                 f"- 生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
                 f"- 数据模式: {mode}\n\n"
-                f"暂无足够样本：需要至少 2 个交易日才能计算前瞻收益。\n"
-                f"等 NAS 定时采集积累真实记录后，回测会自动生效。\n"
+                f"暂无足够样本：所选周期尚无完整前瞻收益或没有质量合格的指数记录。\n"
+                f"请持续积累交易日数据后重新运行回测。\n"
             )
         print(f"📄 报告已保存: {report_path}")
         return
@@ -205,7 +213,7 @@ def run(horizons=(5, 10, 20), include_mock=False, do_calibrate=False):
         print(cal)
 
     # 生成 Markdown 报告
-    report_path = os.path.join(DATA_DIR, "backtest_report.md")
+    report_path = os.path.join(report_dir, "backtest_report.md")
     lines = [
         "# 宝妈指数回测报告",
         "",
@@ -229,7 +237,7 @@ def run(horizons=(5, 10, 20), include_mock=False, do_calibrate=False):
         lines += ["", calibrate(samples, horizons)]
     lines += [
         "",
-        "> 说明: 回测仅用真实记录（source=real）。模拟历史用于前端预览，不参与结论。",
+        f"> 说明: {mode}；演示报告不得用于真实结论。",
         "> 数据积累越多，结论越可靠；当前样本少时请勿据此操作。",
     ]
     with open(report_path, "w", encoding="utf-8") as f:

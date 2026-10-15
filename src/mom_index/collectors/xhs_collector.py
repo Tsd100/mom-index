@@ -21,7 +21,7 @@ SEARCH_KEYWORDS = {
     "semiconductor": ["芯片还能买吗", "半导体新手", "芯片ETF"],
 }
 
-def search_notes(keyword: str, count: int = 20) -> List[Dict]:
+def search_notes(keyword: str, count: int = 20, report=None) -> List[Dict]:
     """搜索小红书笔记"""
     if not API_KEY:
         print(f"  ⚠️ 未配置 RNODE_API_KEY，跳过小红书搜索: {keyword}")
@@ -45,12 +45,18 @@ def search_notes(keyword: str, count: int = 20) -> List[Dict]:
                 note = item.get("note") or item.get("note_card") or item
                 if note and isinstance(note, dict):
                     notes.append(_parse_note(note))
+            if report is not None:
+                report.append({'keyword': keyword, 'status': 'ok' if notes else 'empty', 'count': len(notes)})
             return notes
         else:
-            print(f"  XHS API错误: {resp.status_code} {resp.text[:100]}")
+            if report is not None:
+                report.append({'keyword': keyword, 'status': 'failed', 'http_status': resp.status_code})
+            print(f"  XHS API错误: HTTP {resp.status_code}")
             return []
     except Exception as e:
-        print(f"  XHS 请求失败: {e}")
+        if report is not None:
+            report.append({'keyword': keyword, 'status': 'failed', 'error_type': type(e).__name__})
+        print(f"  XHS 请求失败: {type(e).__name__}")
         return []
 
 def get_note_detail(note_id: str) -> Optional[Dict]:
@@ -169,6 +175,7 @@ def _gen_sample_posts() -> Dict[str, List[Dict]]:
         for i, p in enumerate(posts):
             parsed.append({
                 "id": f"xhs_sim_{sector}_{i}",
+                "source": "mock",
                 "title": p["title"],
                 "content": p["content"],
                 "platform": "xiaohongshu",
@@ -183,7 +190,7 @@ def _gen_sample_posts() -> Dict[str, List[Dict]]:
     return result
 
 
-def collect_all() -> Dict[str, List[Dict]]:
+def collect_all(report=None) -> Dict[str, List[Dict]]:
     """采集所有板块的小红书数据。
 
     无 API Key 时默认直接跳过（不再混入模拟数据，保证看板数据 100% 真实）。
@@ -193,8 +200,9 @@ def collect_all() -> Dict[str, List[Dict]]:
         result = {}
         for sector_key, keywords in SEARCH_KEYWORDS.items():
             all_notes = []
+            attempts = []
             for kw in keywords:
-                notes = search_notes(kw, count=5)
+                notes = search_notes(kw, count=5, report=attempts)
                 all_notes.extend(notes)
             seen = set()
             unique = []
@@ -203,6 +211,9 @@ def collect_all() -> Dict[str, List[Dict]]:
                     seen.add(n["id"])
                     unique.append(n)
             result[sector_key] = unique
+            if report is not None:
+                failed = sum(a['status'] == 'failed' for a in attempts)
+                report[sector_key] = {'status': ('partial' if unique else 'failed') if failed else ('ok' if unique else 'empty'), 'requests': attempts}
             print(f"  [小红书-{sector_key}] 采集到 {len(unique)} 条")
         return result
     else:

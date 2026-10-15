@@ -1,32 +1,15 @@
-"""数据同步脚本 — 从 src/data/ 同步到 src/mom_index/frontend/data/
-运行: python sync_data.py
-pipeline.py 已内置自动同步，此脚本用于手动修复不一致。
-"""
-import os
-import shutil
-import sys
+"""重新生成并发布过滤后的生产看板；不复制原始历史或帖子。"""
+from mom_index.analyzer.index_calculator import get_dashboard_data
+from mom_index.analyzer.signal import generate_signals
+from mom_index.pipeline import publish_dashboard
 
-_pkg_dir = os.path.dirname(os.path.abspath(__file__))       # src/mom_index
-_repo_root = os.path.dirname(os.path.dirname(_pkg_dir))     # 仓库根目录
-DATA_DIR = os.environ.get("MOM_INDEX_DATA_DIR", os.path.join(_repo_root, "data"))
-FRONTEND_DATA_DIR = os.path.join(_pkg_dir, "frontend", "data")
-FILES = ["dashboard_data.json", "history.json", "xhs_posts.json"]
 
 def sync():
-    if not os.path.isdir(DATA_DIR):
-        print(f"错误: 数据目录不存在 {DATA_DIR}", file=sys.stderr)
-        sys.exit(1)
-    os.makedirs(FRONTEND_DATA_DIR, exist_ok=True)
-    for fname in FILES:
-        src = os.path.join(DATA_DIR, fname)
-        dst = os.path.join(FRONTEND_DATA_DIR, fname)
-        if os.path.exists(src):
-            shutil.copy2(src, dst)
-            size = os.path.getsize(dst)
-            print(f"  ✓ {fname} ({size} bytes)")
-        else:
-            print(f"  ○ {fname} (源文件不存在，跳过)")
-    print(f"\n同步完成: {DATA_DIR} → {FRONTEND_DATA_DIR}")
+    dashboard = get_dashboard_data()
+    dashboard['signals'] = generate_signals(dashboard)
+    publish_dashboard(dashboard)
+    print(f"已发布 {dashboard['record_count']} 条已核验历史；旧记录和演示数据保持隔离")
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     sync()

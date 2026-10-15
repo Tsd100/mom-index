@@ -118,7 +118,7 @@ python -m mom_index.backtest --horizons 5 10 20
 python -m mom_index.backtest --calibrate
 ```
 
-回测输出各情绪区间之后的 N 日平均收益，并检验"指数越高、未来收益越低"的反向假设（期望负相关）。样本充足时 `--calibrate` 会扫描最优分界点。报告生成在 `data/backtest_report.md`。
+回测输出各情绪区间之后的 N 日平均收益，并检验"指数越高、未来收益越低"的反向假设（期望负相关）。样本充足时 `--calibrate` 会扫描最优分界点。正式报告生成在 `src/data/production/backtest_report.md`；`--include-mock` 演示报告单独写入 `src/data/demo/backtest_report.md`。
 
 ## 历史价格回填
 
@@ -129,21 +129,43 @@ python -m mom_index.backfill_history --days 60
 
 用腾讯 K 线接口拉取各 ETF 真实日K收盘价到 `data/price_backfill.json`，前端价格曲线优先显示真实价格（情绪曲线仍以真实记录为准）。
 
-## 数据说明
+## 数据真实性与样本质量（2026-10-15）
 
-- **真实记录**（`source=real`）：管线真实采集生成，回测只认这类记录。
-- **模拟记录**（`source=mock`）：真实记录不足 5 天时，自动生成 30 天模拟曲线用于前端预览（固定种子、跨运行稳定，前端以虚线+横幅标注）。攒满 5 天后自动移除模拟数据。
-- **原始帖子存档**：每次采集的帖子原样存入 `data/raw_posts.db`（SQLite），将来调整信号词库可重算历史。
-- **小红书**：无 `RNODE_API_KEY` 时直接跳过，不再混入模拟数据；`XHS_ALLOW_MOCK=1` 可强制演示。
-- **股吧多页采集**：默认翻 3 页并去重（`GUBA_PAGES` 可调），低活跃板块样本更充分。
-- **今日信号清单**：看板顶部按严重程度列出"操作信号"（指数 + 较前日变化 + 买卖比 + 价格趋势合成）。
-- **LLM 抽查复核**（可选）：设置 `MOM_INDEX_LLM_API_KEY` 后，按 `MOM_INDEX_LLM_SAMPLE_RATE` 采样率用大模型复核规则引擎拿不准的帖子；未设置时纯规则引擎。
+生产管线不再自动补模拟历史，也不会把演示帖子用于指数计算。**旧记录的 `source=real` 不足以证明纯真实**：历史上曾混入模拟小红书帖子，因此旧文件原样保留，新看板与正式回测默认排除未核验记录，不猜测其真实性。
+
+默认数据根目录是 `src/data/`，可用 `MOM_INDEX_DATA_DIR` 覆盖：
+
+| 路径 | 用途 |
+|---|---|
+| `history.json` | 原有历史，原样保留，仅统计隔离数量 |
+| `production/history.json` | 新口径生产快照，含来源证明，每天保留最新快照 |
+| `runs/<run_id>.json` | 每次运行的来源状态、质量、指数和逐帖分析；同日重跑亦可追溯 |
+| `raw_posts.db` | 真实原始存档增加 run_id，演示帖子写独立 demo_posts 表；历史存档不删除 |
+| `demo/history.json` | 显式生成的演示历史，不发布到生产看板 |
+
+```powershell
+$env:PYTHONPATH="src"
+python -m mom_index.pipeline           # 生产采集与发布
+python -m mom_index.pipeline --demo    # 只生成隔离演示历史，不调用采集
+python -m mom_index.sync_data          # 重新发布过滤后的生产看板，不触发采集
+python -m unittest discover -s tests -v
+```
+
+- **来源证明**：上海时区采集时间、运行编号、各来源完成/失败/部分成功状态、采集页数、ETF 映射、规则与采集源码 SHA-256、LLM 配置指纹、帖子身份摘要。日志不保存 API Key 或 Cookie。
+- **口径可比性**：规则、采集页数、配置或实际来源集合变化时，不计算跨口径 Δ；它表示与上次可比日快照之差，不保证是前一交易日。
+- **质量门**：少于 30 条有效样本、有效样本时间未知比例超过 20%、24 小时内更新的有效样本少于一半、启用来源采集失败/不完整，均暂停冷热判断，指数显示 `—`。采集完成超过 24 小时后，后端信号和前端也暂停判断。
+- **时间语义**：股吧列表是“最后更新”，不是发布时间。“首次采集”表示本地此前没见过，不等于当天新帖。没有年份的列表时间按最近过去日期解释；不能可靠解析的时间标记未知，不静默补造。
+- **采集方式**：默认 3 页去重后的列表快照，不是严格“当日新帖样本”。卡片显示样本、有效数、近期更新、时间未知、首次采集、已见、重复与模拟排除数。
+- **模拟隔离**：即使设置 `XHS_ALLOW_MOCK=1`，生产分析仍会排除模拟帖子；演示数据仅用于开发验证。生产看板拒绝旧版静态 JSON。
+- **回测边界**：正式回测只用带新来源证明且样本质量合格的指数；交易日对齐、跨口径分组、价格时间校验及阈值有效性验证仍是后续工作，当前结果不构成预测能力证明。
+- **页面刷新**：每 5 分钟重新读取生产 JSON，不会重新采集。网络导致 Chart.js 加载失败时显示明确提示，卡片仍可用。
+- **LLM**：无 `MOM_INDEX_LLM_API_KEY` 时只用规则引擎；设置后可按采样率复核。此次真实验证关闭 LLM 与可选付费数据源。
 
 ## 数据源
 
 | 数据源 | 状态 | 说明 |
 |--------|------|------|
-| 东方财富股吧 | ✅ 稳定 | 12 个 ETF 吧，无需 cookie，无风控 |
+| 东方财富股吧 | 按次校验 | 12 个 ETF 吧，记录 HTTP/解析失败，仍可能受反爬影响 |
 | 腾讯财经 (qt.gtimg.cn) | ✅ 稳定 | ETF 实时价格，免费无 key |
 | 腾讯K线 (ifzq.gtimg.cn) | ✅ 稳定 | 历史日K，用于价格回填 |
 | 小红书 (rnote.dev / Playwright) | ⚠️ 需充值/登录 | 无 key 时自动跳过（不再模拟） |
@@ -168,7 +190,7 @@ python nas-deploy-tool.py   # 生成 docker/ + docker-compose.yml 离线部署�
 - 设置 `CRON_SCHEDULE`（如 `0 9,15 * * *`）→ supercronic 定时采集
 - 不设置 → 启动 HTTP 服务（默认端口 8503），访问 `/dashboard.html`
 
-数据通过 `MOM_INDEX_DATA_DIR` 映射到宿主机卷，`raw_posts.db` 与 `history.json` 会持续积累。
+数据通过 `MOM_INDEX_DATA_DIR` 映射到宿主机卷，`raw_posts.db`、`production/history.json` 与 `runs/` 会持续积累。本轮未生成或验证 NAS 部署包。
 
 ## 技术栈
 

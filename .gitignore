@@ -35,3 +35,7 @@ desktop.ini
 *.db
 *.log
 output/
+
+src/data/runs/
+src/data/demo/
+src/data/production/

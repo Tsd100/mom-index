@@ -42,6 +42,7 @@ def _search(keyword: str, count: int = 10) -> List[Dict]:
                 cookies[k] = v
     resp = requests.get(url, params={"q": keyword, "count": count, "page": 1},
                         headers=headers, cookies=cookies, timeout=15)
+    resp.raise_for_status()
     data = resp.json()  # 无登录态时这里会抛异常（返回 WAF HTML/400016）
     return [
         {
@@ -58,23 +59,33 @@ def _search(keyword: str, count: int = 10) -> List[Dict]:
     ]
 
 
-def collect_all() -> Dict[str, List[Dict]]:
+def collect_all(report=None) -> Dict[str, List[Dict]]:
     """采集所有板块（需 MOM_INDEX_ENABLE_XUEQIU=1 + 有效登录 Cookie）"""
     if not ENABLED:
         print("  ⚠️ 雪球未启用（设置 MOM_INDEX_ENABLE_XUEQIU=1 开启）")
         return {}
     if not COOKIE:
+        if report is not None:
+            for sector in SEARCH_KEYWORDS:
+                report[sector] = {'status': 'failed', 'error_type': 'MissingCookie'}
         print("  ⚠️ 雪球需要登录 Cookie（XUEQIU_COOKIE），当前无法采集")
         return {}
     result = {}
     for sector, keywords in SEARCH_KEYWORDS.items():
         posts = []
+        attempts = []
         for kw in keywords:
             try:
-                posts.extend(_search(kw))
+                rows = _search(kw)
+                posts.extend(rows)
+                attempts.append({'keyword': kw, 'status': 'ok' if rows else 'empty', 'count': len(rows)})
             except Exception as e:
-                print(f"  [雪球-{sector}] 搜索「{kw}」失败: {e}")
+                attempts.append({'keyword': kw, 'status': 'failed', 'error_type': type(e).__name__})
+                print(f"  [雪球-{sector}] 搜索「{kw}」失败: {type(e).__name__}")
         result[sector] = posts
+        if report is not None:
+            failed = sum(a['status'] == 'failed' for a in attempts)
+            report[sector] = {'status': ('partial' if posts else 'failed') if failed else ('ok' if posts else 'empty'), 'requests': attempts}
         print(f"  [雪球-{sector}] {len(posts)} 条")
     return result
 

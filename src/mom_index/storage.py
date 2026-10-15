@@ -10,6 +10,7 @@ import json
 import os
 import sqlite3
 from datetime import datetime
+from mom_index.provenance import is_mock, post_key
 
 DATA_DIR = os.environ.get(
     "MOM_INDEX_DATA_DIR",
@@ -37,20 +38,24 @@ def _connect() -> sqlite3.Connection:
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     conn.executescript(_SCHEMA)
+    if "run_id" not in {row[1] for row in conn.execute("PRAGMA table_info(raw_posts)")}:
+        conn.execute("ALTER TABLE raw_posts ADD COLUMN run_id TEXT")
     return conn
 
 
-def save_posts(sector: str, posts: list, platform: str = "unknown") -> int:
+def save_posts(sector: str, posts: list, platform: str = "unknown", run_id=None) -> int:
     """把一批原始帖子追加存档，返回实际写入条数"""
     if not posts:
         return 0
     conn = _connect()
     now = datetime.now().isoformat()
     rows = []
+    demo_rows = []
     for p in posts:
         if not p or not p.get("title"):
             continue
-        rows.append((
+        target = demo_rows if is_mock(p) else rows
+        target.append((
             now,
             sector,
             p.get("platform") or platform,
@@ -58,16 +63,39 @@ def save_posts(sector: str, posts: list, platform: str = "unknown") -> int:
             p.get("url", ""),
             p.get("author", ""),
             json.dumps(p, ensure_ascii=False),
+            run_id,
         ))
+    conn.execute("CREATE TABLE IF NOT EXISTS demo_posts AS SELECT * FROM raw_posts WHERE 0")
+    if demo_rows:
+        conn.executemany(
+            "INSERT INTO demo_posts (collected_at, sector, platform, title, url, author, raw, run_id) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)", demo_rows)
     if rows:
         conn.executemany(
-            "INSERT INTO raw_posts (collected_at, sector, platform, title, url, author, raw) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO raw_posts (collected_at, sector, platform, title, url, author, raw, run_id) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             rows,
         )
-        conn.commit()
+    conn.commit()
     conn.close()
     return len(rows)
+
+
+def seen_post_ids(sector):
+    """已有存档中的帖子身份，仅用于首次见到统计，不推断发布时间。"""
+    conn = _connect()
+    try:
+        result = set()
+        for (raw,) in conn.execute('SELECT raw FROM raw_posts WHERE sector = ?', (sector,)):
+            try:
+                post = json.loads(raw)
+                if not is_mock(post):
+                    result.add(post_key(post))
+            except (ValueError, TypeError):
+                continue
+        return result
+    finally:
+        conn.close()
 
 
 def count_posts() -> int:

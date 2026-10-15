@@ -261,25 +261,74 @@ function renderLegend(data) {
   }
 }
 
-function renderDataNotice(data, realDates) {
+function renderDataNotice(data) {
   const banner = document.getElementById('mock-banner');
-  const realCount = data.real_record_count ?? data.record_count;
-  const hasMock = (data.record_count || 0) > realCount;
-  if (hasMock) {
-    banner.style.display = 'block';
-    banner.textContent =
-      `⚠️ 当前历史曲线包含模拟数据（真实记录 ${realCount} 天，曲线虚线部分为模拟）。` +
-      `攒满 5 个交易日的真实记录后会自动切换为真实曲线。`;
-  } else {
-    banner.style.display = 'none';
+  const counts = data.excluded_records || {};
+  const latest = data.latest;
+  const provenance = latest?.provenance;
+  const expired = provenance && Date.now() - Date.parse(provenance.finished_at) > 24 * 3600000;
+  banner.style.display = 'block';
+  banner.textContent = `生产模式 · 已核验记录 ${data.real_record_count || 0} 天；` +
+    `隔离未核验旧记录 ${counts.unverified || 0} 条、模拟记录 ${counts.mock || 0} 条。` +
+    (expired ? ' ⚠️ 采集结果已超过 24 小时，暂停情绪判断。' : '') +
+    (provenance ? ` 上次采集：${provenance.finished_at}；口径 ${provenance.definition.id.slice(0, 12)}。` : ' 请运行管线采集新数据。') +
+    ' 页面每 5 分钟重新读取数据，不会触发采集。列表更新时间不代表发布时间。';
+  if (provenance) {
+    const details = document.createElement('details');
+    const summary = document.createElement('summary');
+    summary.textContent = '查看采集来源与口径';
+    const body = document.createElement('div');
+    body.style.cssText = 'text-align:left;overflow-wrap:anywhere;font-weight:normal';
+    body.textContent = `运行编号：${provenance.run_id}；口径：${provenance.definition.id}；` +
+      `页数：${provenance.definition.pages ?? '未知'}；` +
+      Object.entries(provenance.sources || {}).map(([name, report]) =>
+        `${({guba:'东方财富',xhs:'小红书',xueqiu:'雪球'})[name] || name}：${({ok:'完成',disabled:'未启用',empty:'无结果',failed:'失败',demo_only:'仅演示，已排除'})[report.status] || report.status}`
+      ).join('；');
+    details.append(summary, body); banner.append(details);
   }
+
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function productionView(input) {
+  // 拒绝部署前遗留的静态 JSON，避免后端未运行时展示旧模拟数据。
+  if (input.schema_version !== 2 || input.mode !== 'production') {
+    return {schema_version: 2, mode: 'production', latest: null, signals: [],
+            sector_history: {}, price_history: {}, real_record_count: 0,
+            excluded_records: {unverified: input.record_count || 0, mock: 0}};
+  }
+  const data = JSON.parse(JSON.stringify(input));
+  const p = data.latest?.provenance;
+  if (!p || !p.mock_excluded || !p.run_id || !p.definition?.id) {
+    data.latest = null; data.signals = []; data.sector_history = {};
+    return data;
+  }
+  const expired = !Number.isFinite(Date.parse(p.finished_at)) || Date.now() - Date.parse(p.finished_at) > 24 * 3600000;
+  Object.values(data.latest.sectors || {}).forEach(sector => {
+    if (expired || sector.quality?.status !== 'ok') {
+      sector.index = null;
+      sector.interpretation = expired ? '采集结果已过期，暂停情绪判断' : '数据不足，暂停情绪判断';
+    }
+  });
+  data.signals = (data.signals || []).map(signal => {
+    if (data.latest.sectors[signal.sector]?.index == null) {
+      return {...signal, index: null, delta: null, level: 'unavailable',
+              action: '数据不足或采集结果过期，暂停情绪判断', extras: ''};
+    }
+    return signal;
+  });
+  return data;
 }
 
 function renderCards(data) {
   const container = document.getElementById('cards');
   const latest = data.latest;
   if (!latest) {
-    container.innerHTML = '<div class="loading">暂无数据，请先运行 pipeline.py</div>';
+    document.getElementById('update-time').textContent = '暂无已核验采集记录';
+    container.innerHTML = '<div class="loading">暂无已核验生产数据，请先运行 python -m mom_index.pipeline</div>';
     return;
   }
 
@@ -292,7 +341,7 @@ function renderCards(data) {
   container.innerHTML = Object.entries(latest.sectors)
   .sort((a, b) => b[1].index - a[1].index)
   .map(([key, sector]) => {
-    const cls = getSignalClass(sector.index);
+    const cls = sector.index == null ? "" : getSignalClass(sector.index);
     const d = sector.details || {};
     const color = SECTOR_COLORS[key] || '#64748b';
     const sig = signalsMap[key] || {};
@@ -302,18 +351,25 @@ function renderCards(data) {
     return `
       <div class="card">
         <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,${color},${color}88);"></div>
-        <div class="sector-name">${getEmoji(sector.index)} ${SECTOR_NAMES[key]}</div>
-        <div class="index-value">${sector.index}</div>
+        <div class="sector-name">${sector.index == null ? "⚪" : getEmoji(sector.index)} ${SECTOR_NAMES[key]}</div>
+        <div class="index-value">${sector.index ?? "—"}</div>
         ${deltaHtml}
-        <div class="signal ${cls}">${sector.interpretation}</div>
+        <div class="signal ${cls}">${escapeHtml(sector.interpretation)}</div>
+        <div style="font-size:12px;line-height:1.8;color:#94a3b8;margin-top:10px">
+          样本 ${sector.quality?.sample_count ?? 0} · 有效 ${sector.quality?.valid_count ?? 0}<br>
+          有效帖 24h 内更新 ${sector.quality?.valid_fresh_count ?? sector.quality?.fresh_count ?? 0} · 时间未知 ${sector.quality?.valid_unknown_time_count ?? sector.quality?.unknown_time_count ?? 0}<br>
+          首次采集 ${sector.quality?.newly_seen_count ?? 0} · 已见 ${sector.quality?.previously_seen_count ?? 0}<br>
+          重复 ${ (sector.quality?.duplicate_count ?? 0) + (sector.quality?.collector_duplicates ?? 0)} · 排除模拟 ${sector.quality?.mock_excluded ?? 0}<br>
+          ${escapeHtml((sector.quality?.reasons || []).join('；'))}
+        </div>
         <!-- 买入/卖出子指数 -->
         <div style="margin-top:14px; display:flex; gap:8px;">
           <div style="flex:1; background:rgba(34,197,94,0.08); border-radius:8px; padding:8px; text-align:center;">
-            <div style="font-size:20px; font-weight:700; color:#4ade80;">${d.mom_buy_index ?? 0}</div>
+            <div style="font-size:20px; font-weight:700; color:#4ade80;">${sector.index == null ? "—" : (d.mom_buy_index ?? 0)}</div>
             <div style="font-size:10px; color:#64748b;">🟢 宝妈买入</div>
           </div>
           <div style="flex:1; background:rgba(239,68,68,0.08); border-radius:8px; padding:8px; text-align:center;">
-            <div style="font-size:20px; font-weight:700; color:#f87171;">${d.mom_sell_index ?? 0}</div>
+            <div style="font-size:20px; font-weight:700; color:#f87171;">${sector.index == null ? "—" : (d.mom_sell_index ?? 0)}</div>
             <div style="font-size:10px; color:#64748b;">🔴 宝妈卖出</div>
           </div>
         </div>
@@ -329,7 +385,7 @@ function renderCards(data) {
           <span>小白帖</span><span>${d.newbie_posts || 0}/${d.valid_posts || d.total_posts || 0} (${d.newbie_ratio || 0}%)</span>
         </div>
         <div class="detail-row">
-          <span>买卖比</span><span style="color:${(d.buy_sell_ratio||0)>1.5?'#f87171':(d.buy_sell_ratio||0)>0.8?'#facc15':'#4ade80'}">${d.buy_sell_ratio||0}:1 ${(d.buy_sell_ratio||0)>1.5?'🔥追涨':(d.buy_sell_ratio||0)>0.8?'⚖️平衡':'🩸恐慌'}</span>
+          <span>买卖比</span><span style="color:${(d.buy_sell_ratio||0)>1.5?'#f87171':(d.buy_sell_ratio||0)>0.8?'#facc15':'#4ade80'}">${sector.index == null || !(d.buy_count || d.sell_count) ? "— 无可用买卖样本" : `买 ${d.buy_count || 0} / 卖 ${d.sell_count || 0}`}</span>
         </div>
       </div>
     `;
@@ -345,7 +401,7 @@ function renderSignals(data) {
   }
   panel.innerHTML = list.map(s => `
     <div class="signal-chip ${s.level}">
-      <div class="sc-title">${s.name} <span class="sc-index">${s.index}</span>
+      <div class="sc-title">${s.name} <span class="sc-index">${s.index ?? "—"}</span>
         ${s.delta != null ? `<span style="color:${s.delta >= 0 ? '#f87171' : '#4ade80'}">${s.delta >= 0 ? '▲' : '▼'} ${Math.abs(s.delta)}</span>` : ''}
       </div>
       <div>${s.action}</div>
@@ -354,7 +410,10 @@ function renderSignals(data) {
   `).join('');
 }
 
+let activeCharts = [];
 function renderCharts(data) {
+  activeCharts.forEach(chart => chart.destroy());
+  activeCharts = [];
   const chartsContainer = document.getElementById('charts');
   chartsContainer.innerHTML = '';
   const history = data.sector_history || {};
@@ -382,7 +441,7 @@ function renderCharts(data) {
     const hasPrice = priceVals.some(v => v !== null);
     const dates = records.map(r => r.date);
     
-    new Chart(ctx, {
+    activeCharts.push(new Chart(ctx, {
       type: 'line',
       data: {
         labels: records.map(r => r.date.slice(5)),
@@ -463,12 +522,13 @@ function renderCharts(data) {
         // 危险区间背景
         // 通过 annotation 插件可以实现，这里保持简洁
       }
-    });
+    }));
   });
 }
 
 function renderTopPosts(data) {
   const container = document.getElementById('top-posts');
+  container.innerHTML = '<h3>典型帖子（采集快照）</h3>';
   const latest = data.latest;
   if (!latest) {
     container.innerHTML += '<div class="loading">暂无数据</div>';
@@ -501,29 +561,31 @@ function renderTopPosts(data) {
       <span class="post-badge ${badgeClass(p.score)}">${badgeText(p.score)} ${p.score}分</span>
       <span style="color:#64748b;font-size:11px">[${p.sector}]</span>
       ${p.intent_label ? `<span style="font-size:11px;margin-left:4px">${p.intent_label}</span>` : ''}
-      ${p.title}
+      ${escapeHtml(p.title)}
     </div>
-    ${p.reasoning ? `<div class="post-reason">📝 ${p.reasoning}</div>` : ''}
-    ${p.key_signals ? p.key_signals.map(s => `<div class="post-meta">▸ ${s}</div>`).join('') : ''}
+    ${p.reasoning ? `<div class="post-reason">📝 ${escapeHtml(p.reasoning)}</div>` : ''}
+    ${p.key_signals ? p.key_signals.map(s => `<div class="post-meta">▸ ${escapeHtml(s)}</div>`).join('') : ''}
   </div>
   `).join('');
 }
 
 // 加载数据（每 5 分钟自动刷新）
 function loadData() {
-  fetch('data/dashboard_data.json')
-    .then(r => r.json())
+  fetch('data/dashboard_data.json', {cache: 'no-store'})
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(productionView)
     .then(data => {
       renderCards(data);
       renderLegend(data);
       renderDataNotice(data);
       renderSignals(data);
-      renderCharts(data);
+      if (typeof Chart !== 'undefined') renderCharts(data);
+      else document.getElementById('charts').textContent = '图表组件加载失败，指数和质量信息仍可查看。';
       renderTopPosts(data);
     })
     .catch(err => {
       document.getElementById('cards').innerHTML =
-        `<div class="loading">⚠️ 数据加载失败: ${err.message}<br>请先运行 pipeline.py 生成数据</div>`;
+        `<div class="loading">⚠️ 数据加载失败: ${escapeHtml(err.message)}<br>请先运行 python -m mom_index.pipeline 生成数据</div>`;
     });
 }
 loadData();
