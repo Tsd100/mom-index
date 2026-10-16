@@ -104,6 +104,16 @@ try {
     console.log(`DPR ${dpr}: PASS`, JSON.stringify(pixels));
   }
   await call('Emulation.setDeviceMetricsOverride', {width: 390, height: 844, deviceScaleFactor: 2, mobile: true});
+  // 如果工作区已有本地生产快照，补查实际12板块映射在移动端的展示。
+  try {
+    const actual = JSON.parse(await readFile('src/mom_index/frontend/data/dashboard_data.json', 'utf8'));
+    if (actual.instruments && actual.latest) {
+      await evaluate(`{const d=productionView(${JSON.stringify(actual)});renderCards(d);renderDataNotice(d);}`);
+      assert(await evaluate(`document.getElementById('cards').textContent.includes('159206') && document.getElementById('cards').textContent.includes('159731')`), '实际映射未显示');
+    }
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+  }
   assert(await evaluate('document.documentElement.scrollWidth <= innerWidth + 1'), '手机横向溢出');
   const empty = {schema_version: 2, mode: 'production', latest: null, sector_history: {}, price_history: {}, signals: []};
   await evaluate(`{const d=${JSON.stringify(empty)};renderCards(d);renderCharts(d);renderTopPosts(d);renderSignals(d);renderDataNotice(d);}`);

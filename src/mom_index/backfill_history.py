@@ -44,27 +44,17 @@ def fetch_kline(etf: str, days: int) -> list:
     return [{"date": row[0], "price": float(row[2])} for row in kline]
 
 
-def main(days: int = 30):
-    result = {}
-    print(f"📈 拉取 {days} 天真实ETF日K收盘价...")
-    for key, cfg in SECTORS.items():
-        try:
-            rows = fetch_kline(cfg["etf"], days)
-            result[key] = rows
-            span = f"{rows[0]['date']} ~ {rows[-1]['date']}" if rows else "空"
-            print(f"  [{cfg['name']}] {len(rows)} 天 ({span})")
-        except Exception as e:
-            print(f"  [{cfg['name']}] 失败: {e}")
-        time.sleep(0.5)
-
-    out = os.path.join(DATA_DIR, "price_backfill.json")
-    with open(out, "w", encoding="utf-8") as f:
-        json.dump(result, f, ensure_ascii=False, indent=2)
-    print(f"\n✅ 已保存: {out}")
+def main(days: int = 180):
+    """兼容旧命令，写入带标的证明的新行情格式，旧回填原件保持不变。"""
+    from mom_index.market_data import fetch_market
+    print('旧价格回填命令已切换为带标的与复权证明的 market_history.json')
+    return fetch_market(DATA_DIR, days)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="真实历史价格回填")
-    parser.add_argument("--days", type=int, default=int(os.environ.get("BACKFILL_DAYS", "30")))
+    parser.add_argument("--days", type=int, default=int(os.environ.get("BACKFILL_DAYS", "180")))
     args = parser.parse_args()
+    if not 10 <= args.days <= 1000:
+        parser.error('--days 需在 10 到 1000 之间')
     main(days=args.days)

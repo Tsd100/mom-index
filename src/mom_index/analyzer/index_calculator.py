@@ -6,6 +6,8 @@ from datetime import datetime, date
 from typing import Dict, List
 import json
 import os
+from copy import deepcopy
+from mom_index.instruments import SECTORS, record_instrument
 from mom_index.provenance import verified_record, now_local, SCHEMA_VERSION
 
 DATA_DIR = os.environ.get("MOM_INDEX_DATA_DIR",
@@ -214,7 +216,15 @@ def get_dashboard_data() -> Dict:
                 "unverified": sum(r.get("source") != "mock" and not verified_record(r) for r in all_records)}
     
     # 最新一条
-    latest = records[-1] if records else None
+    latest = deepcopy(records[-1]) if records else None
+    if latest:
+        for sector, data in latest.get('sectors', {}).items():
+            data['instrument'] = record_instrument(latest, sector) or {}
+            original = latest['provenance']['definition'].get('sectors', {}).get(sector, {})
+            if not data['instrument']:
+                data['mapping_warning'] = f"原采集 {original.get('code', '未知')} 与价格 {original.get('etf', '未知')} 不一致"
+            elif data['instrument'].get('etf') != SECTORS.get(sector, {}).get('etf'):
+                data['mapping_warning'] = '最近采集仍为旧标的；新映射需重新采集后生效'
 
     # 真实记录统计（source == "real"；模拟记录用于前端预览，回测与后续分析会忽略）
     real_records = [r for r in records if r.get("source") == "real"]
@@ -233,32 +243,35 @@ def get_dashboard_data() -> Dict:
                     "index": data["index"] if data.get("quality", {}).get("status") == "ok" else None,
                     "definition_id": data.get("definition_id"),
                 })
-            if sector in price_history and "price" in data:
+            cfg = record_instrument(r, sector)
+            if sector in price_history and "price" in data and cfg and cfg['etf'] == SECTORS[sector]['etf']:
                 price_history[sector].append({
                     "date": r["date"],
                     "price": data["price"],
                 })
                 price_real_dates.add(r["date"])
 
-    # 真实历史价格回填（腾讯K线）：价格曲线优先用真实价格
-    backfill_file = os.path.join(DATA_DIR, "price_backfill.json")
-    if os.path.exists(backfill_file):
-        try:
-            with open(backfill_file, 'r', encoding='utf-8') as f:
-                backfill = json.load(f)
-            for sector, rows in backfill.items():
-                if sector not in price_history:
+    # 旧 price_backfill.json 没有标的/复权证明，不再用于新映射价格曲线。
+    market_file = os.path.join(DATA_DIR, 'market_history.json')
+    if os.path.exists(market_file):
+        from mom_index.provenance import digest, SHANGHAI
+        from mom_index.market_data import completed_rows
+        with open(market_file, encoding='utf-8') as handle:
+            market = json.load(handle)
+        if market.get('dataset_id') == digest({k: v for k, v in market.items() if k != 'dataset_id'}):
+            price_history = {key: [] for key in SECTOR_NAMES}
+            price_real_dates = set()
+            fetched = datetime.fromisoformat(market['fetched_at']).astimezone(SHANGHAI)
+            for sector, cfg in SECTORS.items():
+                node = market.get('instruments', {}).get(cfg['etf'], {})
+                if node.get('rows_hash') != digest(node.get('rows', [])):
                     continue
-                existing = {p["date"] for p in price_history[sector]}
-                for row in rows:
-                    if row["date"] not in existing:
-                        price_history[sector].append(row)
-                        price_real_dates.add(row["date"])
-                price_history[sector].sort(key=lambda p: p["date"])
-        except Exception:
-            pass  # 回填文件损坏时静默忽略，不影响主流程
-    
+                for row in completed_rows(node.get('rows', []), fetched):
+                    price_history[sector].append({'date': row['date'], 'price': row['close'], 'etf': cfg['etf']})
+                    price_real_dates.add(row['date'])
+
     return {
+        "instruments": deepcopy(SECTORS),
         "schema_version": SCHEMA_VERSION,
         "mode": "production",
         "excluded_records": excluded,

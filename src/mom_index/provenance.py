@@ -36,7 +36,7 @@ def build_definition(pages=3):
     root = Path(__file__).parent
     files = ['analyzer/llm_analyzer.py', 'analyzer/index_calculator.py',
              'collectors/guba_collector.py', 'collectors/xhs_collector.py',
-             'collectors/xueqiu_collector.py', 'pipeline.py', 'analyzer/signal.py', 'provenance.py']
+             'collectors/xueqiu_collector.py', 'pipeline.py', 'analyzer/signal.py', 'instruments.py', 'provenance.py']
     rules = {name: hashlib.sha256((root / name).read_bytes()).hexdigest() for name in files}
     body = {
         'version': 'snapshot-v2', 'pages': pages, 'sectors': SECTORS,

@@ -345,6 +345,15 @@ function renderCards(data) {
     const d = sector.details || {};
     const color = SECTOR_COLORS[key] || '#64748b';
     const sig = signalsMap[key] || {};
+    const instrument = sector.instrument || {};
+    const current = (data.instruments || {})[key] || {};
+    const instrumentHtml = `<div style="font-size:12px;line-height:1.6;color:#94a3b8;overflow-wrap:anywhere">
+      最近采集标的：${escapeHtml(instrument.fund_name || instrument.etf || '标的映射待核验')}<br>
+      当前映射：${escapeHtml(current.fund_name || current.etf || '未提供')} ${escapeHtml(current.etf || '')}<br>
+      ${escapeHtml(current.coverage_note || '')}
+      ${sector.mapping_warning ? `<br><span style="color:#fbbf24">${escapeHtml(sector.mapping_warning)}</span>` : ''}
+      ${current.source_url && /^https:\/\//.test(current.source_url) ? `<br><a href="${escapeHtml(current.source_url)}" target="_blank" rel="noopener noreferrer">官方标的资料</a>` : ''}
+    </div>`;
     const deltaHtml = sig.delta != null
       ? `<div class="index-label" style="color:${sig.delta >= 0 ? '#f87171' : '#4ade80'}">较前日 ${sig.delta >= 0 ? '+' : ''}${sig.delta.toFixed(1)}</div>`
       : '<div class="index-label">宝妈指数</div>';
@@ -354,6 +363,7 @@ function renderCards(data) {
         <div class="sector-name">${sector.index == null ? "⚪" : getEmoji(sector.index)} ${SECTOR_NAMES[key]}</div>
         <div class="index-value">${sector.index ?? "—"}</div>
         ${deltaHtml}
+        ${instrumentHtml}
         <div class="signal ${cls}">${escapeHtml(sector.interpretation)}</div>
         <div style="font-size:12px;line-height:1.8;color:#94a3b8;margin-top:10px">
           样本 ${sector.quality?.sample_count ?? 0} · 有效 ${sector.quality?.valid_count ?? 0}<br>
@@ -451,16 +461,17 @@ function renderCharts(data) {
           borderColor: color,
           backgroundColor: color + '20',
           borderWidth: 2,
-          fill: true,
+          fill: false,
           tension: 0.3,
           pointRadius: 2,
           pointHoverRadius: 5,
           yAxisID: 'y',
           segment: {
             borderDash: ctx => realDates.has(dates[ctx.p0DataIndex]) ? undefined : [6, 4],
+            borderColor: ctx => records[ctx.p0DataIndex].definition_id !== records[ctx.p1DataIndex].definition_id ? 'transparent' : color,
           },
         }].concat(hasPrice ? {
-          label: SECTOR_NAMES[sector] + ' 价格',
+          label: SECTOR_NAMES[sector] + ' 当前映射ETF价格',
           data: priceVals,
           borderColor: '#f59e0b',
           backgroundColor: 'rgba(245,158,11,0.08)',

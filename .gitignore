@@ -39,3 +39,8 @@ output/
 src/data/runs/
 src/data/demo/
 src/data/production/
+
+.firecrawl/
+src/data/reconstructed/
+src/data/market_history.json
+src/data/market_snapshots/

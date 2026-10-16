@@ -129,7 +129,7 @@ def calibrate(samples, horizons):
     return "\n".join(lines)
 
 
-def run(horizons=(5, 10, 20), include_mock=False, do_calibrate=False):
+def _run_demo(horizons=(5, 10, 20), include_mock=True, do_calibrate=False):
     report_dir = os.path.join(DATA_DIR, 'demo' if include_mock else 'production')
     os.makedirs(report_dir, exist_ok=True)
     records = load_history(include_mock)
@@ -245,6 +245,50 @@ def run(horizons=(5, 10, 20), include_mock=False, do_calibrate=False):
     print(f"\n📄 报告已保存: {report_path}")
 
 
+def run(horizons=(5, 10, 20), include_mock=False, do_calibrate=False, reconstructed=None):
+    """正式路径使用完整日线；旧快照逻辑只保留为显式演示。"""
+    if include_mock:
+        if reconstructed:
+            raise ValueError('演示与重算研究不能混用')
+        return _run_demo(horizons, True, do_calibrate)
+    from pathlib import Path
+    from mom_index.research import evaluate, render_report
+    from mom_index.provenance import digest
+    import hashlib
+    root = Path(DATA_DIR)
+    if reconstructed:
+        target = Path(reconstructed)
+        history_path = target / 'history.json'
+        manifest = json.loads((target / 'manifest.json').read_text(encoding='utf-8'))
+        if hashlib.sha256(history_path.read_bytes()).hexdigest() != manifest['history_sha256']:
+            raise ValueError('重算历史摘要不匹配')
+        records = json.loads(history_path.read_text(encoding='utf-8')).get('records', [])
+        report_dir = target / 'research'
+    else:
+        records = load_history(False)
+        report_dir = root / 'production'
+    market_path = root / 'market_history.json'
+    market = json.loads(market_path.read_text(encoding='utf-8')) if market_path.exists() else {}
+    if market.get('dataset_id'):
+        body = {k: v for k, v in market.items() if k != 'dataset_id'}
+        if digest(body) != market['dataset_id']:
+            raise ValueError('行情批次内容校验失败')
+    report = evaluate(records, market, tuple(horizons), allow_reconstructed=bool(reconstructed))
+    report['mode'] = 'reconstructed' if reconstructed else 'production'
+    report['generated_at'] = datetime.now().astimezone().isoformat()
+    text = render_report(report)
+    if reconstructed:
+        text += '\n本报告来自显式选择的历史重算版本，不加入生产历史。\n'
+    if do_calibrate:
+        text += '\n当前正式路径不进行样本内阈值寻优，需独立样本外验证后再校准。\n'
+    report_dir.mkdir(parents=True, exist_ok=True)
+    (report_dir / 'backtest_report.md').write_text(text, encoding='utf-8')
+    (report_dir / 'backtest_samples.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
+    print(text)
+    print(f'报告已保存: {report_dir / "backtest_report.md"}')
+    return report
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="宝妈指数回测")
     parser.add_argument("--include-mock", action="store_true",
@@ -253,6 +297,7 @@ if __name__ == "__main__":
                         help="观察周期（交易日），默认 5 10 20")
     parser.add_argument("--calibrate", action="store_true",
                         help="执行阈值校准（样本充足时）")
+    parser.add_argument('--reconstructed', help='显式选择重算版本目录，不混入生产数据')
     args = parser.parse_args()
     run(horizons=tuple(args.horizons), include_mock=args.include_mock,
-        do_calibrate=args.calibrate)
+        do_calibrate=args.calibrate, reconstructed=args.reconstructed)

@@ -12,20 +12,7 @@ from typing import List, Dict, Optional
 
 from .anti_detection import get_anti_detection
 
-SECTORS = {
-    "nasdaq":     {"name": "纳斯达克",  "code": "of159941", "etf": "513100"},
-    "gold":       {"name": "黄金",      "code": "of518880", "etf": "518880"},
-    "telecom":    {"name": "通信",      "code": "of515880", "etf": "515880"},
-    "semiconductor": {"name": "半导体", "code": "of512480", "etf": "512480"},
-    "innovative_drug":   {"name": "创新药",   "code": "of159992", "etf": "159992"},
-    "nonferrous_metals": {"name": "有色金属", "code": "of512400", "etf": "512400"},
-    "new_energy":        {"name": "新能源",   "code": "of516160", "etf": "516160"},
-    "power":             {"name": "电力",     "code": "of159611", "etf": "159611"},
-    "chip":              {"name": "芯片",     "code": "of159995", "etf": "159995"},
-    "robot":             {"name": "机器人",   "code": "of562500", "etf": "562500"},
-    "petrochemical":     {"name": "石油石化", "code": "of159930", "etf": "159930"},
-    "aerospace":         {"name": "商业航天", "code": "of512710", "etf": "512710"},
-}
+from mom_index.instruments import SECTORS
 
 PROXY = None
 
