@@ -94,6 +94,7 @@ class AnalysisResult:
     title: str
     platform: str
     sector: str
+    source_url: str = ""
     
     # 分数
     newbie_score: float = 0.0       # 小白总分 (0-100)
@@ -136,6 +137,7 @@ def analyze_post(post: Dict, sector: str) -> AnalysisResult:
                 title=title[:80],
                 platform=post.get("platform", "unknown"),
                 sector=sector,
+                source_url=post.get("url", ""),
                 newbie_score=0,
                 newbie_confidence="high",
                 level="垃圾帖",
@@ -148,6 +150,7 @@ def analyze_post(post: Dict, sector: str) -> AnalysisResult:
         title=title[:80],
         platform=post.get("platform", "unknown"),
         sector=sector,
+        source_url=post.get("url", ""),
     )
     
     # 1. 逐信号匹配

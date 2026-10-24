@@ -12,7 +12,11 @@ import sqlite3
 from mom_index.analyzer.llm_analyzer import analyze_post
 from mom_index.analyzer.index_calculator import compute_sector_index
 from mom_index.provenance import (SHANGHAI, now_local, prepare_posts, assess_valid_quality,
-                                  verified_record, build_definition, digest)
+                                  verified_record, build_definition, digest,
+                                  SCORING_RULE_VERSION, SAMPLING_RULE_VERSION,
+                                  MIN_POSTS, FRESH_HOURS)
+
+REPLAY_RULE_VERSION = 'replay-v1'
 
 
 def sha(path):
@@ -36,7 +40,7 @@ def replay(db_path, output_root, runs_dir=None):
     finally:
         connection.close()
     rows_digest = digest(rows)
-    grouped, invalid = defaultdict(list), []
+    grouped, invalid, invalid_groups = defaultdict(list), [], []
     for row in rows:
         row_id, collected_at, sector, platform, raw, run_id = row
         try:
@@ -44,17 +48,35 @@ def replay(db_path, output_root, runs_dir=None):
             if not isinstance(post, dict):
                 raise ValueError('原始载荷不是对象')
             post.setdefault('platform', platform or 'unknown')
-            group = run_id or 'legacy:' + collected_at[:10]
+            legacy_day = str(collected_at or '').strip()[:10] or 'unknown'
+            group = run_id or 'legacy:' + legacy_day
             grouped[group].append((row_id, collected_at, sector, post))
         except (ValueError, TypeError):
             invalid.append(row_id)
     rule = build_definition(pages=None)
-    rule.pop('id')
     rule['llm'] = {'enabled': False, 'method': 'pure_rule_analyze_post'}
+    code_audit_id = rule['audit_id']
+    source_rule_hashes = rule['rule_hashes']
+    rule['sources'] = {'replay_input': 'archived_sqlite'}
+    semantic_rule = {
+        'replay_rule_version': REPLAY_RULE_VERSION,
+        'scoring_rule_version': SCORING_RULE_VERSION,
+        'sampling_rule_version': SAMPLING_RULE_VERSION,
+        'minimum_valid_posts': MIN_POSTS,
+        'fresh_hours': FRESH_HOURS,
+        'minimum_known_time_ratio': rule['minimum_known_time_ratio'],
+        'minimum_fresh_ratio': rule['minimum_fresh_ratio'],
+        'method': 'pure_rule_analyze_post',
+    }
+    rule_id = digest(semantic_rule)
+    rule['id'] = rule_id
+    rule['replay_semantics'] = semantic_rule
+    rule['replay_rule_version'] = REPLAY_RULE_VERSION
+    rule['audit_id'] = code_audit_id
+    rule['rule_hashes'] = source_rule_hashes
     rule['replay_code_hash'] = sha(__file__)
-    rule_id = digest(rule)
     audit_hashes = {p.name: sha(p) for p in sorted(runs_dir.glob('*.json'))} if runs_dir.exists() else {}
-    version = digest([before, rows_digest, rule_id, audit_hashes])[:24]
+    version = digest([before, rows_digest, rule_id, code_audit_id, rule['replay_code_hash'], audit_hashes])[:24]
     target = output_root / version
     if target.exists():
         manifest = json.loads((target / 'manifest.json').read_text(encoding='utf-8'))
@@ -70,8 +92,13 @@ def replay(db_path, output_root, runs_dir=None):
         original_p = original.get('provenance', {})
         run_verified = (verified_record({'source': 'real', 'provenance': original_p})
                         and original_p.get('run_id') == group and bool(original_p.get('finished_at')))
-        time_text = original_p.get('finished_at') or max(e[1] for e in entries)
-        timestamp = datetime.fromisoformat(time_text)
+        time_text = original_p.get('finished_at') or max((str(e[1] or '') for e in entries), default='')
+        try:
+            timestamp = datetime.fromisoformat(str(time_text).strip())
+        except (TypeError, ValueError):
+            invalid_groups.append({'group': group, 'raw_row_ids': [e[0] for e in entries],
+                                   'reason': '采集时间缺失或格式无效，已隔离该组'})
+            continue
         if timestamp.tzinfo is None:
             run_verified = False
             timestamp = timestamp.replace(tzinfo=SHANGHAI)
@@ -121,10 +148,12 @@ def replay(db_path, output_root, runs_dir=None):
     (target / 'history.json').write_text(json.dumps({'records': records}, ensure_ascii=False, indent=2), encoding='utf-8')
     manifest = {'version': version, 'created_at': now_local().isoformat(), 'source_db_sha256': before,
                 'raw_rows_digest': rows_digest,
-                'rule_id': rule_id, 'source_runs_sha256': audit_hashes, 'records': len(records),
+                'rule_id': rule_id, 'audit_id': code_audit_id,
+                'source_runs_sha256': audit_hashes, 'records': len(records),
                 'verified_runs': sum(r['audit']['original_run_verified'] for r in records),
                 'unverified_runs': sum(not r['audit']['original_run_verified'] for r in records),
-                'invalid_raw_row_ids': invalid, 'history_sha256': sha(target / 'history.json')}
+                'invalid_raw_row_ids': invalid, 'invalid_groups': invalid_groups,
+                'history_sha256': sha(target / 'history.json')}
     (target / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding='utf-8')
     print(f'重算 {len(records)} 组；可追溯运行 {manifest["verified_runs"]}；未核验 {manifest["unverified_runs"]}；输出 {target}')
     return target

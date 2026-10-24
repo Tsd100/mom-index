@@ -131,6 +131,7 @@ def compute_sector_index(analysis_results: List) -> Dict:
         "top_newbie_posts": [
             {
                 "title": r.title[:60],
+                "source_url": r.source_url,
                 "score": r.newbie_score,
                 "level": r.level,
                 "reasoning": r.reasoning[:150],

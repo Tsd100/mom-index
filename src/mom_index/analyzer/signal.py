@@ -5,13 +5,18 @@
 
 注意: 这是经验规则，不是投资建议；阈值会随回测数据积累而校准。
 """
+from datetime import date, datetime, timedelta
+from math import isfinite
 from typing import Dict, List
 
 from mom_index.analyzer.index_calculator import SECTOR_NAMES
-from mom_index.provenance import record_expired
+from mom_index.provenance import SHANGHAI, record_expired
 
 # 信号优先级（用于排序展示）
 _ORDER = {"danger": 0, "warning": 1, "watch": 2, "normal": 3, "cold": 4, "unavailable": 5}
+PRICE_WINDOW_BARS = 6
+MAX_PRICE_AGE_DAYS = 3
+MAX_PRICE_WINDOW_DAYS = 10
 
 
 def _prev_real_index(sector_history: List[Dict], real_dates) -> float | None:
@@ -22,6 +27,52 @@ def _prev_real_index(sector_history: List[Dict], real_dates) -> float | None:
     if len(pts) < 2:
         return None
     return pts[-2][1]
+
+
+def _confirmed_price_trend(dashboard: Dict, sector: str, sector_data: Dict, signal_date: str):
+    """只在同一 ETF 且行情日期紧邻采集日时给出价格趋势。"""
+    current = (dashboard.get('instruments') or {}).get(sector) or {}
+    captured = sector_data.get('instrument') or {}
+    current_etf = current.get('etf')
+    if (not current_etf or captured.get('etf') != current_etf
+            or sector_data.get('mapping_warning')):
+        return None
+    try:
+        as_of = date.fromisoformat(signal_date)
+        finished_at = datetime.fromisoformat(
+            str((dashboard.get('latest') or {}).get('provenance', {}).get('finished_at', ''))
+        )
+    except (TypeError, ValueError):
+        return None
+    if finished_at.tzinfo is None:
+        return None
+    finished_local = finished_at.astimezone(SHANGHAI)
+    if finished_local.date() != as_of:
+        return None
+    close_is_complete = (finished_local.hour, finished_local.minute, finished_local.second) >= (15, 15, 0)
+    latest_completed_day = as_of if close_is_complete else as_of - timedelta(days=1)
+
+    by_date = {}
+    for row in (dashboard.get('price_history') or {}).get(sector, []):
+        try:
+            day = date.fromisoformat(str(row.get('date', '')))
+            price = float(row.get('price'))
+        except (TypeError, ValueError):
+            continue
+        if day > latest_completed_day or price <= 0 or not isfinite(price):
+            continue
+        if row.get('etf') and row['etf'] != current_etf:
+            continue
+        by_date[day] = price
+
+    bars = sorted(by_date.items())
+    if len(bars) < PRICE_WINDOW_BARS:
+        return None
+    window = bars[-PRICE_WINDOW_BARS:]
+    if ((as_of - window[-1][0]).days > MAX_PRICE_AGE_DAYS
+            or (as_of - window[0][0]).days > MAX_PRICE_WINDOW_DAYS):
+        return None
+    return (window[-1][1] - window[0][1]) / window[0][1]
 
 
 def generate_signals(dashboard: Dict) -> List[Dict]:
@@ -49,13 +100,8 @@ def generate_signals(dashboard: Dict) -> List[Dict]:
         d = s.get("details") or {}
         ratio = d.get("buy_sell_ratio") or 0
 
-        # 价格趋势：最新收盘 vs 5 个交易日前（价格曲线含真实回填）
-        ph = dashboard.get("price_history", {}).get(key, [])
-        price_trend = 0.0
-        if len(ph) >= 6:
-            p0, p1 = ph[-1].get("price"), ph[-6].get("price")
-            if p0 and p1:
-                price_trend = (p0 - p1) / p1
+        # 价格趋势必须使用当前映射标的，并且报价日期要贴近这次采集。
+        price_trend = _confirmed_price_trend(dashboard, key, s, latest.get('date'))
 
         # 基础结论（按情绪区间）
         if idx >= 75:
@@ -77,9 +123,9 @@ def generate_signals(dashboard: Dict) -> List[Dict]:
             extras.append("小白买盘一边倒（追涨情绪）")
         elif 0 < ratio <= 0.5 and idx >= 40:
             extras.append("小白恐慌卖盘占优")
-        if price_trend >= 0.05 and idx >= 40:
+        if price_trend is not None and price_trend >= 0.05 and idx >= 40:
             extras.append("价格近 5 日上涨")
-        if price_trend <= -0.05 and idx < 20:
+        if price_trend is not None and price_trend <= -0.05 and idx < 20:
             extras.append("价格近 5 日下跌，情绪冰点")
 
         signals.append({

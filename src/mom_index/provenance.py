@@ -10,6 +10,8 @@ SHANGHAI = timezone(timedelta(hours=8))
 SCHEMA_VERSION = 2
 MIN_POSTS = 30
 FRESH_HOURS = 24
+SCORING_RULE_VERSION = 'scoring-v1'
+SAMPLING_RULE_VERSION = 'board-snapshot-v2'
 
 
 def now_local():
@@ -38,11 +40,15 @@ def build_definition(pages=3):
              'collectors/guba_collector.py', 'collectors/xhs_collector.py',
              'collectors/xueqiu_collector.py', 'pipeline.py', 'analyzer/signal.py', 'instruments.py', 'provenance.py']
     rules = {name: hashlib.sha256((root / name).read_bytes()).hexdigest() for name in files}
-    body = {
-        'version': 'snapshot-v2', 'pages': pages, 'sectors': SECTORS,
+    # 人工维护的语义版本用于跨运行可比性；audit_id 则保留所有源文件的完整指纹。
+    semantic = {
+        'version': 'snapshot-v3',
+        'scoring_rule_version': SCORING_RULE_VERSION,
+        'sampling_rule_version': SAMPLING_RULE_VERSION,
+        'pages': pages, 'sectors': SECTORS,
         'sampling': 'deduplicated_board_snapshot', 'fresh_hours': FRESH_HOURS,
         'minimum_valid_posts': MIN_POSTS, 'minimum_known_time_ratio': 0.8,
-        'minimum_fresh_ratio': 0.5, 'rule_hashes': rules,
+        'minimum_fresh_ratio': 0.5,
         'llm': {'enabled': bool(os.environ.get('MOM_INDEX_LLM_API_KEY')),
                 'model': os.environ.get('MOM_INDEX_LLM_MODEL', 'gpt-4o-mini'),
                 'endpoint_hash': digest(os.environ.get('MOM_INDEX_LLM_BASE_URL', 'https://api.openai.com/v1')),
@@ -50,7 +56,8 @@ def build_definition(pages=3):
         'sources': {'xhs_enabled': bool(os.environ.get('RNODE_API_KEY')),
                     'xueqiu_enabled': os.environ.get('MOM_INDEX_ENABLE_XUEQIU') == '1'},
     }
-    return {'id': digest(body), **body}
+    audit = {**semantic, 'rule_hashes': rules}
+    return {'id': digest(semantic), 'audit_id': digest(rules), **audit}
 
 
 def parse_list_time(value, now):

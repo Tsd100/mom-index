@@ -55,6 +55,66 @@ class IntegrityTests(unittest.TestCase):
         dashboard['latest']['provenance']['finished_at'] = '2020-01-01T00:00:00+08:00'
         self.assertEqual({s['sector']: s for s in generate_signals(dashboard)}['chip']['level'], 'unavailable')
 
+    def test_price_signal_requires_current_mapping_and_recent_bars(self):
+        from datetime import timedelta
+        from mom_index.provenance import SHANGHAI
+
+        def dashboard_for(captured_etf, age_days):
+            now = datetime.now(SHANGHAI)
+            latest_day = now.date()
+            finished = now.replace(hour=16, minute=0, second=0, microsecond=0)
+            bars = []
+            for offset in range(5, -1, -1):
+                day = latest_day - timedelta(days=offset + age_days)
+                bars.append({'date': day.isoformat(), 'price': 1 + (5 - offset) * 0.1, 'etf': '159206'})
+            return {
+                'latest': {'date': latest_day.isoformat(),
+                           'provenance': {'finished_at': finished.isoformat()},
+                           'sectors': {'aerospace': {'index': 50, 'quality': {'status': 'ok'},
+                               'instrument': {'etf': captured_etf}}}},
+                'instruments': {'aerospace': {'etf': '159206'}},
+                'price_history': {'aerospace': bars},
+            }
+
+        with patch('mom_index.analyzer.signal.record_expired', return_value=False):
+            current = {row['sector']: row for row in generate_signals(dashboard_for('159206', 0))}['aerospace']
+            old_mapping = {row['sector']: row for row in generate_signals(dashboard_for('512710', 0))}['aerospace']
+            stale_quotes = {row['sector']: row for row in generate_signals(dashboard_for('159206', 9))}['aerospace']
+        self.assertIn('价格近 5 日上涨', current['extras'])
+        self.assertNotIn('价格近 5 日上涨', old_mapping['extras'])
+        self.assertNotIn('价格近 5 日上涨', stale_quotes['extras'])
+
+    def test_intraday_signal_ignores_same_day_unfinished_close(self):
+        from datetime import timedelta
+        from mom_index.provenance import SHANGHAI
+
+        finished = datetime.now(SHANGHAI).replace(hour=10, minute=0, second=0, microsecond=0)
+        day = finished.date()
+        bars = [
+            {'date': (day - timedelta(days=offset)).isoformat(),
+             'price': 120 if offset == 0 else 100, 'etf': '159206'}
+            for offset in range(6, -1, -1)
+        ]
+        dashboard = {
+            'latest': {'date': day.isoformat(), 'provenance': {'finished_at': finished.isoformat()},
+                       'sectors': {'aerospace': {'index': 50, 'quality': {'status': 'ok'},
+                           'instrument': {'etf': '159206'}}}},
+            'instruments': {'aerospace': {'etf': '159206'}},
+            'price_history': {'aerospace': bars},
+        }
+        with patch('mom_index.analyzer.signal.record_expired', return_value=False):
+            signal = generate_signals(dashboard)[0]
+        self.assertNotIn('价格近 5 日上涨', signal['extras'])
+
+    def test_top_post_retains_original_source_url(self):
+        from mom_index.analyzer.llm_analyzer import AnalysisResult
+        source_url = 'https://guba.eastmoney.com/news,sh518880,1.html'
+        result = AnalysisResult(post_id='guba_1', title='新手请教怎么买', platform='guba', sector='gold',
+                                newbie_score=80, level='纯小白', reasoning='命中知识求助',
+                                intent='buy', key_signals=['知识求助'], source_url=source_url)
+        summary = calc.compute_sector_index([result])
+        self.assertEqual(summary['top_newbie_posts'][0]['source_url'], source_url)
+
     def test_quality_tracks_unknown_time_duplicates_and_mock(self):
         from mom_index.provenance import prepare_posts
         now = datetime.fromisoformat('2026-10-15T10:00:00+08:00')
@@ -78,7 +138,22 @@ class IntegrityTests(unittest.TestCase):
         from mom_index.provenance import build_definition
         a = build_definition(pages=3)
         self.assertEqual(a, build_definition(pages=3))
-        self.assertNotEqual(a['id'], build_definition(pages=1)['id'])
+        different_sampling = build_definition(pages=1)
+        self.assertNotEqual(a['id'], different_sampling['id'])
+        self.assertEqual(a['audit_id'], different_sampling['audit_id'])
+        original_read = Path.read_bytes
+
+        def with_audit_only_comment(path):
+            content = original_read(path)
+            return content + b'\n# audit-only comment\n' if path.name == 'signal.py' else content
+
+        with patch.object(Path, 'read_bytes', with_audit_only_comment):
+            audit_only_change = build_definition(pages=3)
+        self.assertEqual(a['id'], audit_only_change['id'])
+        self.assertNotEqual(a['audit_id'], audit_only_change['audit_id'])
+        with patch('mom_index.provenance.SCORING_RULE_VERSION', 'scoring-v2'):
+            semantic_change = build_definition(pages=3)
+        self.assertNotEqual(a['id'], semantic_change['id'])
         self.assertNotIn('api_key', json.dumps(a).lower())
 
     def test_freshness_and_year_boundary(self):

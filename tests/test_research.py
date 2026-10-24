@@ -175,6 +175,28 @@ class ResearchTests(unittest.TestCase):
             self.assertEqual(record['audit']['duplicates_excluded'], 1)
             self.assertTrue((target / 'manifest.json').exists())
 
+    def test_replay_quarantines_bad_timestamp_group_and_keeps_valid_groups(self):
+        from mom_index.replay import replay
+        with tempfile.TemporaryDirectory() as root:
+            db = Path(root, 'raw.db')
+            conn = sqlite3.connect(db)
+            conn.execute('CREATE TABLE raw_posts (id INTEGER PRIMARY KEY, collected_at TEXT, sector TEXT, platform TEXT, raw TEXT, run_id TEXT)')
+            valid = {'id': 'guba_good', 'title': '新手请教怎么买', 'platform': 'guba'}
+            invalid = {'id': 'guba_bad_time', 'title': '小白还能买吗', 'platform': 'guba'}
+            conn.execute('INSERT INTO raw_posts (collected_at,sector,platform,raw) VALUES (?,?,?,?)',
+                         ('2026-08-02T16:00:00+08:00', 'gold', 'guba', json.dumps(valid)))
+            conn.execute('INSERT INTO raw_posts (collected_at,sector,platform,raw) VALUES (?,?,?,?)',
+                         ('unknown', 'gold', 'guba', json.dumps(invalid)))
+            conn.commit(); conn.close()
+
+            target = replay(db, Path(root, 'reconstructed'), runs_dir=Path(root, 'runs'))
+            history = json.loads((target / 'history.json').read_text(encoding='utf-8'))
+            manifest = json.loads((target / 'manifest.json').read_text(encoding='utf-8'))
+            self.assertEqual(len(history['records']), 1)
+            self.assertEqual(history['records'][0]['date'], '2026-08-02')
+            self.assertEqual(manifest['invalid_groups'][0]['group'], 'legacy:unknown')
+            self.assertIn('时间', manifest['invalid_groups'][0]['reason'])
+
 
 if __name__ == '__main__':
     unittest.main()

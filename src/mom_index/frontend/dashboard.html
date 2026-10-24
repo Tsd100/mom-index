@@ -99,6 +99,8 @@ body {
 .post-item .post-title { color: #e2e8f0; margin-bottom: 4px; }
 .post-item .post-meta { color: #64748b; font-size: 11px; }
 .post-item .post-reason { color: #94a3b8; font-size: 12px; margin-top: 4px; font-style: italic; }
+.post-source { display: inline-block; margin-top: 8px; color: #60a5fa; font-size: 12px; text-decoration: none; }
+.post-source:hover { text-decoration: underline; }
 .post-badge {
   display: inline-block;
   padding: 2px 8px;
@@ -266,7 +268,8 @@ function renderDataNotice(data) {
   const counts = data.excluded_records || {};
   const latest = data.latest;
   const provenance = latest?.provenance;
-  const expired = provenance && Date.now() - Date.parse(provenance.finished_at) > 24 * 3600000;
+  const finishedAt = Date.parse(provenance?.finished_at);
+  const expired = provenance && (!Number.isFinite(finishedAt) || Date.now() - finishedAt > 24 * 3600000);
   banner.style.display = 'block';
   banner.textContent = `生产模式 · 已核验记录 ${data.real_record_count || 0} 天；` +
     `隔离未核验旧记录 ${counts.unverified || 0} 条、模拟记录 ${counts.mock || 0} 条。` +
@@ -276,14 +279,24 @@ function renderDataNotice(data) {
   if (provenance) {
     const details = document.createElement('details');
     const summary = document.createElement('summary');
-    summary.textContent = '查看采集来源与口径';
+    summary.textContent = '查看采集运行状态、来源与口径';
     const body = document.createElement('div');
     body.style.cssText = 'text-align:left;overflow-wrap:anywhere;font-weight:normal';
-    body.textContent = `运行编号：${provenance.run_id}；口径：${provenance.definition.id}；` +
-      `页数：${provenance.definition.pages ?? '未知'}；` +
-      Object.entries(provenance.sources || {}).map(([name, report]) =>
-        `${({guba:'东方财富',xhs:'小红书',xueqiu:'雪球'})[name] || name}：${({ok:'完成',disabled:'未启用',empty:'无结果',failed:'失败',demo_only:'仅演示，已排除'})[report.status] || report.status}`
-      ).join('；');
+    const startedAt = Date.parse(provenance.started_at);
+    const duration = Number.isFinite(startedAt) && Number.isFinite(finishedAt)
+      ? `${Math.max(0, Math.round((finishedAt - startedAt) / 1000))} 秒` : '未知';
+    const sourceNames = {guba:'东方财富',xhs:'小红书',xueqiu:'雪球'};
+    const stateNames = {ok:'完成',disabled:'未启用',empty:'无结果',failed:'失败',partial:'部分完成',demo_only:'仅演示，已排除'};
+    const sourceLines = Object.entries(provenance.sources || {}).map(([name, report]) => {
+      const sectors = Object.entries(report.sectors || {}).map(([key, state]) =>
+        `${SECTOR_NAMES[key] || key}：${stateNames[state.status] || state.status}，解析 ${state.parsed_count ?? 0} 条，完成 ${state.fetched_pages ?? 0}/${state.requested_pages ?? 0} 页${state.error_type ? `，错误 ${state.error_type}` : ''}`
+      );
+      return `${sourceNames[name] || name}：${stateNames[report.status] || report.status}${sectors.length ? `（${sectors.join('；')}）` : ''}`;
+    });
+    const definition = provenance.definition || {};
+    body.textContent = `运行编号：${provenance.run_id}；开始：${provenance.started_at || '未知'}；结束：${provenance.finished_at || '未知'}；耗时：${duration}；` +
+      `采样口径：${definition.id || '未知'}；代码审计指纹：${definition.audit_id || '历史记录未保存'}；页数：${definition.pages ?? '未知'}；` +
+      sourceLines.join('；');
     details.append(summary, body); banner.append(details);
   }
 
@@ -447,28 +460,32 @@ function renderCharts(data) {
     const pArr = priceHistory[sector] || [];
     const priceMap = {};
     pArr.forEach(p => { priceMap[p.date] = p.price; });
-    const priceVals = records.map(r => priceMap[r.date] || null);
+    const recordsByDate = new Map(records.map(record => [record.date, record]));
+    const dates = [...new Set([...records.map(r => r.date), ...pArr.map(p => p.date)])].sort();
+    const emotionRecords = dates.map(day => recordsByDate.get(day) || null);
+    const emotionVals = emotionRecords.map(record => record?.index ?? null);
+    const priceVals = dates.map(day => priceMap[day] ?? null);
     const hasPrice = priceVals.some(v => v !== null);
-    const dates = records.map(r => r.date);
     
     activeCharts.push(new Chart(ctx, {
       type: 'line',
       data: {
-        labels: records.map(r => r.date.slice(5)),
+        labels: dates.map(day => day.slice(5)),
         datasets: [{
           label: SECTOR_NAMES[sector],
-          data: records.map(r => r.index),
+          data: emotionVals,
           borderColor: color,
           backgroundColor: color + '20',
           borderWidth: 2,
           fill: false,
           tension: 0.3,
+          spanGaps: true,
           pointRadius: 2,
           pointHoverRadius: 5,
           yAxisID: 'y',
           segment: {
             borderDash: ctx => realDates.has(dates[ctx.p0DataIndex]) ? undefined : [6, 4],
-            borderColor: ctx => records[ctx.p0DataIndex].definition_id !== records[ctx.p1DataIndex].definition_id ? 'transparent' : color,
+            borderColor: ctx => emotionSegmentColor(emotionRecords, ctx.p0DataIndex, ctx.p1DataIndex, color),
           },
         }].concat(hasPrice ? {
           label: SECTOR_NAMES[sector] + ' 当前映射ETF价格',
@@ -537,6 +554,23 @@ function renderCharts(data) {
   });
 }
 
+function emotionSegmentColor(emotionRecords, startIndex, endIndex, color) {
+  const observations = emotionRecords.slice(startIndex, endIndex + 1).filter(Boolean);
+  if (observations.length < 2 || observations.some(row => row.index == null)) return 'transparent';
+  const definition = observations[0].definition_id;
+  return observations.every(row => row.definition_id === definition) ? color : 'transparent';
+}
+
+const POST_SOURCE_HOSTS = ['guba.eastmoney.com', 'xueqiu.com', 'xiaohongshu.com', 'xhslink.com'];
+function safePostUrl(value) {
+  try {
+    const url = new URL(value);
+    const host = url.hostname.toLowerCase();
+    return url.protocol === 'https:' && POST_SOURCE_HOSTS.some(allowed => host === allowed || host.endsWith(`.${allowed}`))
+      ? url.href : '';
+  } catch { return ''; }
+}
+
 function renderTopPosts(data) {
   const container = document.getElementById('top-posts');
   container.innerHTML = '<h3>典型帖子（采集快照）</h3>';
@@ -571,11 +605,12 @@ function renderTopPosts(data) {
     <div class="post-title">
       <span class="post-badge ${badgeClass(p.score)}">${badgeText(p.score)} ${p.score}分</span>
       <span style="color:#64748b;font-size:11px">[${p.sector}]</span>
-      ${p.intent_label ? `<span style="font-size:11px;margin-left:4px">${p.intent_label}</span>` : ''}
+      ${p.intent_label ? `<span style="font-size:11px;margin-left:4px">${escapeHtml(p.intent_label)}</span>` : ''}
       ${escapeHtml(p.title)}
     </div>
     ${p.reasoning ? `<div class="post-reason">📝 ${escapeHtml(p.reasoning)}</div>` : ''}
     ${p.key_signals ? p.key_signals.map(s => `<div class="post-meta">▸ ${escapeHtml(s)}</div>`).join('') : ''}
+    ${safePostUrl(p.source_url) ? `<a class="post-source" href="${escapeHtml(safePostUrl(p.source_url))}" target="_blank" rel="noopener noreferrer">查看原帖 ↗</a>` : ''}
   </div>
   `).join('');
 }
@@ -595,6 +630,15 @@ function loadData() {
       renderTopPosts(data);
     })
     .catch(err => {
+      activeCharts.forEach(chart => chart.destroy());
+      activeCharts = [];
+      ['legend', 'signals-panel', 'charts', 'top-posts'].forEach(id => {
+        document.getElementById(id).replaceChildren();
+      });
+      const banner = document.getElementById('mock-banner');
+      banner.style.display = 'block';
+      banner.textContent = '当前数据源不可用；旧指数、信号、图表和典型帖已隐藏。恢复连接后页面会自动重试。';
+      document.getElementById('update-time').textContent = '数据加载失败';
       document.getElementById('cards').innerHTML =
         `<div class="loading">⚠️ 数据加载失败: ${escapeHtml(err.message)}<br>请先运行 python -m mom_index.pipeline 生成数据</div>`;
     });

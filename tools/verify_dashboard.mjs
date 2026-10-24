@@ -24,20 +24,25 @@ const fixture = {
   excluded_records: {mock: 29, unverified: 3}, real_dates: ['2026-10-13', '2026-10-14', '2026-10-15'],
   price_real_dates: ['2026-10-13', '2026-10-14', '2026-10-15'],
   latest: {date: '2026-10-15', provenance: {schema_version: 2, run_id: 'browser-test', mock_excluded: true,
-    finished_at: new Date().toISOString(), definition: {id: 'browser-test-definition'}},
+    started_at: new Date(Date.now() - 12000).toISOString(), finished_at: new Date().toISOString(),
+    definition: {id: 'browser-test-definition', audit_id: 'browser-audit-fingerprint'},
+    sources: {guba: {status: 'partial', sectors: {gold: {status: 'partial', parsed_count: 30,
+      requested_pages: 3, fetched_pages: 2, error_type: 'Timeout'}}}, xhs: {status: 'disabled'}, xueqiu: {status: 'disabled'}}},
     sectors: {gold: {index: 45, interpretation: '开始升温', quality: {status: 'ok', sample_count: 50,
       valid_count: 45, fresh_count: 40, newly_seen_count: 20, previously_seen_count: 30},
-      details: {}, top_newbie_posts: [{title: '<img src=x onerror="window.injected=true">', score: 50,
+      details: {}, top_newbie_posts: [{title: '<img src=x onerror="window.injected=true">', source_url: 'https://guba.eastmoney.com/news,sh518880,1.html', score: 50,
         reasoning: '测试转义', key_signals: ['小白'], intent_label: '买入'}]}}},
   signals: [{sector: 'gold', name: '黄金', index: 45, delta: 1, level: 'watch', action: '开始升温', extras: ''}],
-  sector_history: {gold: [{date: '2026-10-13', index: 30}, {date: '2026-10-14', index: 44}, {date: '2026-10-15', index: 45}]},
+  sector_history: {gold: [{date: '2026-10-15', index: 45}]},
   price_history: {gold: [{date: '2026-10-13', price: 8}, {date: '2026-10-14', price: 9}, {date: '2026-10-15', price: 8.5}]},
 };
 const server = createServer((req, res) => {
   if (req.url?.startsWith('/data/')) {
+    if (dashboardFailure) {res.statusCode = 503; res.end('offline'); return;}
     res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(fixture));
   } else {res.setHeader('Content-Type', 'text/html; charset=utf-8'); res.end(html);}
 });
+let dashboardFailure = false;
 await new Promise(r => server.listen(0, '127.0.0.1', r));
 const chrome = spawn(browser, ['--headless=new', '--no-first-run', '--no-default-browser-check',
   '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank'], {stdio: 'ignore', windowsHide: true});
@@ -84,6 +89,15 @@ try {
     }
     assert(ready, 'Chart.js 未加载或画布没有生成');
     await new Promise(r => setTimeout(r, 1200));
+    const chartData = await evaluate(`(() => {const chart=Object.values(Chart.instances)[0];return {labels:chart?.data.labels,series:chart?.data.datasets.map(d=>d.data)}})()`);
+    assert.deepEqual(chartData.labels, ['10-13', '10-14', '10-15'], '价格日期不应被情绪记录日期截断');
+    assert.deepEqual(chartData.series[0], [null, null, 45], '缺少情绪记录的价格日应保持空值');
+    assert.deepEqual(chartData.series[1], [8, 9, 8.5]);
+    const segmentColors = await evaluate(`(() => {
+      const a={index:30,definition_id:'v1'}, b={index:60,definition_id:'v1'}, failed={index:null,definition_id:'v1'}, changed={index:45,definition_id:'v2'};
+      return [emotionSegmentColor([a,null,b],0,2,'#abc'), emotionSegmentColor([a,failed,b],0,2,'#abc'), emotionSegmentColor([a,null,changed],0,2,'#abc')];
+    })()`);
+    assert.deepEqual(segmentColors, ['#abc', 'transparent', 'transparent'], '曲线应只跨过纯价格日期');
     const pixels = await evaluate(`Array.from(document.querySelectorAll('canvas')).map(canvas => {
       const rgba=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
       let painted=0,colorful=0; for(let i=0;i<rgba.length;i+=4){if(rgba[i+3])painted++; if(Math.max(rgba[i],rgba[i+1],rgba[i+2])-Math.min(rgba[i],rgba[i+1],rgba[i+2])>30&&rgba[i+3])colorful++;}
@@ -93,7 +107,23 @@ try {
     await evaluate('loadData(); new Promise(r=>setTimeout(r,300))');
     assert.equal(await evaluate(`document.querySelectorAll('.post-item').length`), 1, '刷新重复追加帖子');
     assert.equal(await evaluate('window.injected === true'), false, '帖子 HTML 未转义');
+    assert.equal(await evaluate(`document.querySelector('.post-source')?.getAttribute('href')`),
+      'https://guba.eastmoney.com/news,sh518880,1.html', '典型帖未保留原帖链接');
+    const runStatus = await evaluate(`document.getElementById('mock-banner').textContent`);
+    assert(runStatus.includes('Timeout') && runStatus.includes('30') && runStatus.includes('代码审计指纹'), '缺少采集运行状态明细');
+    const unsafePost = structuredClone(fixture);
+    unsafePost.latest.sectors.gold.top_newbie_posts[0].source_url = 'javascript:alert(1)';
+    await evaluate(`renderTopPosts(${JSON.stringify(unsafePost)})`);
+    assert.equal(await evaluate(`document.querySelector('.post-source')`), null, '不可信链接被生成为可点击链接');
     assert.equal(await evaluate(`Object.keys(Chart.instances).length`), 1, '刷新泄漏图表');
+    dashboardFailure = true;
+    await evaluate('loadData(); new Promise(r=>setTimeout(r,300))');
+    assert(await evaluate(`document.getElementById('cards').textContent.includes('加载失败')`), '网络失败未显示状态');
+    assert.equal(await evaluate(`document.getElementById('signals-panel').textContent.trim()`), '', '网络失败后仍显示旧信号');
+    assert.equal(await evaluate(`document.getElementById('top-posts').textContent.trim()`), '', '网络失败后仍显示旧帖子');
+    assert.equal(await evaluate(`document.getElementById('charts').children.length`), 0, '网络失败后仍显示旧图表');
+    assert.equal(await evaluate(`Object.keys(Chart.instances).length`), 0, '网络失败后未销毁旧图表');
+    dashboardFailure = false;
     const stale = structuredClone(fixture); stale.latest.provenance.finished_at = '2026-08-08T00:00:00+08:00';
     const view = await evaluate(`productionView(${JSON.stringify(stale)})`);
     assert.equal(view.latest.sectors.gold.index, null);
