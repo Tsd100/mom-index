@@ -1,0 +1,13 @@
+.git
+.env
+output
+offline-deps/*.tar
+**/__pycache__
+**/*.pyc
+src/data
+src/mom_index/frontend/data
+**/*.db
+**/*.sqlite
+**/*.log
+tests
+docs

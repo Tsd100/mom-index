@@ -35,6 +35,7 @@ desktop.ini
 *.db
 *.log
 output/
+offline-deps/
 
 src/data/runs/
 src/data/demo/

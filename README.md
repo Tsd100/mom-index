@@ -56,9 +56,10 @@
 ```
 mom-index/
 ├── pyproject.toml               # 包定义（src 布局）
-├── nas-deploy-tool.py           # 飞牛NAS离线部署包生成工具
+├── nas-deploy-tool.py           # 应用源码与Linux wheels部署包（不含数据/基础镜像）
+├── docker-compose.yml          # 独立web与每日collector，持久output
 ├── docker/
-│   └── entrypoint.sh            # 容器入口（定时任务 / HTTP 服务）
+│   └── entrypoint.sh            # 网页/每日采集服务入口
 ├── src/
 │   └── mom_index/
 │       ├── pipeline.py          # 主流程：采集→分析→指数→存储
@@ -198,21 +199,20 @@ python -m unittest discover -s tests -v
 - **关键词规则限制**：非 LLM 语义理解，会漏掉隐含信号、误判部分 spam
 - **商业航天覆盖有限**：新映射使用卫星ETF，仅代表部分产业；旧军工ETF历史不改写
 - **单日快照**：一次采集只是一个数据点，需要持续运行积累
-- **持续采集**：Windows 本机可在任务计划程序中定期运行 `python -m mom_index.pipeline`（工作目录为仓库根目录，并设置 `PYTHONPATH=src`）。项目只提供采集入口，不会自动注册或启用系统计划任务；看板刷新也不会触发采集。
+- **持续采集**：目标部署为NAS上的独立网页与每日采集服务，默认上海时间17:00运行。看板显示调度状态、上次结束、下次运行和有效板块数；页面刷新不触发采集。
 - **雪球/微博/抖音**：均需登录态与反爬绕过，暂未接入真实数据
 
 ## 部署到飞牛 NAS
 
-```bash
-python nas-deploy-tool.py   # 生成 docker/ + docker-compose.yml 离线部署包
+```powershell
+python nas-deploy-tool.py   # 生成output/下独立版本应用包和Linux依赖，基础镜像另行核实
 ```
 
-容器支持两种模式：
+NAS使用同一镜像运行两个服务：`web`常驻8503端口提供看板，`collector`每天上海时间17:00自动更新行情与帖子。首次启动立即采集；重启读取持久状态，异常有限重试。两者设置`unless-stopped`自动重启，Chart.js由本地文件提供。
 
-- 设置 `CRON_SCHEDULE`（如 `0 9,15 * * *`）→ supercronic 定时采集
-- 不设置 → 启动 HTTP 服务（默认端口 8503），访问 `/dashboard.html`
+宿主机`output/data/`保存原始库、生产历史、运行审计与调度状态；`output/frontend/data/`仅保存可公开的看板JSON，由web只读挂载。`COLLECTION_TIME`替代旧`CRON_SCHEDULE`；`NAS_PORT`设置外部访问端口。
 
-数据通过 `MOM_INDEX_DATA_DIR` 映射到宿主机卷，`raw_posts.db`、`production/history.json` 与 `runs/` 会持续积累。本轮未生成或验证 NAS 部署包。
+详见[中文NAS部署说明](docs/nas-deployment.md)。实际安装前须核实NAS已有项目/镜像/端口/挂载并备份；应用包不包含本机数据和基础镜像，不能覆盖NAS已有生产历史。
 
 ## 技术栈
 

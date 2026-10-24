@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>宝妈指数 · Mom Index</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="vendor/chart.umd.min.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -179,6 +179,7 @@ body {
 <div class="container">
   <!-- 模拟数据提示横幅（真实数据攒满后自动隐藏） -->
   <div class="mock-banner" id="mock-banner" style="display:none"></div>
+  <div id="runtime-status" style="display:none;padding:12px 16px;margin-bottom:16px;border:1px solid #334155;border-radius:8px;color:#93c5fd;font-size:13px;line-height:1.8"></div>
 
   <!-- 今日操作信号 -->
   <div class="signals-panel" id="signals-panel"></div>
@@ -274,7 +275,7 @@ function renderDataNotice(data) {
   banner.textContent = `生产模式 · 已核验记录 ${data.real_record_count || 0} 天；` +
     `隔离未核验旧记录 ${counts.unverified || 0} 条、模拟记录 ${counts.mock || 0} 条。` +
     (expired ? ' ⚠️ 采集结果已超过 24 小时，暂停情绪判断。' : '') +
-    (provenance ? ` 上次采集：${provenance.finished_at}；口径 ${provenance.definition.id.slice(0, 12)}。` : ' 请运行管线采集新数据。') +
+    (provenance ? ` 上次采集：${provenance.finished_at}；口径 ${provenance.definition.id.slice(0, 12)}。` : ' 等待采集任务发布首份有效快照。') +
     ' 页面每 5 分钟重新读取数据，不会触发采集。列表更新时间不代表发布时间。';
   if (provenance) {
     const details = document.createElement('details');
@@ -341,7 +342,7 @@ function renderCards(data) {
   const latest = data.latest;
   if (!latest) {
     document.getElementById('update-time').textContent = '暂无已核验采集记录';
-    container.innerHTML = '<div class="loading">暂无已核验生产数据，请先运行 python -m mom_index.pipeline</div>';
+    container.innerHTML = '<div class="loading">暂无已核验采集记录，请等待采集任务完成，或查看采集运行状态。</div>';
     return;
   }
 
@@ -616,7 +617,30 @@ function renderTopPosts(data) {
 }
 
 // 加载数据（每 5 分钟自动刷新）
+function renderRuntimeStatus(state) {
+  const panel = document.getElementById('runtime-status');
+  if (!state.collection_time) { panel.style.display = 'none'; return; }
+  const names = {running:'正在采集',completed:'已完成',partial:'部分完成，请查看样本质量',failed:'运行失败，等待重试或下次任务',interrupted:'上次运行被中断'};
+  const result = state.result || {};
+  panel.style.display = 'block';
+  panel.textContent = `NAS 自动采集：每天 ${state.collection_time}（上海时间）；${names[state.status] || '等待采集'}。` +
+    (state.next_run_at ? ` 下次运行：${state.next_run_at}。` : '') +
+    (state.last_finished_at ? ` 上次结束：${state.last_finished_at}。` : '') +
+    (result.total_sectors != null ? ` 上次有效板块 ${result.valid_sectors ?? 0}/${result.total_sectors}。` : '');
+}
+
+function loadRuntimeStatus() {
+  fetch('data/service_status.json', {cache:'no-store'})
+    .then(response => {if (!response.ok) throw new Error('unavailable'); return response.json();})
+    .then(renderRuntimeStatus)
+    .catch(() => {
+      const panel = document.getElementById('runtime-status');
+      if (panel.style.display !== 'none') panel.textContent = 'NAS 自动采集状态暂时无法读取。';
+    });
+}
+
 function loadData() {
+  loadRuntimeStatus();
   fetch('data/dashboard_data.json', {cache: 'no-store'})
     .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(productionView)
@@ -640,7 +664,7 @@ function loadData() {
       banner.textContent = '当前数据源不可用；旧指数、信号、图表和典型帖已隐藏。恢复连接后页面会自动重试。';
       document.getElementById('update-time').textContent = '数据加载失败';
       document.getElementById('cards').innerHTML =
-        `<div class="loading">⚠️ 数据加载失败: ${escapeHtml(err.message)}<br>请先运行 python -m mom_index.pipeline 生成数据</div>`;
+        `<div class="loading">⚠️ 数据加载失败: ${escapeHtml(err.message)}<br>请稍后重试，或检查 NAS 采集与网页服务的运行状态。</div>`;
     });
 }
 loadData();

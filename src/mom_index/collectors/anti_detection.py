@@ -58,7 +58,6 @@ class AntiDetection:
             "User-Agent": ua,
             "Accept": random.choice(self.ACCEPT_HEADERS),
             "Accept-Language": random.choice(self.ACCEPT_LANGUAGES),
-            "Accept-Encoding": "gzip, deflate, br",
             "DNT": "1",
             "Connection": "keep-alive",
             "Upgrade-Insecure-Requests": "1",

@@ -28,10 +28,15 @@ DATA_DIR = os.environ.get("MOM_INDEX_DATA_DIR",
 
 def publish_dashboard(dashboard, frontend_dir=None):
     """仅发布经过过滤的生产 JSON；不向前端复制历史原件与原始帖子。"""
-    target = Path(frontend_dir or Path(__file__).parent / "frontend" / "data")
+    target = Path(frontend_dir or os.environ.get('MOM_INDEX_FRONTEND_DATA_DIR')
+                  or Path(__file__).parent / "frontend" / "data")
     target.mkdir(parents=True, exist_ok=True)
-    (target / "dashboard_data.json").write_text(
-        json.dumps(dashboard, ensure_ascii=False, indent=2), encoding="utf-8")
+    temporary = target / ('.dashboard-' + uuid4().hex + '.tmp')
+    try:
+        temporary.write_text(json.dumps(dashboard, ensure_ascii=False, indent=2), encoding='utf-8')
+        temporary.replace(target / 'dashboard_data.json')
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def run_pipeline(publish=True):

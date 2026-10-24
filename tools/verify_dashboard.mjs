@@ -11,6 +11,7 @@ const out = resolve('output');
 await mkdir(out, {recursive: true});
 const profile = await mkdtemp(join(out, 'qa-browser-'));
 const html = await readFile('src/mom_index/frontend/dashboard.html', 'utf8');
+const chartjs = await readFile('src/mom_index/frontend/vendor/chart.umd.min.js');
 const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]);
 await writeFile(join(out, 'dashboard-check.js'), scripts.join('\n'));
 const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]));
@@ -37,7 +38,12 @@ const fixture = {
   price_history: {gold: [{date: '2026-10-13', price: 8}, {date: '2026-10-14', price: 9}, {date: '2026-10-15', price: 8.5}]},
 };
 const server = createServer((req, res) => {
-  if (req.url?.startsWith('/data/')) {
+  if (req.url === '/vendor/chart.umd.min.js') {
+    res.setHeader('Content-Type', 'application/javascript'); res.end(chartjs);
+  } else if (req.url === '/data/service_status.json') {
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({collection_time:'17:00',status:'partial',next_run_at:'2026-10-25T17:00:00+08:00',result:{valid_sectors:1,total_sectors:12}}));
+  } else if (req.url?.startsWith('/data/')) {
     if (dashboardFailure) {res.statusCode = 503; res.end('offline'); return;}
     res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(fixture));
   } else {res.setHeader('Content-Type', 'text/html; charset=utf-8'); res.end(html);}
@@ -88,6 +94,7 @@ try {
       await new Promise(r => setTimeout(r, 100));
     }
     assert(ready, 'Chart.js 未加载或画布没有生成');
+    assert(await evaluate(`document.getElementById('runtime-status').textContent.includes('17:00') && document.getElementById('runtime-status').textContent.includes('1/12')`), 'NAS每日采集状态未显示');
     await new Promise(r => setTimeout(r, 1200));
     const chartData = await evaluate(`(() => {const chart=Object.values(Chart.instances)[0];return {labels:chart?.data.labels,series:chart?.data.datasets.map(d=>d.data)}})()`);
     assert.deepEqual(chartData.labels, ['10-13', '10-14', '10-15'], '价格日期不应被情绪记录日期截断');

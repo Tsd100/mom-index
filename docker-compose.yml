@@ -1,0 +1,59 @@
+x-mom-image: &mom-image
+  image: mom-index:2026.10.24.3
+  build:
+    context: .
+    dockerfile: docker/Dockerfile
+
+services:
+  web:
+    <<: *mom-image
+    command: ["web"]
+    restart: unless-stopped
+    ports:
+      - "${NAS_PORT:-8503}:8503"
+    volumes:
+      - ./output/frontend/data:/app/public-data:ro
+    environment:
+      TZ: Asia/Shanghai
+      WEBSERVER_PORT: "8503"
+      MOM_INDEX_FRONTEND_DATA_DIR: /app/public-data
+    healthcheck:
+      test: ["CMD", "python", "-m", "mom_index.nas_runtime", "health"]
+      interval: 30s
+      timeout: 8s
+      retries: 3
+      start_period: 15s
+    logging: &logs
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  collector:
+    <<: *mom-image
+    command: ["collector"]
+    restart: unless-stopped
+    volumes:
+      - ./output:/app/output
+    environment:
+      TZ: Asia/Shanghai
+      MOM_INDEX_DATA_DIR: /app/output/data
+      MOM_INDEX_FRONTEND_DATA_DIR: /app/output/frontend/data
+      COLLECTION_TIME: "${COLLECTION_TIME:-17:00}"
+      RUN_ON_STARTUP: "${RUN_ON_STARTUP:-1}"
+      GUBA_PAGES: "${GUBA_PAGES:-3}"
+      XHS_ALLOW_MOCK: "0"
+      RNODE_API_KEY: "${RNODE_API_KEY:-}"
+      MOM_INDEX_ENABLE_XUEQIU: "${MOM_INDEX_ENABLE_XUEQIU:-0}"
+      XUEQIU_COOKIE: "${XUEQIU_COOKIE:-}"
+      MOM_INDEX_LLM_API_KEY: "${MOM_INDEX_LLM_API_KEY:-}"
+      MOM_INDEX_LLM_BASE_URL: "${MOM_INDEX_LLM_BASE_URL:-https://api.openai.com/v1}"
+      MOM_INDEX_LLM_MODEL: "${MOM_INDEX_LLM_MODEL:-gpt-4o-mini}"
+      MOM_INDEX_LLM_SAMPLE_RATE: "${MOM_INDEX_LLM_SAMPLE_RATE:-0.05}"
+    healthcheck:
+      test: ["CMD", "python", "-m", "mom_index.nas_runtime", "health-collector"]
+      interval: 60s
+      timeout: 8s
+      retries: 3
+      start_period: 60s
+    logging: *logs
