@@ -38,7 +38,7 @@ def build_definition(pages=3):
     root = Path(__file__).parent
     files = ['analyzer/llm_analyzer.py', 'analyzer/text_rules.py', 'analyzer/index_calculator.py',
              'collectors/guba_collector.py', 'collectors/anti_detection.py', 'collectors/xhs_collector.py',
-             'collectors/xueqiu_collector.py', 'pipeline.py', 'analyzer/signal.py', 'daily_summary.py', 'instruments.py', 'provenance.py']
+             'collectors/xueqiu_collector.py', 'pipeline.py', 'analyzer/signal.py', 'daily_summary.py', 'sample_insights.py', 'instruments.py', 'provenance.py']
     rules = {name: hashlib.sha256((root / name).read_bytes()).hexdigest() for name in files}
     # 人工维护的语义版本用于跨运行可比性；audit_id 则保留所有源文件的完整指纹。
     semantic = {

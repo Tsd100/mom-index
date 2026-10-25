@@ -74,12 +74,14 @@ body {
 /* 图表区域 */
 .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 24px; }
 .chart-box {
+  min-width: 0;
   background: #1e293b;
   border: 1px solid #334155;
   border-radius: 12px;
   padding: 20px;
 }
 .chart-box h3 { font-size: 16px; margin-bottom: 16px; color: #e2e8f0; }
+.chart-box canvas { max-width: 100%; }
 
 /* Top 小白帖 */
 .top-posts {
@@ -190,6 +192,9 @@ body {
   <!-- 模拟数据提示横幅（真实数据攒满后自动隐藏） -->
   <div class="mock-banner" id="mock-banner" style="display:none"></div>
   <div id="runtime-status" style="display:none;padding:12px 16px;margin-bottom:16px;border:1px solid #334155;border-radius:8px;color:#93c5fd;font-size:13px;line-height:1.8"></div>
+
+  <section class="daily-summary" id="quality-overview" aria-live="polite"></section>
+  <section class="daily-summary" id="recent-observations" aria-live="polite"></section>
 
   <section class="daily-summary" id="daily-summary" aria-live="polite"><h2>每日变化摘要</h2><p>等待采集快照…</p></section>
 
@@ -369,6 +374,53 @@ function productionView(input) {
   return data;
 }
 
+function snapshotExpired(data) {
+  const age = Date.now() - Date.parse(data.latest?.provenance?.finished_at);
+  return !Number.isFinite(age) || age < 0 || age > 24 * 3600000;
+}
+
+function renderQualityOverview(data) {
+  const panel = document.getElementById('quality-overview');
+  panel.innerHTML = '<h2>采集与样本质量</h2>';
+  if (!data.latest) { panel.innerHTML += '<p>等待首份已核验采集快照。</p>'; return; }
+  const overview = data.quality_overview || {};
+  const rows = overview.sectors || Object.fromEntries(Object.entries(data.latest.sectors || {}).map(([key,value]) =>
+    [key,{...value.quality,recent_count:value.quality?.valid_fresh_count}]));
+  const expired = snapshotExpired(data);
+  const names = {ok:'合格',stale:'近期样本占比不足',collection_failed:'来源不完整',insufficient:'有效样本不足',unknown_time:'样本时间待核验',unknown:'未记录',failed:'失败',partial:'部分完成',empty:'无结果'};
+  const sourceNames = {ok:'抓取完成',failed:'失败',partial:'部分失败',empty:'无结果',unknown:'未记录'};
+  const platformNames = {guba:'东方财富',xhs:'小红书',xueqiu:'雪球'};
+  const count = expired ? 0 : Object.values(rows).filter(row => row.status === 'ok').length;
+  panel.innerHTML += `<p>${expired ? '上次采集结果已过期，当前暂停判断。' : `当前样本合格 ${count}/${Object.keys(rows).length} 个板块。`} 抓取成功与样本合格分别记录。连续失败按有记录的每日最终快照统计，不包含同日重试次数。</p>`;
+  panel.innerHTML += `<details class="summary-note"><summary>查看板块质量与最近成功时间</summary><div class="summary-grid">${Object.entries(rows).map(([key,row]) =>
+    `<article class="summary-change"><strong>${escapeHtml(SECTOR_NAMES[key] || key)}</strong><div>样本：${escapeHtml(names[row.status] || row.status || '未记录')} · 来源：${escapeHtml(sourceNames[row.failed_sources?.length && row.collection_status === 'ok' ? 'partial' : row.collection_status] || row.collection_status || '未记录')}</div><div>采集时近期有效 ${escapeHtml(row.recent_count ?? '未记录')}/${escapeHtml(row.valid_count ?? '未记录')}</div><div>最近抓取成功：${escapeHtml(row.last_collection_success_at || '未记录')}</div><div>最近样本合格：${escapeHtml(row.last_qualified_at || '未记录')}</div><div>连续失败观测日：${escapeHtml(row.consecutive_failed_observations ?? '未记录')}</div><div>${escapeHtml((row.reasons || []).join('；'))}</div>${row.failed_sources?.length ? `<div>失败来源：${escapeHtml(row.failed_sources.map(source => platformNames[source] || source).join('、'))}</div>` : ''}</article>`
+  ).join('')}</div></details>`;
+}
+
+function renderRecentObservations(data) {
+  const panel = document.getElementById('recent-observations');
+  panel.innerHTML = '<h2>近期样本观察</h2><p>统计采集时 24 小时内更新的有效帖子，不等于新发布或新增投资者；独立展示，不替代正式指数。</p>';
+  if (!data.latest) { panel.innerHTML += '<p>等待首份近期样本观察。</p>'; return; }
+  const expired = snapshotExpired(data);
+  panel.innerHTML += `<details class="summary-note"><summary>查看各板块近期样本</summary><div class="summary-grid">${Object.entries(data.latest.sectors || {}).map(([key,sector]) => {
+    const item = sector.recent_observation;
+    if (!item) return `<article class="summary-change"><strong>${escapeHtml(SECTOR_NAMES[key] || key)}</strong>旧快照未记录此观察项，等待后续采集。</article>`;
+    const canObserve = !expired && item.status === 'ok' && item.directions;
+    const direction = item.directions || {};
+    const message = expired ? '采集结果已过期，暂停方向与情绪观察。' : item.status === 'source_unavailable'
+      ? '来源不完整或未核验，暂停方向与情绪观察。' : '近期有效样本不足 30 条，暂停方向与情绪观察。';
+    return `<article class="summary-change"><strong>${escapeHtml(SECTOR_NAMES[key] || key)}</strong><div>采集时近期有效 ${escapeHtml(item.recent_count)}/${escapeHtml(item.valid_count)}</div><div>时间未确认 ${escapeHtml(item.unknown_time_count ?? '未记录')}</div>${canObserve
+      ? `<div>买入表达 ${escapeHtml(direction.buy)} · 卖出表达 ${escapeHtml(direction.sell)} · 方向未确认 ${escapeHtml(direction.neutral)}</div><div>规则情绪均值（−1～1）：${escapeHtml(item.mean_sentiment)}</div>`
+      : `<div>${message}</div>`}</article>`;
+  }).join('')}</div></details>`;
+}
+
+function renderComponentChange(change) {
+  if (!change || change.status !== 'ok') return '<div class="summary-note component-change">旧记录缺少完整分量，暂不能拆解公式变化。</div>';
+  const signed = value => typeof value === 'number' && Number.isFinite(value) ? `${value > 0 ? '+' : ''}${value.toFixed(4)}` : '—';
+  return `<details class="component-change"><summary>查看四项公式贡献</summary><p class="summary-note">加权分量之差，用于核对总分变化，不解释市场因果。</p>${(change.items || []).map(item => `<div>${escapeHtml(item.label)}：${escapeHtml(signed(item.change))} 分</div>`).join('')}<div class="summary-note">总分舍入差：${escapeHtml(signed(change.rounding_residual))} 分</div></details>`;
+}
+
 function renderDailySummary(data) {
   const panel = document.getElementById('daily-summary');
   const summary = data.daily_summary;
@@ -390,7 +442,7 @@ function renderDailySummary(data) {
       const url = safePostUrl(post.source_url);
       return `<div class="summary-evidence">${escapeHtml(post.title)}<div class="summary-note">${escapeHtml(post.reasoning)} ${escapeHtml(post.intent_basis)}</div>${url ? `<a class="summary-source" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">查看原帖 ↗</a>` : '<span class="summary-note">原帖链接未提供或未通过核验</span>'}</div>`;
     }).join('');
-    return `<article class="summary-change"><strong>${escapeHtml(SECTOR_NAMES[item.sector] || item.sector)} ${escapeHtml(deltaText)} 分</strong><div class="summary-note">较 ${escapeHtml(item.comparison_date)} · 当前 ${escapeHtml(item.index)} 分<br>有效样本 ${escapeHtml(item.valid_count)}/${escapeHtml(item.sample_count)}</div><details><summary>查看代表帖子与判定依据</summary><p class="summary-note">代表帖子用于核对规则，不证明其导致了指数变化。</p>${evidence || '<p class="summary-note">本次快照未保留代表帖子。</p>'}</details></article>`;
+    return `<article class="summary-change"><strong>${escapeHtml(SECTOR_NAMES[item.sector] || item.sector)} ${escapeHtml(deltaText)} 分</strong><div class="summary-note">较 ${escapeHtml(item.comparison_date)} · 当前 ${escapeHtml(item.index)} 分<br>有效样本 ${escapeHtml(item.valid_count)}/${escapeHtml(item.sample_count)}</div>${renderComponentChange(item.component_change)}<details><summary>查看代表帖子与判定依据</summary><p class="summary-note">代表帖子用于核对规则，不证明其导致了指数变化。</p>${evidence || '<p class="summary-note">本次快照未保留代表帖子。</p>'}</details></article>`;
   }).join('')}</div>` : '<p>暂无可比较的板块变化。首份记录、口径切换或上期质量缺口均会暂停比较。</p>';
   const notes = [...(summary.unavailable || []), ...(summary.not_comparable || [])];
   if (notes.length) {
@@ -712,6 +764,8 @@ function loadData() {
       renderDataNotice(data);
       renderSignals(data);
       renderDailySummary(data);
+      renderQualityOverview(data);
+      renderRecentObservations(data);
       if (typeof Chart !== 'undefined') renderCharts(data);
       else document.getElementById('charts').textContent = '图表组件加载失败，指数和质量信息仍可查看。';
       renderTopPosts(data);
@@ -719,7 +773,7 @@ function loadData() {
     .catch(err => {
       activeCharts.forEach(chart => chart.destroy());
       activeCharts = [];
-      ['legend', 'signals-panel', 'charts', 'top-posts', 'daily-summary'].forEach(id => {
+      ['legend', 'signals-panel', 'charts', 'top-posts', 'daily-summary', 'quality-overview', 'recent-observations'].forEach(id => {
         document.getElementById(id).replaceChildren();
       });
       const banner = document.getElementById('mock-banner');

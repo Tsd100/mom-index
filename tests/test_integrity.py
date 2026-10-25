@@ -194,6 +194,11 @@ class IntegrityTests(unittest.TestCase):
             self.assertEqual(quality['sample_count'], 35)
             self.assertEqual(quality['status'], 'ok')
             self.assertIsNotNone(result['latest']['sectors']['gold']['index'])
+            recent = result['latest']['sectors']['gold']['recent_observation']
+            self.assertEqual(recent['recent_count'], 35)
+            self.assertEqual(recent['status'], 'ok')
+            self.assertEqual(recent['directions']['neutral'], 35)
+            self.assertIn('gold', result['quality_overview']['sectors'])
             self.assertEqual(len(list(Path(self.temp.name, 'runs').glob('*.json'))), 1)
             audit = json.loads(next(Path(self.temp.name, 'runs').glob('*.json')).read_text(encoding='utf-8'))
             self.assertEqual(audit['sectors']['gold']['index'], result['latest']['sectors']['gold']['index'])
@@ -208,11 +213,20 @@ class IntegrityTests(unittest.TestCase):
             self.assertIsNone(result['latest']['sectors']['chip']['index'])
             second = pipeline.run_pipeline(publish=False)
             self.assertEqual(second['latest']['sectors']['gold']['quality']['newly_seen_count'], 0)
+            rows.extend([{'id':f'old_{i}', 'title':'小白请教还能买吗',
+                          'date':'10-01 09:00', 'platform':'guba'} for i in range(60)])
+            mixed = pipeline.run_pipeline(publish=False)
+            self.assertIsNone(mixed['latest']['sectors']['gold']['index'])
+            self.assertEqual(mixed['latest']['sectors']['gold']['quality']['status'], 'stale')
+            self.assertEqual(mixed['latest']['sectors']['gold']['recent_observation']['status'], 'ok')
+            del rows[35:]
             with patch.object(pipeline, 'collect_xhs', side_effect=RuntimeError('failed')), \
                  patch.dict('os.environ', {'RNODE_API_KEY': 'test-only'}):
                 third = pipeline.run_pipeline(publish=False)
             self.assertIsNone(third['latest']['sectors']['gold']['index'])
             self.assertIn('xhs', third['latest']['sectors']['gold']['quality']['failed_sources'])
+            self.assertEqual(third['latest']['sectors']['gold']['recent_observation']['status'], 'source_unavailable')
+            self.assertIsNone(third['latest']['sectors']['gold']['recent_observation']['directions'])
 
     def test_backtest_rejects_legacy_and_bad_quality(self):
         from mom_index import backtest

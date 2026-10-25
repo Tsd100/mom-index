@@ -41,6 +41,15 @@ const fixture = {
       evidence:[{title:'<img src=x onerror="window.injected=true">',reasoning:'命中加仓',
         source_url:'https://guba.eastmoney.com/news,sh518880,1.html'}]}],unavailable:[],not_comparable:[]},
 };
+fixture.latest.sectors.gold.recent_observation = {version:'recent-updated-v1',status:'ok',recent_count:35,valid_count:45,
+  unknown_time_count:0,directions:{buy:20,sell:5,neutral:10},mean_sentiment:0.25};
+fixture.quality_overview = {expired:false,current_qualified_count:1,total_count:1,observed_dates:3,
+  sectors:{gold:{status:'ok',collection_status:'ok',valid_count:45,recent_count:35,
+    last_collection_success_at:'2026-10-15T17:00:00+08:00',last_qualified_at:'2026-10-15T17:00:00+08:00',
+    consecutive_failed_observations:0,reasons:[]}}};
+fixture.daily_summary.highlights[0].component_change = {status:'ok',items:[
+  {key:'feature_share',label:'特征帖占比',change:5}, {key:'feature_strength',label:'平均特征分',change:5},
+  {key:'emotion_extremity',label:'情绪极端度',change:5},{key:'feature_purity',label:'高分特征帖占比',change:0}],rounding_residual:0};
 const server = createServer((req, res) => {
   if (req.url === '/vendor/chart.umd.min.js') {
     res.setHeader('Content-Type', 'application/javascript'); res.end(chartjs);
@@ -98,6 +107,11 @@ try {
       await new Promise(r => setTimeout(r, 100));
     }
     assert(ready, 'Chart.js 未加载或画布没有生成');
+    assert(await evaluate(`document.getElementById('quality-overview')?.textContent.includes('最近抓取成功')`), '缺少质量面板');
+    assert(await evaluate(`document.getElementById('recent-observations')?.textContent.includes('35/45') && document.getElementById('recent-observations')?.textContent.includes('买入表达 20')`), '近期观察数量或方向缺失');
+    assert(await evaluate(`document.querySelector('.component-change')?.textContent.includes('特征帖占比')`), '公式变化拆解未显示');
+    const precisionText = await evaluate(`renderComponentChange({status:'ok',items:[{label:'分量',change:-1.3333}],rounding_residual:-0.0503})`);
+    assert(precisionText.includes('-1.3333') && precisionText.includes('-0.0503'), '展示舍入丢失核对精度');
     assert(await evaluate(`document.getElementById('daily-summary')?.textContent.includes('2026-10-12') && document.getElementById('daily-summary')?.textContent.includes('+15.0')`), '每日摘要未显示实际比较日期与变化');
     assert(await evaluate(`document.querySelector('#daily-summary .summary-source')?.getAttribute('href') === 'https://guba.eastmoney.com/news,sh518880,1.html'`), '摘要原帖链接丢失');
     await evaluate(`document.querySelector('#daily-summary details').open = true`);
@@ -135,6 +149,8 @@ try {
     assert(await evaluate(`document.getElementById('cards').textContent.includes('加载失败')`), '网络失败未显示状态');
     assert.equal(await evaluate(`document.getElementById('signals-panel').textContent.trim()`), '', '网络失败后仍显示旧信号');
     assert.equal(await evaluate(`document.getElementById('daily-summary').textContent.trim()`), '', '网络失败后仍显示旧摘要');
+    assert.equal(await evaluate(`document.getElementById('recent-observations').textContent.trim()`), '', '网络失败后仍显示旧近期观察');
+    assert.equal(await evaluate(`document.getElementById('quality-overview').textContent.trim()`), '', '网络失败后仍显示旧质量面板');
     assert.equal(await evaluate(`document.getElementById('top-posts').textContent.trim()`), '', '网络失败后仍显示旧帖子');
     assert.equal(await evaluate(`document.getElementById('charts').children.length`), 0, '网络失败后仍显示旧图表');
     assert.equal(await evaluate(`Object.keys(Chart.instances).length`), 0, '网络失败后未销毁旧图表');
@@ -144,12 +160,17 @@ try {
     assert.equal(view.latest.sectors.gold.index, null);
     assert.equal(view.signals[0].delta, null);
     assert.equal(view.daily_summary.highlights.length, 0, '过期摘要仍显示排名');
+    await evaluate(`renderRecentObservations(${JSON.stringify(view)});renderQualityOverview(${JSON.stringify(view)})`);
+    assert(await evaluate(`document.getElementById('recent-observations').textContent.includes('过期') && !document.getElementById('recent-observations').textContent.includes('买入表达 20')`), '过期样本仍显示方向判断');
     await evaluate(`renderDailySummary(${JSON.stringify(view)})`);
     assert(await evaluate(`document.getElementById('daily-summary').textContent.includes('过期')`), '过期摘要缺少说明');
     const unsafeSummary = structuredClone(fixture); unsafeSummary.daily_summary.highlights[0].evidence[0].source_url = 'javascript:alert(1)';
     await evaluate(`renderDailySummary(${JSON.stringify(unsafeSummary)})`);
     assert.equal(await evaluate(`document.querySelector('#daily-summary .summary-source')`), null, '摘要生成了不可信原帖链接');
     assert.equal(await evaluate('window.injected === true'), false, '摘要原帖文本未转义');
+    const unsafeQuality = structuredClone(fixture); unsafeQuality.quality_overview.sectors.gold.reasons = ['<img src=x onerror="window.injected=true">'];
+    await evaluate(`renderQualityOverview(${JSON.stringify(unsafeQuality)})`);
+    assert.equal(await evaluate('window.injected === true'), false, '质量原因文本未转义');
     await evaluate(`renderDailySummary(${JSON.stringify(fixture)})`);
     assert.equal((await evaluate(`productionView({latest:{sectors:{gold:{index:99}}},record_count:31})`)).latest, null);
     await evaluate('loadData(); new Promise(r=>setTimeout(r,350))');
@@ -159,6 +180,12 @@ try {
     console.log(`DPR ${dpr}: PASS`, JSON.stringify(pixels));
   }
   await call('Emulation.setDeviceMetricsOverride', {width: 390, height: 844, deviceScaleFactor: 2, mobile: true});
+  await call('Emulation.setPageScaleFactor', {pageScaleFactor:1});
+  await evaluate('new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))');
+  const mobileLayout = await evaluate(`({inner:innerWidth,client:document.documentElement.clientWidth,visual:visualViewport.width,wide:[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>400).slice(0,8).map(e=>({tag:e.tagName,cls:e.className,w:e.getBoundingClientRect().width,right:e.getBoundingClientRect().right}))})`);
+  assert.equal(mobileLayout.inner,390,JSON.stringify(mobileLayout));
+  await evaluate('new Promise(r=>setTimeout(r,350))');
+  assert(await evaluate(`[...document.querySelectorAll('canvas')].every(canvas => Math.abs(canvas.width/canvas.clientWidth-2)<0.1)`), '手机图表未按设备像素比重绘');
   // 如果工作区已有本地生产快照，补查实际12板块映射在移动端的展示。
   try {
     const actual = JSON.parse(await readFile('src/mom_index/frontend/data/dashboard_data.json', 'utf8'));
@@ -171,9 +198,12 @@ try {
   }
   assert(await evaluate('document.documentElement.scrollWidth <= innerWidth + 1'), '手机横向溢出');
   await evaluate(`renderDailySummary(${JSON.stringify(fixture)}); document.querySelector('#daily-summary details').open = true`);
+  await evaluate(`document.querySelector('#quality-overview details').open = true; document.querySelector('#recent-observations details').open = true`);
   assert(await evaluate('document.documentElement.scrollWidth <= innerWidth + 1'), '手机摘要横向溢出');
+  const mobileShot = await call('Page.captureScreenshot', {format:'png'});
+  await writeFile(join(out,'dashboard-mobile.png'),Buffer.from(mobileShot.data,'base64'));
   const empty = {schema_version: 2, mode: 'production', latest: null, sector_history: {}, price_history: {}, signals: []};
-  await evaluate(`{const d=${JSON.stringify(empty)};renderCards(d);renderCharts(d);renderTopPosts(d);renderSignals(d);renderDataNotice(d);renderDailySummary(d);}`);
+  await evaluate(`{const d=${JSON.stringify(empty)};renderCards(d);renderCharts(d);renderTopPosts(d);renderSignals(d);renderDataNotice(d);renderDailySummary(d);renderRecentObservations(d);renderQualityOverview(d);}`);
   assert(await evaluate(`document.getElementById('daily-summary').textContent.includes('等待')`), '无数据摘要未提示等待');
   assert.equal(await evaluate(`document.querySelectorAll('canvas').length`), 0);
   assert.equal(errors.length, 0, JSON.stringify(errors));

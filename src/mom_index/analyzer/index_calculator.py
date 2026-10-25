@@ -9,6 +9,7 @@ import os
 from copy import deepcopy
 from mom_index.instruments import SECTORS, record_instrument
 from mom_index.provenance import verified_record, now_local, SCHEMA_VERSION
+from mom_index.sample_insights import COMPONENT_VERSION
 
 DATA_DIR = os.environ.get("MOM_INDEX_DATA_DIR",
     os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data"))
@@ -109,6 +110,9 @@ def compute_sector_index(analysis_results: List) -> Dict:
     
     return {
         "index": index,
+        "score_components": {'version':COMPONENT_VERSION, 'values':{
+            'feature_share':newbie_ratio*0.40, 'feature_strength':avg_newbie_score*0.25,
+            'emotion_extremity':avg_sentiment*0.20, 'feature_purity':purity_signal*0.15}},
         "interpretation": interpret_index(index),
         "details": {
             "total_posts": total,
@@ -247,6 +251,7 @@ def get_dashboard_data() -> Dict:
                     "date": r["date"],
                     "index": data["index"] if data.get("quality", {}).get("status") == "ok" else None,
                     "definition_id": data.get("definition_id"),
+                    "score_components": deepcopy(data.get('score_components')),
                 })
             cfg = record_instrument(r, sector)
             if sector in price_history and "price" in data and cfg and cfg['etf'] == SECTORS[sector]['etf']:
@@ -290,4 +295,6 @@ def get_dashboard_data() -> Dict:
     }
     from mom_index.daily_summary import build_daily_summary
     dashboard['daily_summary'] = build_daily_summary(dashboard)
+    from mom_index.sample_insights import quality_overview
+    dashboard['quality_overview'] = quality_overview(records)
     return dashboard

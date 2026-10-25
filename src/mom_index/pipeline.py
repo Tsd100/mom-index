@@ -21,6 +21,7 @@ from mom_index.analyzer.index_calculator import (
 )
 from mom_index.collectors.price_collector import fetch_all_prices
 from mom_index.storage import save_posts, count_posts, seen_post_ids
+from mom_index.sample_insights import recent_observation
 
 DATA_DIR = os.environ.get("MOM_INDEX_DATA_DIR",
     os.path.join(os.path.dirname(os.path.dirname(__file__)), "data"))
@@ -90,6 +91,7 @@ def run_pipeline(publish=True):
         qualities[sector] = quality
         sector_definition_id = digest([definition['id'], sorted({p.get('platform', 'unknown') for p in all_posts[sector]})])
         value.update(quality=quality, definition_id=sector_definition_id)
+        value['recent_observation'] = recent_observation(all_posts[sector], results, quality, assessed_at)
         if quality['status'] != 'ok':
             value['index'] = None
             value['interpretation'] = '数据不足，暂停情绪判断'

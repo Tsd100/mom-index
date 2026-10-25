@@ -3,6 +3,7 @@ from copy import deepcopy
 from math import isfinite
 
 from mom_index.provenance import record_expired
+from mom_index.sample_insights import component_change
 
 
 def valid_number(value):
@@ -51,6 +52,7 @@ def build_daily_summary(dashboard):
         changes.append({'sector': sector, 'index': current['index'],
                         'delta': round(current['index'] - previous['index'], 1),
                         'comparison_date': previous['date'],
+                        'component_change':component_change(current,previous),
                         'valid_count': quality.get('valid_count', 0),
                         'sample_count': quality.get('sample_count', 0),
                         'evidence': [{key: deepcopy(post.get(key, ''))
