@@ -137,7 +137,8 @@ def compute_sector_index(analysis_results: List) -> Dict:
                 "reasoning": r.reasoning[:150],
                 "sentiment": r.sentiment_score,
                 "intent": r.intent,
-                "intent_label": {"buy": "🟢 买入", "sell": "🔴 卖出", "neutral": "⚪ 观望"}.get(r.intent, ""),
+                "intent_label": {"buy": "🟢 买入表达", "sell": "🔴 卖出表达", "neutral": "⚪ 方向未确认"}.get(r.intent, ""),
+                "intent_basis": r.intent_basis,
                 "key_signals": r.key_signals[:2],
             }
             for r in sorted(newbie_posts, key=lambda x: x.newbie_score, reverse=True)[:5]
@@ -147,15 +148,15 @@ def compute_sector_index(analysis_results: List) -> Dict:
 
 def interpret_index(index: float) -> str:
     if index >= 75:
-        return "🔴 极度狂热 — 擦鞋童时刻！小白情绪爆表，历史级别的危险信号"
+        return "🔴 讨论特征评分极高 — 请结合样本与原帖核查"
     elif index >= 60:
-        return "🟠 高度警惕 — 小白大量涌入，市场情绪过热，建议大幅减仓"
+        return "🟠 讨论特征评分较高 — 不代表未来价格方向"
     elif index >= 40:
-        return "🟡 开始升温 — 小白活跃度明显上升，需保持关注"
+        return "🟡 讨论特征评分中等 — 变化需与同口径记录比较"
     elif index >= 20:
-        return "🟢 正常区间 — 小白参与度适中，无需特别操作"
+        return "🟢 讨论特征评分较低 — 分档尚未校准"
     else:
-        return "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号"
+        return "🔵 讨论特征评分很低 — 分档尚未校准"
 
 
 def load_history() -> Dict:
@@ -220,6 +221,9 @@ def get_dashboard_data() -> Dict:
     latest = deepcopy(records[-1]) if records else None
     if latest:
         for sector, data in latest.get('sectors', {}).items():
+            data['interpretation'] = (interpret_index(data['index'])
+                                      if data.get('index') is not None and data.get('quality', {}).get('status') == 'ok'
+                                      else '数据不足，暂停情绪判断')
             data['instrument'] = record_instrument(latest, sector) or {}
             original = latest['provenance']['definition'].get('sectors', {}).get(sector, {})
             if not data['instrument']:
@@ -271,7 +275,7 @@ def get_dashboard_data() -> Dict:
                     price_history[sector].append({'date': row['date'], 'price': row['close'], 'etf': cfg['etf']})
                     price_real_dates.add(row['date'])
 
-    return {
+    dashboard = {
         "instruments": deepcopy(SECTORS),
         "schema_version": SCHEMA_VERSION,
         "mode": "production",
@@ -284,3 +288,6 @@ def get_dashboard_data() -> Dict:
         "real_dates": real_dates,
         "price_real_dates": sorted(price_real_dates),
     }
+    from mom_index.daily_summary import build_daily_summary
+    dashboard['daily_summary'] = build_daily_summary(dashboard)
+    return dashboard

@@ -36,6 +36,10 @@ const fixture = {
   signals: [{sector: 'gold', name: '黄金', index: 45, delta: 1, level: 'watch', action: '开始升温', extras: ''}],
   sector_history: {gold: [{date: '2026-10-15', index: 45}]},
   price_history: {gold: [{date: '2026-10-13', price: 8}, {date: '2026-10-14', price: 9}, {date: '2026-10-15', price: 8.5}]},
+  daily_summary: {status:'ready',date:'2026-10-15',available_count:1,total_count:1,
+    highlights:[{sector:'gold',index:45,delta:15,comparison_date:'2026-10-12',valid_count:45,sample_count:50,
+      evidence:[{title:'<img src=x onerror="window.injected=true">',reasoning:'命中加仓',
+        source_url:'https://guba.eastmoney.com/news,sh518880,1.html'}]}],unavailable:[],not_comparable:[]},
 };
 const server = createServer((req, res) => {
   if (req.url === '/vendor/chart.umd.min.js') {
@@ -94,6 +98,9 @@ try {
       await new Promise(r => setTimeout(r, 100));
     }
     assert(ready, 'Chart.js 未加载或画布没有生成');
+    assert(await evaluate(`document.getElementById('daily-summary')?.textContent.includes('2026-10-12') && document.getElementById('daily-summary')?.textContent.includes('+15.0')`), '每日摘要未显示实际比较日期与变化');
+    assert(await evaluate(`document.querySelector('#daily-summary .summary-source')?.getAttribute('href') === 'https://guba.eastmoney.com/news,sh518880,1.html'`), '摘要原帖链接丢失');
+    await evaluate(`document.querySelector('#daily-summary details').open = true`);
     assert(await evaluate(`document.getElementById('runtime-status').textContent.includes('17:00') && document.getElementById('runtime-status').textContent.includes('1/12')`), 'NAS每日采集状态未显示');
     await new Promise(r => setTimeout(r, 1200));
     const chartData = await evaluate(`(() => {const chart=Object.values(Chart.instances)[0];return {labels:chart?.data.labels,series:chart?.data.datasets.map(d=>d.data)}})()`);
@@ -127,6 +134,7 @@ try {
     await evaluate('loadData(); new Promise(r=>setTimeout(r,300))');
     assert(await evaluate(`document.getElementById('cards').textContent.includes('加载失败')`), '网络失败未显示状态');
     assert.equal(await evaluate(`document.getElementById('signals-panel').textContent.trim()`), '', '网络失败后仍显示旧信号');
+    assert.equal(await evaluate(`document.getElementById('daily-summary').textContent.trim()`), '', '网络失败后仍显示旧摘要');
     assert.equal(await evaluate(`document.getElementById('top-posts').textContent.trim()`), '', '网络失败后仍显示旧帖子');
     assert.equal(await evaluate(`document.getElementById('charts').children.length`), 0, '网络失败后仍显示旧图表');
     assert.equal(await evaluate(`Object.keys(Chart.instances).length`), 0, '网络失败后未销毁旧图表');
@@ -135,7 +143,17 @@ try {
     const view = await evaluate(`productionView(${JSON.stringify(stale)})`);
     assert.equal(view.latest.sectors.gold.index, null);
     assert.equal(view.signals[0].delta, null);
+    assert.equal(view.daily_summary.highlights.length, 0, '过期摘要仍显示排名');
+    await evaluate(`renderDailySummary(${JSON.stringify(view)})`);
+    assert(await evaluate(`document.getElementById('daily-summary').textContent.includes('过期')`), '过期摘要缺少说明');
+    const unsafeSummary = structuredClone(fixture); unsafeSummary.daily_summary.highlights[0].evidence[0].source_url = 'javascript:alert(1)';
+    await evaluate(`renderDailySummary(${JSON.stringify(unsafeSummary)})`);
+    assert.equal(await evaluate(`document.querySelector('#daily-summary .summary-source')`), null, '摘要生成了不可信原帖链接');
+    assert.equal(await evaluate('window.injected === true'), false, '摘要原帖文本未转义');
+    await evaluate(`renderDailySummary(${JSON.stringify(fixture)})`);
     assert.equal((await evaluate(`productionView({latest:{sectors:{gold:{index:99}}},record_count:31})`)).latest, null);
+    await evaluate('loadData(); new Promise(r=>setTimeout(r,350))');
+    await evaluate(`document.querySelector('#daily-summary details').open = true`);
     const shot = await call('Page.captureScreenshot', {format: 'png'});
     await writeFile(join(out, `dashboard-dpr${dpr}.png`), Buffer.from(shot.data, 'base64'));
     console.log(`DPR ${dpr}: PASS`, JSON.stringify(pixels));
@@ -152,8 +170,11 @@ try {
     if (error.code !== 'ENOENT') throw error;
   }
   assert(await evaluate('document.documentElement.scrollWidth <= innerWidth + 1'), '手机横向溢出');
+  await evaluate(`renderDailySummary(${JSON.stringify(fixture)}); document.querySelector('#daily-summary details').open = true`);
+  assert(await evaluate('document.documentElement.scrollWidth <= innerWidth + 1'), '手机摘要横向溢出');
   const empty = {schema_version: 2, mode: 'production', latest: null, sector_history: {}, price_history: {}, signals: []};
-  await evaluate(`{const d=${JSON.stringify(empty)};renderCards(d);renderCharts(d);renderTopPosts(d);renderSignals(d);renderDataNotice(d);}`);
+  await evaluate(`{const d=${JSON.stringify(empty)};renderCards(d);renderCharts(d);renderTopPosts(d);renderSignals(d);renderDataNotice(d);renderDailySummary(d);}`);
+  assert(await evaluate(`document.getElementById('daily-summary').textContent.includes('等待')`), '无数据摘要未提示等待');
   assert.equal(await evaluate(`document.querySelectorAll('canvas').length`), 0);
   assert.equal(errors.length, 0, JSON.stringify(errors));
   console.log('PASS: 语法对应的 DOM ID、刷新、过期、旧 JSON 拒绝、转义、空数据、移动端与运行时检查');

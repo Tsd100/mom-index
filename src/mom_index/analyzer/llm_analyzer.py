@@ -8,6 +8,8 @@ from datetime import datetime
 import json
 import os
 import random
+from math import isfinite
+from mom_index.analyzer.text_rules import asserted_clauses, affirmative_hits, expression_features
 
 # ============================================================
 # 信号定义库
@@ -64,25 +66,6 @@ PRO_KEYWORDS = {
     "冷静表达": ["分析", "观点", "看法", "逻辑", "原因在于"],
 }
 
-# ---- 买入/卖出意图关键词 ----
-BUY_KEYWORDS = [
-    "上车", "冲", "梭哈", "all in", "满仓", "抄底", "加仓", "买入", "买了", "入手", "已入",
-    "追", "杀入", "建仓", "补仓", "定投", "已上车",
-    "还能买吗", "还能上车吗", "可以买吗", "能不能买", "要不要入",
-    "想买", "想入", "心动", "看着眼馋", "忍不住",
-    "后悔没买", "错过", "买少了", "早知道就买了", "再不买",
-]
-
-SELL_KEYWORDS = [
-    "割肉", "割", "止损", "清仓", "减仓", "出货", "卖了", "出了", "跑了", "走人",
-    "不玩了", "离场", "下车", "赎回",
-    "要不要割", "要不要走", "该不该卖", "还能留吗", "要不要清",
-    "想卖", "想走", "想割", "想跑",
-    "亏了", "亏麻了", "亏惨了", "深套", "套牢", "后悔买了", "被套",
-    "跌麻了", "跌惨了", "血亏", "亏死", "跌死", "跌崩",
-]
-
-
 # ============================================================
 # 分析引擎
 # ============================================================
@@ -110,6 +93,7 @@ class AnalysisResult:
     sentiment_score: float = 0  # -1(恐慌) ~ +1(贪婪)
     intent: str = "neutral"     # buy/sell/neutral — 买入/卖出意图
     intent_strength: float = 0  # 0~1 意图强度
+    intent_basis: str = ""  # 表达依据不等于成交或持仓证明
     
     # 用于前端展示
     key_signals: List[str] = field(default_factory=list)
@@ -119,7 +103,7 @@ def analyze_post(post: Dict, sector: str) -> AnalysisResult:
     """分析单条帖子，返回详细判定"""
     title = post.get("title", "")
     content = post.get("content", "")
-    full_text = f"{title} {content}" if content else title
+    full_text = f"{title}\n{content}" if content else title
     
     # 0. 垃圾过滤
     SPAM_PATTERNS = [
@@ -159,7 +143,8 @@ def analyze_post(post: Dict, sector: str) -> AnalysisResult:
     
     for signal in NEWBIE_SIGNALS:
         keywords = NEWBIE_KEYWORDS.get(signal.name, [])
-        matched_kws = [kw for kw in keywords if kw.lower() in full_text.lower()]
+        matched_kws = sorted({kw for clause in asserted_clauses(full_text)
+                              for kw in affirmative_hits(clause, keywords)})
         if matched_kws:
             matched_newbie.append((signal.name, signal.description, signal.weight, matched_kws))
     
@@ -218,21 +203,14 @@ def analyze_post(post: Dict, sector: str) -> AnalysisResult:
     )
     
     # 7. 情绪分析
-    result.sentiment_score = _analyze_sentiment(full_text)
+    features = expression_features(full_text)
+    result.sentiment_score = features['sentiment']
     
     # 8. 买入/卖出意图判定
-    buy_count = sum(1 for kw in BUY_KEYWORDS if kw in full_text)
-    sell_count = sum(1 for kw in SELL_KEYWORDS if kw in full_text)
-    
-    if buy_count > sell_count:
-        result.intent = "buy"
-        result.intent_strength = min(1.0, buy_count / 5)
-    elif sell_count > buy_count:
-        result.intent = "sell"
-        result.intent_strength = min(1.0, sell_count / 5)
-    else:
-        result.intent = "neutral"
-        result.intent_strength = 0
+    result.intent = features['intent']
+    result.intent_strength = features['intent_strength']
+    result.intent_basis = ('识别到作者的方向表达，不证明实际交易' if result.intent != 'neutral'
+                           else '未确认方向：提问、否定、转述、亏损或买卖表达相抵不推断交易')
     
     # 9. 关键信号摘要（用于前端卡片）
     result.key_signals = []
@@ -291,16 +269,7 @@ def _generate_reasoning(
 
 def _analyze_sentiment(text: str) -> float:
     """情绪分析: -1(恐慌) ~ +1(贪婪)"""
-    greed_words = ["冲", "梭哈", "稳赚", "必涨", "躺赚", "满仓", "抄底", "起飞", "暴涨", "翻倍", "赚了", "盈利"]
-    fear_words = ["割肉", "止损", "亏", "跌惨", "暴跌", "崩盘", "完了", "套牢", "深套", "亏了", "赔了", "大跌"]
-    
-    greed = sum(1 for w in greed_words if w in text)
-    fear = sum(1 for w in fear_words if w in text)
-    
-    total = greed + fear
-    if total == 0:
-        return 0.0
-    return round((greed - fear) / total, 2)
+    return expression_features(text)['sentiment']
 
 
 # ============================================================
@@ -334,7 +303,7 @@ def analyze_all(sector_data: Dict[str, List[Dict]]) -> Dict[str, List[AnalysisRe
 
 # ============================================================
 # 可选 LLM 混合分析（默认关闭，设置 MOM_INDEX_LLM_API_KEY 后启用）
-# 规则引擎优先，LLM 按采样率抽查复核，拿不准的帖子交给大模型判断。
+# 方向与情绪由本地表达规则确定；LLM 只按采样率抽查讨论特征分。
 # ============================================================
 LLM_API_KEY = os.environ.get("MOM_INDEX_LLM_API_KEY", "")
 LLM_BASE_URL = os.environ.get("MOM_INDEX_LLM_BASE_URL", "https://api.openai.com/v1").rstrip("/")
@@ -373,9 +342,8 @@ def llm_rejudge(post: Dict, result: AnalysisResult) -> AnalysisResult:
             "你是散户情绪分析器。判断这条帖子作者的\"小白程度\""
             "（越不懂投资分越高）。\n"
             f"帖子标题: {post.get('title', '')[:120]}\n"
-            "只输出JSON: {\"newbie_score\": 0-100整数, "
-            "\"intent\": \"buy|sell|neutral\", \"sentiment\": -1|0|1, "
-            "\"reasoning\": \"一句话\"}"
+            "只评估文字中的讨论特征，不判断作者身份或提出交易建议。\n"
+            "只输出JSON: {\"newbie_score\": 0-100整数}"
         )
         resp = _req.post(
             f"{LLM_BASE_URL}/chat/completions",
@@ -395,12 +363,14 @@ def llm_rejudge(post: Dict, result: AnalysisResult) -> AnalysisResult:
         content = resp.json()["choices"][0]["message"]["content"]
         data = json.loads(content[content.find("{"):content.rfind("}") + 1])
         score = float(data.get("newbie_score", result.newbie_score))
+        if not isfinite(score):
+            raise ValueError('Invalid model score')
         result.newbie_score = max(0, min(100, score))
         result.level = _level_for_score(result.newbie_score)
-        result.intent = data.get("intent", result.intent)
-        result.sentiment_score = float(data.get("sentiment", result.sentiment_score))
-        result.reasoning = f"[LLM复核] {data.get('reasoning', '').strip()}"
-        result.newbie_confidence = "high"
+        # 模型只抽查特征分；方向和情绪继续使用可回放的本地表达规则。
+        # 不直接发布任意模型措辞，避免引入交易指令和与规则依据矛盾的解释。
+        result.reasoning = f"[模型抽查] 讨论特征分 {result.newbie_score:g}；方向与情绪沿用本地表达规则。"
+        result.newbie_confidence = "medium"
         _llm_used += 1
     except Exception:
         pass  # LLM 失败不影响主流程

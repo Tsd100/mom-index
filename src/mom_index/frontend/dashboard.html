@@ -166,13 +166,23 @@ body {
   .charts { grid-template-columns: 1fr; }
   .card .index-value { font-size: 36px; }
 }
+.daily-summary { background:#172338; border:1px solid #334155; border-radius:12px; padding:20px; margin-bottom:20px; overflow-wrap:anywhere; }
+.daily-summary h2 { font-size:18px; margin:0 0 8px; }
+.daily-summary p, .summary-note { color:#94a3b8; font-size:13px; line-height:1.8; }
+.summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr)); gap:12px; margin-top:14px; }
+.summary-change { border:1px solid #334155; border-radius:8px; padding:14px; min-width:0; }
+.summary-change strong { display:block; font-size:16px; margin-bottom:8px; }
+.summary-change details { margin-top:10px; font-size:13px; line-height:1.8; }
+.summary-change summary { cursor:pointer; color:#93c5fd; }
+.summary-evidence { border-top:1px solid #334155; padding:8px 0; }
+.summary-source { color:#93c5fd; }
 </style>
 </head>
 <body>
 
 <div class="header">
   <h1>👩‍👧 宝妈指数</h1>
-  <div class="subtitle">当小白开始讨论投资，就是该警惕的时候</div>
+  <div class="subtitle">观察散户讨论特征、方向表达与每日变化</div>
   <div class="subtitle" id="update-time" style="margin-top:4px"></div>
 </div>
 
@@ -181,7 +191,9 @@ body {
   <div class="mock-banner" id="mock-banner" style="display:none"></div>
   <div id="runtime-status" style="display:none;padding:12px 16px;margin-bottom:16px;border:1px solid #334155;border-radius:8px;color:#93c5fd;font-size:13px;line-height:1.8"></div>
 
-  <!-- 今日操作信号 -->
+  <section class="daily-summary" id="daily-summary" aria-live="polite"><h2>每日变化摘要</h2><p>等待采集快照…</p></section>
+
+  <!-- 当前情绪观察 -->
   <div class="signals-panel" id="signals-panel"></div>
 
   <!-- 四个板块指数卡片 -->
@@ -201,9 +213,8 @@ body {
 </div>
 
 <div class="footer">
-  宝妈指数 v1.0 — 数据来源: 东方财富股吧 · 小红书 · 抖音<br>
-  指数越高 = 小白越活跃 = 市场情绪越危险<br>
-  <span style="color:#64748b">⚠️ 仅供参考，不构成投资建议</span>
+  宝妈指数 · 散户情绪观察 — 实际启用来源见采集运行状态<br>
+  指数衡量样本中的讨论特征；方向表达不证明实际成交。分档及预测能力尚未验证。
 </div>
 
 <script>
@@ -252,6 +263,14 @@ function getEmoji(idx) {
   if (idx >= 20) return '🟢';
   return '🔵';
 }
+
+function observationLabel(idx) {
+  if (idx >= 75) return '讨论特征评分极高';
+  if (idx >= 60) return '讨论特征评分较高';
+  if (idx >= 40) return '讨论特征评分中等';
+  if (idx >= 20) return '讨论特征评分较低';
+  return '讨论特征评分很低';
+}
 function renderLegend(data) {
   const container = document.getElementById('legend');
   const sectors = data && data.sector_history ? Object.keys(data.sector_history) : [];
@@ -270,7 +289,7 @@ function renderDataNotice(data) {
   const latest = data.latest;
   const provenance = latest?.provenance;
   const finishedAt = Date.parse(provenance?.finished_at);
-  const expired = provenance && (!Number.isFinite(finishedAt) || Date.now() - finishedAt > 24 * 3600000);
+  const expired = provenance && (!Number.isFinite(finishedAt) || Date.now() < finishedAt || Date.now() - finishedAt > 24 * 3600000);
   banner.style.display = 'block';
   banner.textContent = `生产模式 · 已核验记录 ${data.real_record_count || 0} 天；` +
     `隔离未核验旧记录 ${counts.unverified || 0} 条、模拟记录 ${counts.mock || 0} 条。` +
@@ -318,13 +337,17 @@ function productionView(input) {
   const p = data.latest?.provenance;
   if (!p || !p.mock_excluded || !p.run_id || !p.definition?.id) {
     data.latest = null; data.signals = []; data.sector_history = {};
+    data.daily_summary = null;
     return data;
   }
-  const expired = !Number.isFinite(Date.parse(p.finished_at)) || Date.now() - Date.parse(p.finished_at) > 24 * 3600000;
+  const age = Date.now() - Date.parse(p.finished_at);
+  const expired = !Number.isFinite(age) || age < 0 || age > 24 * 3600000;
   Object.values(data.latest.sectors || {}).forEach(sector => {
     if (expired || sector.quality?.status !== 'ok') {
       sector.index = null;
       sector.interpretation = expired ? '采集结果已过期，暂停情绪判断' : '数据不足，暂停情绪判断';
+    } else {
+      sector.interpretation = observationLabel(sector.index) + ' · 分档尚未校准';
     }
   });
   data.signals = (data.signals || []).map(signal => {
@@ -332,9 +355,47 @@ function productionView(input) {
       return {...signal, index: null, delta: null, level: 'unavailable',
               action: '数据不足或采集结果过期，暂停情绪判断', extras: ''};
     }
-    return signal;
+    return {...signal, action: observationLabel(signal.index),
+      extras: signal.observation_version === 1 ? signal.extras : '',
+      delta: signal.comparison_date ? signal.delta : null};
   });
+  if (expired) {
+    data.daily_summary = {status:'expired',highlights:[],unavailable:[],not_comparable:[],available_count:0,
+      total_count:Object.keys(data.latest.sectors || {}).length};
+  } else if (data.daily_summary) {
+    data.daily_summary.highlights = (data.daily_summary.highlights || []).filter(item =>
+      data.latest.sectors[item.sector]?.index != null);
+  }
   return data;
+}
+
+function renderDailySummary(data) {
+  const panel = document.getElementById('daily-summary');
+  const summary = data.daily_summary;
+  panel.innerHTML = '<h2>每日变化摘要</h2>';
+  if (!data.latest || !summary || summary.status === 'waiting') {
+    panel.innerHTML += '<p>等待采集任务生成每日摘要；首次记录或规则升级后，需积累同口径记录才能比较。</p>';
+    return;
+  }
+  if (summary.status === 'expired') {
+    panel.innerHTML += '<p>采集结果已过期或时间未核验，暂停变化摘要。等待下一次有效采集。</p>';
+    return;
+  }
+  panel.innerHTML += `<p>${escapeHtml(summary.date)} 采集快照 · 可观察板块 ${escapeHtml(summary.available_count)}/${escapeHtml(summary.total_count)}。按指数变化幅度显示最多三个板块；比较日期可能并非昨日。</p>`;
+  const changes = summary.highlights || [];
+  panel.innerHTML += changes.length ? `<div class="summary-grid">${changes.map(item => {
+    const delta = Number(item.delta);
+    const deltaText = Number.isFinite(delta) ? `${delta > 0 ? '+' : ''}${delta.toFixed(1)}` : '—';
+    const evidence = (item.evidence || []).map(post => {
+      const url = safePostUrl(post.source_url);
+      return `<div class="summary-evidence">${escapeHtml(post.title)}<div class="summary-note">${escapeHtml(post.reasoning)} ${escapeHtml(post.intent_basis)}</div>${url ? `<a class="summary-source" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">查看原帖 ↗</a>` : '<span class="summary-note">原帖链接未提供或未通过核验</span>'}</div>`;
+    }).join('');
+    return `<article class="summary-change"><strong>${escapeHtml(SECTOR_NAMES[item.sector] || item.sector)} ${escapeHtml(deltaText)} 分</strong><div class="summary-note">较 ${escapeHtml(item.comparison_date)} · 当前 ${escapeHtml(item.index)} 分<br>有效样本 ${escapeHtml(item.valid_count)}/${escapeHtml(item.sample_count)}</div><details><summary>查看代表帖子与判定依据</summary><p class="summary-note">代表帖子用于核对规则，不证明其导致了指数变化。</p>${evidence || '<p class="summary-note">本次快照未保留代表帖子。</p>'}</details></article>`;
+  }).join('')}</div>` : '<p>暂无可比较的板块变化。首份记录、口径切换或上期质量缺口均会暂停比较。</p>';
+  const notes = [...(summary.unavailable || []), ...(summary.not_comparable || [])];
+  if (notes.length) {
+    panel.innerHTML += `<details class="summary-note"><summary>查看未参与比较的板块（${notes.length}）</summary>${notes.map(item => `<div>${escapeHtml(SECTOR_NAMES[item.sector] || item.sector)}：${escapeHtml(item.reason)}</div>`).join('')}</details>`;
+  }
 }
 
 function renderCards(data) {
@@ -369,7 +430,7 @@ function renderCards(data) {
       ${current.source_url && /^https:\/\//.test(current.source_url) ? `<br><a href="${escapeHtml(current.source_url)}" target="_blank" rel="noopener noreferrer">官方标的资料</a>` : ''}
     </div>`;
     const deltaHtml = sig.delta != null
-      ? `<div class="index-label" style="color:${sig.delta >= 0 ? '#f87171' : '#4ade80'}">较前日 ${sig.delta >= 0 ? '+' : ''}${sig.delta.toFixed(1)}</div>`
+      ? `<div class="index-label" style="color:${sig.delta >= 0 ? '#f87171' : '#4ade80'}">较 ${escapeHtml(sig.comparison_date)} ${sig.delta >= 0 ? '+' : ''}${sig.delta.toFixed(1)}</div>`
       : '<div class="index-label">宝妈指数</div>';
     return `
       <div class="card">
@@ -390,26 +451,26 @@ function renderCards(data) {
         <div style="margin-top:14px; display:flex; gap:8px;">
           <div style="flex:1; background:rgba(34,197,94,0.08); border-radius:8px; padding:8px; text-align:center;">
             <div style="font-size:20px; font-weight:700; color:#4ade80;">${sector.index == null ? "—" : (d.mom_buy_index ?? 0)}</div>
-            <div style="font-size:10px; color:#64748b;">🟢 宝妈买入</div>
+            <div style="font-size:10px; color:#64748b;">🟢 买入表达评分</div>
           </div>
           <div style="flex:1; background:rgba(239,68,68,0.08); border-radius:8px; padding:8px; text-align:center;">
             <div style="font-size:20px; font-weight:700; color:#f87171;">${sector.index == null ? "—" : (d.mom_sell_index ?? 0)}</div>
-            <div style="font-size:10px; color:#64748b;">🔴 宝妈卖出</div>
+            <div style="font-size:10px; color:#64748b;">🔴 卖出表达评分</div>
           </div>
         </div>
         <!-- 买卖比进度条 -->
         <div style="margin-top:8px; display:flex; align-items:center; gap:6px; font-size:10px; color:#64748b;">
-          <span>卖出 ${d.sell_count||0}</span>
+          <span>卖出表达 ${d.sell_count||0}</span>
           <div style="flex:1; height:5px; background:#2d1f1f; border-radius:3px; overflow:hidden; display:flex;">
             <div style="width:${(d.buy_count||0)/(Math.max(d.buy_count||0, d.sell_count||0, 1))*100}%; height:100%; background:linear-gradient(90deg,#22c55e,#4ade80);"></div>
           </div>
-          <span>买入 ${d.buy_count||0}</span>
+          <span>买入表达 ${d.buy_count||0}</span>
         </div>
         <div class="detail-row">
           <span>小白帖</span><span>${d.newbie_posts || 0}/${d.valid_posts || d.total_posts || 0} (${d.newbie_ratio || 0}%)</span>
         </div>
         <div class="detail-row">
-          <span>买卖比</span><span style="color:${(d.buy_sell_ratio||0)>1.5?'#f87171':(d.buy_sell_ratio||0)>0.8?'#facc15':'#4ade80'}">${sector.index == null || !(d.buy_count || d.sell_count) ? "— 无可用买卖样本" : `买 ${d.buy_count || 0} / 卖 ${d.sell_count || 0}`}</span>
+          <span>表达方向</span><span style="color:${(d.buy_sell_ratio||0)>1.5?'#f87171':(d.buy_sell_ratio||0)>0.8?'#facc15':'#4ade80'}">${sector.index == null || !(d.buy_count || d.sell_count) ? "— 方向未确认" : `买 ${d.buy_count || 0} / 卖 ${d.sell_count || 0}`}</span>
         </div>
       </div>
     `;
@@ -425,11 +486,11 @@ function renderSignals(data) {
   }
   panel.innerHTML = list.map(s => `
     <div class="signal-chip ${s.level}">
-      <div class="sc-title">${s.name} <span class="sc-index">${s.index ?? "—"}</span>
+      <div class="sc-title">${escapeHtml(s.name)} <span class="sc-index">${s.index ?? "—"}</span>
         ${s.delta != null ? `<span style="color:${s.delta >= 0 ? '#f87171' : '#4ade80'}">${s.delta >= 0 ? '▲' : '▼'} ${Math.abs(s.delta)}</span>` : ''}
       </div>
-      <div>${s.action}</div>
-      ${s.extras ? `<div class="sc-extra">${s.extras}</div>` : ''}
+      <div>${escapeHtml(s.action)}</div>
+      ${s.extras ? `<div class="sc-extra">${escapeHtml(s.extras)}</div>` : ''}
     </div>
   `).join('');
 }
@@ -610,6 +671,7 @@ function renderTopPosts(data) {
       ${escapeHtml(p.title)}
     </div>
     ${p.reasoning ? `<div class="post-reason">📝 ${escapeHtml(p.reasoning)}</div>` : ''}
+    ${p.intent_basis ? `<div class="post-meta">${escapeHtml(p.intent_basis)}</div>` : ''}
     ${p.key_signals ? p.key_signals.map(s => `<div class="post-meta">▸ ${escapeHtml(s)}</div>`).join('') : ''}
     ${safePostUrl(p.source_url) ? `<a class="post-source" href="${escapeHtml(safePostUrl(p.source_url))}" target="_blank" rel="noopener noreferrer">查看原帖 ↗</a>` : ''}
   </div>
@@ -649,6 +711,7 @@ function loadData() {
       renderLegend(data);
       renderDataNotice(data);
       renderSignals(data);
+      renderDailySummary(data);
       if (typeof Chart !== 'undefined') renderCharts(data);
       else document.getElementById('charts').textContent = '图表组件加载失败，指数和质量信息仍可查看。';
       renderTopPosts(data);
@@ -656,7 +719,7 @@ function loadData() {
     .catch(err => {
       activeCharts.forEach(chart => chart.destroy());
       activeCharts = [];
-      ['legend', 'signals-panel', 'charts', 'top-posts'].forEach(id => {
+      ['legend', 'signals-panel', 'charts', 'top-posts', 'daily-summary'].forEach(id => {
         document.getElementById(id).replaceChildren();
       });
       const banner = document.getElementById('mock-banner');

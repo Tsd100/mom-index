@@ -10,7 +10,7 @@ SHANGHAI = timezone(timedelta(hours=8))
 SCHEMA_VERSION = 2
 MIN_POSTS = 30
 FRESH_HOURS = 24
-SCORING_RULE_VERSION = 'scoring-v1'
+SCORING_RULE_VERSION = 'scoring-v2-expression-context'
 SAMPLING_RULE_VERSION = 'board-snapshot-v2'
 
 
@@ -36,9 +36,9 @@ def post_key(post):
 def build_definition(pages=3):
     from mom_index.collectors.guba_collector import SECTORS
     root = Path(__file__).parent
-    files = ['analyzer/llm_analyzer.py', 'analyzer/index_calculator.py',
+    files = ['analyzer/llm_analyzer.py', 'analyzer/text_rules.py', 'analyzer/index_calculator.py',
              'collectors/guba_collector.py', 'collectors/anti_detection.py', 'collectors/xhs_collector.py',
-             'collectors/xueqiu_collector.py', 'pipeline.py', 'analyzer/signal.py', 'instruments.py', 'provenance.py']
+             'collectors/xueqiu_collector.py', 'pipeline.py', 'analyzer/signal.py', 'daily_summary.py', 'instruments.py', 'provenance.py']
     rules = {name: hashlib.sha256((root / name).read_bytes()).hexdigest() for name in files}
     # 人工维护的语义版本用于跨运行可比性；audit_id 则保留所有源文件的完整指纹。
     semantic = {
