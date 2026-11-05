@@ -14,6 +14,7 @@ import os
 from typing import Dict, List
 
 import requests
+from mom_index.provenance import normalize_source_time
 
 ENABLED = os.environ.get("MOM_INDEX_ENABLE_XUEQIU") == "1"
 COOKIE = os.environ.get("XUEQIU_COOKIE", "")
@@ -44,6 +45,9 @@ def _search(keyword: str, count: int = 10) -> List[Dict]:
                         headers=headers, cookies=cookies, timeout=15)
     resp.raise_for_status()
     data = resp.json()  # 无登录态时这里会抛异常（返回 WAF HTML/400016）
+    if (not isinstance(data, dict) or data.get('error_code') not in (None, 0, '0')
+            or data.get('success') is False or not isinstance(data.get('list'), list)):
+        raise ValueError('InvalidSearchResponse')
     return [
         {
             "id": f"xq_{s.get('id', '')}",
@@ -51,7 +55,9 @@ def _search(keyword: str, count: int = 10) -> List[Dict]:
             "url": f"https://xueqiu.com/{s.get('user_id', '')}/{s.get('id', '')}",
             "platform": "xueqiu",
             "author": (s.get("user") or {}).get("screen_name", ""),
-            "date": str(s.get("created_at", "")),
+            "date": normalize_source_time(s.get("created_at")),
+            "time_basis": "publication",
+            "time_source_field": "created_at",
             "collected_at": __import__("datetime").datetime.now().isoformat(),
         }
         for s in (data.get("list") or [])

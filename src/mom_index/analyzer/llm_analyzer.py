@@ -281,7 +281,7 @@ def analyze_sector(posts: List[Dict], sector: str) -> List[AnalysisResult]:
     results = []
     for post in posts:
         result = analyze_post(post, sector)
-        if llm_spotcheck_enabled() and random.random() < LLM_SAMPLE_RATE:
+        if result.level != '垃圾帖' and llm_spotcheck_enabled() and random.random() < LLM_SAMPLE_RATE:
             result = llm_rejudge(post, result)
         results.append(result)
     
@@ -335,6 +335,8 @@ def _level_for_score(score: float) -> str:
 def llm_rejudge(post: Dict, result: AnalysisResult) -> AnalysisResult:
     """用 LLM 复核一条帖子的小白程度（失败时保留规则引擎结果）"""
     global _llm_used
+    if result.level == '垃圾帖':
+        return result
     try:
         import requests as _req
 

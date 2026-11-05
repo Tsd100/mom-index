@@ -10,8 +10,8 @@ SHANGHAI = timezone(timedelta(hours=8))
 SCHEMA_VERSION = 2
 MIN_POSTS = 30
 FRESH_HOURS = 24
-SCORING_RULE_VERSION = 'scoring-v2-expression-context'
-SAMPLING_RULE_VERSION = 'board-snapshot-v2'
+SCORING_RULE_VERSION = 'scoring-v3-spam-gate'
+SAMPLING_RULE_VERSION = 'board-snapshot-v3-source-time'
 
 
 def now_local():
@@ -38,7 +38,7 @@ def build_definition(pages=3):
     root = Path(__file__).parent
     files = ['analyzer/llm_analyzer.py', 'analyzer/text_rules.py', 'analyzer/index_calculator.py',
              'collectors/guba_collector.py', 'collectors/anti_detection.py', 'collectors/xhs_collector.py',
-             'collectors/xueqiu_collector.py', 'pipeline.py', 'analyzer/signal.py', 'daily_summary.py', 'sample_insights.py', 'instruments.py', 'provenance.py']
+             'collectors/xueqiu_collector.py', 'pipeline.py', 'analyzer/signal.py', 'daily_summary.py', 'sample_insights.py', 'instruments.py', 'provenance.py', 'file_io.py', 'market_data.py']
     rules = {name: hashlib.sha256((root / name).read_bytes()).hexdigest() for name in files}
     # 人工维护的语义版本用于跨运行可比性；audit_id 则保留所有源文件的完整指纹。
     semantic = {
@@ -78,6 +78,20 @@ def parse_list_time(value, now):
         return None
 
 
+def normalize_source_time(value):
+    """适配器的来源时间：秒/毫秒或完整日期；不以采集时间补缺失。"""
+    try:
+        text = str(value or '').strip()
+        if re.fullmatch(r'\d{10}|\d{13}', text):
+            seconds = int(text) / (1000 if len(text) == 13 else 1)
+            timestamp = datetime.fromtimestamp(seconds, SHANGHAI)
+        else:
+            timestamp = parse_list_time(text, now_local())
+        return timestamp.isoformat() if timestamp is not None else None
+    except (ValueError, TypeError, OSError, OverflowError):
+        return None
+
+
 def prepare_posts(posts, now=None, seen_ids=None):
     now = now or now_local()
     seen_ids = seen_ids or set()
@@ -110,7 +124,8 @@ def prepare_posts(posts, now=None, seen_ids=None):
         'fresh_count': fresh, 'unknown_time_count': unknown,
         'oldest_age_hours': round(max(ages), 1) if ages else None,
         'newest_age_hours': round(min(ages), 1) if ages else None,
-        'time_basis': 'list_updated_at_not_publication', 'sample_digest': digest(sorted(unique)),
+        'time_basis': (next(iter(bases)) if len(bases := {p.get('time_basis', 'list_updated_at_not_publication') for p in accepted}) == 1
+                       else 'mixed_source_times' if bases else 'unknown'), 'sample_digest': digest(sorted(unique)),
     }
     if len(accepted) < MIN_POSTS:
         quality.update(status='insufficient', reasons=['有效样本不足 30 条'])

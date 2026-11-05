@@ -32,7 +32,7 @@ def recent_observation(posts, results, quality, now=None):
     complete = quality.get('collection_status') == 'ok' and not quality.get('failed_sources')
     status = 'source_unavailable' if not complete else 'ok' if len(recent) >= MIN_POSTS else 'insufficient'
     return {'version':'recent-updated-v1', 'as_of':now.isoformat(), 'window_hours':FRESH_HOURS,
-            'time_basis':'list_updated_at_not_publication', 'status':status,
+            'time_basis':quality.get('time_basis', 'list_updated_at_not_publication'), 'status':status,
             'valid_count':valid, 'recent_count':len(recent), 'unknown_time_count':unknown,
             'recent_ratio':round(len(recent)/valid,4) if valid else None,
             'directions':{key:sum(r.intent == key for r in recent) for key in ('buy','sell','neutral')}

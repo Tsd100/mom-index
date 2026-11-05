@@ -7,6 +7,7 @@ import requests
 
 from mom_index.instruments import SECTORS
 from mom_index.provenance import now_local, digest
+from mom_index.file_io import atomic_json
 
 DEFAULT_ROOT = Path(__file__).resolve().parents[1] / 'data'
 
@@ -76,9 +77,8 @@ def fetch_market(root=DEFAULT_ROOT, days=180):
     snapshots = root / 'market_snapshots'
     snapshots.mkdir(exist_ok=True)
     dataset['dataset_id'] = digest(dataset)
-    text = json.dumps(dataset, ensure_ascii=False, indent=2)
-    (snapshots / (dataset['dataset_id'] + '.json')).write_text(text, encoding='utf-8')
-    (root / 'market_history.json').write_text(text, encoding='utf-8')
+    atomic_json(snapshots / (dataset['dataset_id'] + '.json'), dataset)
+    atomic_json(root / 'market_history.json', dataset)
     return dataset
 
 

@@ -263,15 +263,22 @@ def get_dashboard_data() -> Dict:
 
     # 旧 price_backfill.json 没有标的/复权证明，不再用于新映射价格曲线。
     market_file = os.path.join(DATA_DIR, 'market_history.json')
+    market_status = {'status': 'missing'}
     if os.path.exists(market_file):
         from mom_index.provenance import digest, SHANGHAI
         from mom_index.market_data import completed_rows
-        with open(market_file, encoding='utf-8') as handle:
-            market = json.load(handle)
-        if market.get('dataset_id') == digest({k: v for k, v in market.items() if k != 'dataset_id'}):
-            price_history = {key: [] for key in SECTOR_NAMES}
-            price_real_dates = set()
+        # 有当前行情文件时，验证失败不退回未经本批核验的报价。
+        price_history = {key: [] for key in SECTOR_NAMES}
+        price_real_dates = set()
+        try:
+            with open(market_file, encoding='utf-8') as handle:
+                market = json.load(handle)
+            if (not isinstance(market, dict) or market.get('dataset_id') != digest({k: v for k, v in market.items() if k != 'dataset_id'})
+                    or market.get('adjustment') != 'qfq'):
+                raise ValueError('InvalidMarketProof')
             fetched = datetime.fromisoformat(market['fetched_at']).astimezone(SHANGHAI)
+            if datetime.fromisoformat(market['fetched_at']).tzinfo is None:
+                raise ValueError('UnknownMarketTimezone')
             for sector, cfg in SECTORS.items():
                 node = market.get('instruments', {}).get(cfg['etf'], {})
                 if node.get('rows_hash') != digest(node.get('rows', [])):
@@ -279,6 +286,11 @@ def get_dashboard_data() -> Dict:
                 for row in completed_rows(node.get('rows', []), fetched):
                     price_history[sector].append({'date': row['date'], 'price': row['close'], 'etf': cfg['etf']})
                     price_real_dates.add(row['date'])
+            market_status = {'status':'ok'}
+        except (OSError, ValueError, TypeError, KeyError, AttributeError) as error:
+            price_history = {key: [] for key in SECTOR_NAMES}
+            price_real_dates = set()
+            market_status = {'status':'unavailable', 'error_type':type(error).__name__}
 
     dashboard = {
         "instruments": deepcopy(SECTORS),
@@ -292,6 +304,7 @@ def get_dashboard_data() -> Dict:
         "real_record_count": len(real_records),
         "real_dates": real_dates,
         "price_real_dates": sorted(price_real_dates),
+        "market_status": market_status,
     }
     from mom_index.daily_summary import build_daily_summary
     dashboard['daily_summary'] = build_daily_summary(dashboard)

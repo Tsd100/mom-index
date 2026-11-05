@@ -6,6 +6,7 @@ import os
 import requests
 from datetime import datetime
 from typing import List, Dict, Optional
+from mom_index.provenance import normalize_source_time
 
 # 配置: 在 https://rnote.dev/auth/register 注册后获取
 # 设置环境变量 RNODE_API_KEY 或直接填入
@@ -37,14 +38,32 @@ def search_notes(keyword: str, count: int = 20, report=None) -> List[Dict]:
         )
         if resp.status_code == 200:
             data = resp.json()
+            if not isinstance(data, dict):
+                raise ValueError('InvalidResponseSchema')
+            for envelope in (data, data.get('data')):
+                if isinstance(envelope, dict) and (envelope.get('success') is False
+                        or envelope.get('code') not in (None, 0, 200, '0', '200')):
+                    raise ValueError('SourceBusinessError')
             # rnote.dev 响应结构: data.data.data.items[].note
-            inner = data.get("data", {}).get("data", {})
-            items = inner.get("items", [])
+            inner = data['data']['data']
+            if (not isinstance(inner, dict) or inner.get('success') is False
+                    or inner.get('code') not in (None, 0, 200, '0', '200')):
+                raise ValueError('SourceBusinessError')
+            items = inner['items']
+            if not isinstance(items, list):
+                raise ValueError('InvalidResponseSchema')
             notes = []
             for item in items:
+                if not isinstance(item, dict):
+                    raise ValueError('InvalidResponseItem')
                 note = item.get("note") or item.get("note_card") or item
                 if note and isinstance(note, dict):
-                    notes.append(_parse_note(note))
+                    parsed = _parse_note(note)
+                    if not parsed['id'] or not parsed['title']:
+                        raise ValueError('InvalidResponseItem')
+                    notes.append(parsed)
+                else:
+                    raise ValueError('InvalidResponseItem')
             if report is not None:
                 report.append({'keyword': keyword, 'status': 'ok' if notes else 'empty', 'count': len(notes)})
             return notes
@@ -82,12 +101,17 @@ def _parse_note(raw: Dict) -> Dict:
     user = raw.get("user") or raw.get("author") or {}
     interact = raw.get("interact_info") or raw.get("note_interact_info") or {}
     tags = raw.get("tag_list") or raw.get("tags") or []
+    time_field = next((key for key in ('publish_time', 'created_at', 'create_time', 'time') if raw.get(key) is not None), None)
     
     return {
         "id": raw.get("id") or raw.get("note_id", ""),
         "title": (raw.get("title") or raw.get("desc") or "")[:100],
         "content": raw.get("desc") or raw.get("content") or "",
         "platform": "xiaohongshu",
+        "date": normalize_source_time(raw.get(time_field)) if time_field else None,
+        "time_basis": "publication",
+        "time_source_field": time_field,
+        "url": raw.get('url') or raw.get('note_url') or '',
         "author": user.get("nickname") or user.get("nick_name", "未知"),
         "author_followers": user.get("follower_count", 0),
         "likes": interact.get("liked_count", 0),
