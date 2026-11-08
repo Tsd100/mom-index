@@ -252,6 +252,13 @@ def get_dashboard_data() -> Dict:
                     "index": data["index"] if data.get("quality", {}).get("status") == "ok" else None,
                     "definition_id": data.get("definition_id"),
                     "score_components": deepcopy(data.get('score_components')),
+                    "quality": deepcopy(data.get('quality', {})),
+                    "details": deepcopy(data.get('details', {})),
+                    "recent_observation": deepcopy(data.get('recent_observation')),
+                    "top_newbie_posts": deepcopy(data.get('top_newbie_posts', [])),
+                    "instrument": record_instrument(r, sector) or {},
+                    "observed_at": r.get('provenance', {}).get('finished_at'),
+                    "run_id": r.get('provenance', {}).get('run_id'),
                 })
             cfg = record_instrument(r, sector)
             if sector in price_history and "price" in data and cfg and cfg['etf'] == SECTORS[sector]['etf']:

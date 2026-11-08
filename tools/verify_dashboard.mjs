@@ -12,6 +12,7 @@ await mkdir(out, {recursive: true});
 const profile = await mkdtemp(join(out, 'qa-browser-'));
 const html = await readFile('src/mom_index/frontend/dashboard.html', 'utf8');
 const chartjs = await readFile('src/mom_index/frontend/vendor/chart.umd.min.js');
+const trendModel = await readFile('src/mom_index/frontend/trend-model.js');
 const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]);
 await writeFile(join(out, 'dashboard-check.js'), scripts.join('\n'));
 const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]));
@@ -50,8 +51,15 @@ fixture.quality_overview = {expired:false,current_qualified_count:1,total_count:
 fixture.daily_summary.highlights[0].component_change = {status:'ok',items:[
   {key:'feature_share',label:'特征帖占比',change:5}, {key:'feature_strength',label:'平均特征分',change:5},
   {key:'emotion_extremity',label:'情绪极端度',change:5},{key:'feature_purity',label:'高分特征帖占比',change:0}],rounding_residual:0};
+Object.assign(fixture.sector_history.gold[0],{definition_id:'test',quality:{status:'ok',valid_count:45},
+  details:{mom_buy_index:20,mom_sell_index:10},top_newbie_posts:fixture.latest.sectors.gold.top_newbie_posts,
+  observed_at:fixture.latest.provenance.finished_at,instrument:{etf:'518880'}});
+fixture.instruments={gold:{etf:'518880'},chip:{etf:'159995'}};
+fixture.sector_history.chip=[{...fixture.sector_history.gold[0],index:55}];
 const server = createServer((req, res) => {
-  if (req.url === '/vendor/chart.umd.min.js') {
+  if (req.url === '/trend-model.js') {
+    res.setHeader('Content-Type','application/javascript');res.end(trendModel);
+  } else if (req.url === '/vendor/chart.umd.min.js') {
     res.setHeader('Content-Type', 'application/javascript'); res.end(chartjs);
   } else if (req.url === '/data/service_status.json') {
     res.setHeader('Content-Type', 'application/json');
@@ -73,8 +81,15 @@ try {
     await new Promise(r => setTimeout(r, 100));
   }
   assert(port, 'Chromium 未启动');
-  const tabs = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
-  ws = new WebSocket(tabs.find(t => t.type === 'page').webSocketDebuggerUrl);
+  let tab;
+  for (let attempt=0;attempt<50;attempt++) {
+    const tabs=await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
+    tab=tabs.find(t=>t.type==='page');
+    if(tab) break;
+    await new Promise(resolve=>setTimeout(resolve,100));
+  }
+  assert(tab,'Chromium 未创建预览页');
+  ws = new WebSocket(tab.webSocketDebuggerUrl);
   await new Promise((r, reject) => {ws.onopen = r; ws.onerror = reject;});
   let sequence = 0;
   const pending = new Map(), errors = [];
@@ -102,11 +117,12 @@ try {
     await call('Page.navigate', {url: `http://127.0.0.1:${server.address().port}/`});
     let ready = false;
     for (let i = 0; i < 100; i++) {
-      ready = await evaluate(`typeof Chart !== 'undefined' && document.querySelectorAll('canvas').length === 1`);
+      ready = await evaluate(`typeof Chart !== 'undefined' && document.querySelectorAll('canvas').length === 2`);
       if (ready) break;
       await new Promise(r => setTimeout(r, 100));
     }
     assert(ready, 'Chart.js 未加载或画布没有生成');
+    await evaluate(`document.getElementById('trend-range').value='custom';document.getElementById('trend-start').value='2026-10-13';document.getElementById('trend-end').value='2026-10-15';document.getElementById('trend-price').checked=true;renderCharts(trendData)`);
     assert(await evaluate(`document.getElementById('quality-overview')?.textContent.includes('最近抓取成功')`), '缺少质量面板');
     assert(await evaluate(`document.getElementById('recent-observations')?.textContent.includes('35/45') && document.getElementById('recent-observations')?.textContent.includes('买入表达 20')`), '近期观察数量或方向缺失');
     assert(await evaluate(`document.querySelector('.component-change')?.textContent.includes('特征帖占比')`), '公式变化拆解未显示');
@@ -118,14 +134,29 @@ try {
     assert(await evaluate(`document.getElementById('runtime-status').textContent.includes('17:00') && document.getElementById('runtime-status').textContent.includes('1/12')`), 'NAS每日采集状态未显示');
     await new Promise(r => setTimeout(r, 1200));
     const chartData = await evaluate(`(() => {const chart=Object.values(Chart.instances)[0];return {labels:chart?.data.labels,series:chart?.data.datasets.map(d=>d.data)}})()`);
-    assert.deepEqual(chartData.labels, ['10-13', '10-14', '10-15'], '价格日期不应被情绪记录日期截断');
+    assert.deepEqual(chartData.labels, ['2026-10-13', '2026-10-14', '2026-10-15'], '应保留完整日期和缺采集日');
     assert.deepEqual(chartData.series[0], [null, null, 45], '缺少情绪记录的价格日应保持空值');
     assert.deepEqual(chartData.series[1], [8, 9, 8.5]);
+    await evaluate(`document.getElementById('trend-day').value='2026-10-14';document.getElementById('trend-day').dispatchEvent(new Event('change'))`);
+    assert(await evaluate(`document.getElementById('trend-detail').textContent.includes('没有已核验')`),'缺日被伪装成历史快照');
+    await evaluate(`document.getElementById('trend-sector').value='chip';document.getElementById('trend-sector').dispatchEvent(new Event('change'))`);
+    assert.equal(await evaluate(`Object.values(Chart.instances)[0].data.datasets[0].data.at(-1)`),55,'板块切换失败');
+    await evaluate(`document.getElementById('trend-sector').value='gold';document.getElementById('trend-metric').value='buy';renderCharts(trendData)`);
+    assert.equal(await evaluate(`Object.values(Chart.instances)[0].data.datasets[0].data.at(-1)`),20,'指标切换失败');
+    await evaluate(`document.getElementById('trend-metric').value='index';renderCharts(trendData)`);
+    await new Promise(r=>setTimeout(r,700));
+    const clickPoint=await evaluate(`(()=>{const c=Object.values(Chart.instances)[0];c.canvas.scrollIntoView({block:'center'});const r=c.canvas.getBoundingClientRect(),p=c.getDatasetMeta(0).data[2];return {x:r.left+p.x,y:r.top+p.y};})()`);
+    await call('Input.dispatchMouseEvent',{type:'mousePressed',...clickPoint,button:'left',clickCount:1});
+    await call('Input.dispatchMouseEvent',{type:'mouseReleased',...clickPoint,button:'left',clickCount:1});
+    await new Promise(r=>setTimeout(r,150));
+    assert.equal(await evaluate(`document.getElementById('trend-day').value`),'2026-10-15','点选趋势图未联动日期');
+    assert(await evaluate(`document.getElementById('trend-detail').textContent.includes('518880')`),'历史标的详情未显示');
     const segmentColors = await evaluate(`(() => {
       const a={index:30,definition_id:'v1'}, b={index:60,definition_id:'v1'}, failed={index:null,definition_id:'v1'}, changed={index:45,definition_id:'v2'};
       return [emotionSegmentColor([a,null,b],0,2,'#abc'), emotionSegmentColor([a,failed,b],0,2,'#abc'), emotionSegmentColor([a,null,changed],0,2,'#abc')];
     })()`);
     assert.deepEqual(segmentColors, ['#abc', 'transparent', 'transparent'], '曲线应只跨过纯价格日期');
+    assert.equal(await evaluate(`emotionSegmentColor([{index:30},{index:40}],0,1,'#abc')`),'transparent','未知口径不应连线');
     const pixels = await evaluate(`Array.from(document.querySelectorAll('canvas')).map(canvas => {
       const rgba=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
       let painted=0,colorful=0; for(let i=0;i<rgba.length;i+=4){if(rgba[i+3])painted++; if(Math.max(rgba[i],rgba[i+1],rgba[i+2])-Math.min(rgba[i],rgba[i+1],rgba[i+2])>30&&rgba[i+3])colorful++;}
@@ -133,6 +164,8 @@ try {
     })`);
     assert(pixels.every(p => p.painted > 500 && p.ratio > .01 && Math.abs(p.dpr-dpr) < .1), JSON.stringify(pixels));
     await evaluate('loadData(); new Promise(r=>setTimeout(r,300))');
+    assert.equal(await evaluate(`document.getElementById('trend-range').value`),'custom','刷新丢失时间选择');
+    assert.equal(await evaluate(`document.getElementById('trend-sector').value`),'gold','刷新丢失板块选择');
     assert.equal(await evaluate(`document.querySelectorAll('.post-item').length`), 1, '刷新重复追加帖子');
     assert.equal(await evaluate('window.injected === true'), false, '帖子 HTML 未转义');
     assert.equal(await evaluate(`document.querySelector('.post-source')?.getAttribute('href')`),
@@ -143,7 +176,7 @@ try {
     unsafePost.latest.sectors.gold.top_newbie_posts[0].source_url = 'javascript:alert(1)';
     await evaluate(`renderTopPosts(${JSON.stringify(unsafePost)})`);
     assert.equal(await evaluate(`document.querySelector('.post-source')`), null, '不可信链接被生成为可点击链接');
-    assert.equal(await evaluate(`Object.keys(Chart.instances).length`), 1, '刷新泄漏图表');
+    assert.equal(await evaluate(`Object.keys(Chart.instances).length`), 2, '刷新泄漏图表');
     dashboardFailure = true;
     await evaluate('loadData(); new Promise(r=>setTimeout(r,300))');
     assert(await evaluate(`document.getElementById('cards').textContent.includes('加载失败')`), '网络失败未显示状态');
@@ -160,6 +193,8 @@ try {
     assert.equal(view.latest.sectors.gold.index, null);
     assert.equal(view.signals[0].delta, null);
     assert.equal(view.daily_summary.highlights.length, 0, '过期摘要仍显示排名');
+    await evaluate(`renderCharts(${JSON.stringify(view)})`);
+    assert.equal(await evaluate(`Object.values(Chart.instances)[0].data.datasets[0].data.at(-1)`),45,'过期最新判断不应删除带日期历史');
     await evaluate(`renderRecentObservations(${JSON.stringify(view)});renderQualityOverview(${JSON.stringify(view)})`);
     assert(await evaluate(`document.getElementById('recent-observations').textContent.includes('过期') && !document.getElementById('recent-observations').textContent.includes('买入表达 20')`), '过期样本仍显示方向判断');
     await evaluate(`renderDailySummary(${JSON.stringify(view)})`);

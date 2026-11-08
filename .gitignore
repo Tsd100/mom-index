@@ -45,3 +45,5 @@ src/data/production/
 src/data/reconstructed/
 src/data/market_history.json
 src/data/market_snapshots/
+src/data/service_status.json
+src/data/collection_result.json

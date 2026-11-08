@@ -181,6 +181,7 @@ def make_web_server(public, host='0.0.0.0', port=8503):
             path = urlsplit(self.path).path
             files = {'/': (FRONTEND / 'dashboard.html', 'text/html; charset=utf-8'),
                      '/dashboard.html': (FRONTEND / 'dashboard.html', 'text/html; charset=utf-8'),
+                     '/trend-model.js': (FRONTEND / 'trend-model.js', 'application/javascript; charset=utf-8'),
                      '/vendor/chart.umd.min.js': (FRONTEND / 'vendor' / 'chart.umd.min.js', 'application/javascript'),
                      '/data/dashboard_data.json': (public / 'dashboard_data.json', 'application/json; charset=utf-8'),
                      '/data/service_status.json': (public / 'service_status.json', 'application/json; charset=utf-8')}

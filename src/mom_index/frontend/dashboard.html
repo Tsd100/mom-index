@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>宝妈指数 · Mom Index</title>
 <script src="vendor/chart.umd.min.js"></script>
+<script src="trend-model.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -178,6 +179,16 @@ body {
 .summary-change summary { cursor:pointer; color:#93c5fd; }
 .summary-evidence { border-top:1px solid #334155; padding:8px 0; }
 .summary-source { color:#93c5fd; }
+.trend-controls { display:flex; flex-wrap:wrap; gap:12px; margin:16px 0; align-items:end; }
+.trend-controls label { display:flex; flex-direction:column; gap:6px; font-size:13px; color:#cbd5e1; }
+.trend-controls select, .trend-controls input { background:#0f172a; color:#e2e8f0; border:1px solid #475569; border-radius:6px; padding:9px; max-width:100%; min-width:0; }
+.trend-boards { display:grid; grid-template-columns:repeat(auto-fit,minmax(125px,1fr)); gap:8px; }
+.trend-boards button { color:#cbd5e1; background:#0f172a; border:1px solid #334155; border-radius:8px; padding:10px; text-align:left; cursor:pointer; }
+.trend-boards button[aria-pressed="true"] { border-color:#38bdf8; background:#16334c; }
+#charts { grid-template-columns:1fr; margin:16px 0; }
+#trend-detail { margin-top:18px; border-top:1px solid #334155; padding-top:16px; overflow-wrap:anywhere; }
+#trend-detail h3 { margin-bottom:8px; }
+#cards { margin-top:16px; }
 </style>
 </head>
 <body>
@@ -193,6 +204,24 @@ body {
   <div class="mock-banner" id="mock-banner" style="display:none"></div>
   <div id="runtime-status" style="display:none;padding:12px 16px;margin-bottom:16px;border:1px solid #334155;border-radius:8px;color:#93c5fd;font-size:13px;line-height:1.8"></div>
 
+  <section class="daily-summary" id="trend-workspace">
+    <h2>板块趋势</h2>
+    <p>按自然日查看历史快照。空白表示缺采集或样本不合格，规则切换处断线；历史数值不代表当前判断。</p>
+    <div class="trend-boards" id="trend-boards"></div>
+    <div class="trend-controls">
+      <label>板块<select id="trend-sector"></select></label>
+      <label>时间范围<select id="trend-range"><option value="7">近7天</option><option value="30" selected>近30天</option><option value="90">近90天</option><option value="all">全部历史</option><option value="custom">自定义</option></select></label>
+      <label>开始日期<input id="trend-start" type="date"></label>
+      <label>结束日期<input id="trend-end" type="date"></label>
+      <label>观察指标<select id="trend-metric"><option value="index">综合指数</option><option value="buy">买入表达评分</option><option value="sell">卖出表达评分</option></select></label>
+      <label>价格叠加<input id="trend-price" type="checkbox"></label>
+    </div>
+    <div class="summary-note" id="trend-summary"></div>
+    <div class="charts" id="charts"></div>
+    <div class="trend-controls"><label>查看某一天<input id="trend-day" type="date"></label></div>
+    <div id="trend-detail" aria-live="polite">等待历史快照。</div>
+  </section>
+
   <section class="daily-summary" id="quality-overview" aria-live="polite"></section>
   <section class="daily-summary" id="recent-observations" aria-live="polite"></section>
 
@@ -202,13 +231,12 @@ body {
   <div class="signals-panel" id="signals-panel"></div>
 
   <!-- 四个板块指数卡片 -->
-  <div class="cards" id="cards"></div>
+  <details><summary>查看最新完整快照与各板块质量</summary><div class="cards" id="cards"></div></details>
 
   <!-- 图例（由 JS 动态渲染） -->
   <div class="legend" id="legend"></div>
 
   <!-- 历史曲线（由 JS 动态渲染） -->
-  <div class="charts" id="charts"></div>
 
   <!-- Top 小白帖 -->
   <div class="top-posts" id="top-posts">
@@ -549,22 +577,85 @@ function renderSignals(data) {
 }
 
 let activeCharts = [];
+let trendData = null;
+let trendView = null;
+function trendOptions() {
+  return {sector:document.getElementById('trend-sector').value, range:document.getElementById('trend-range').value,
+    start:document.getElementById('trend-start').value,end:document.getElementById('trend-end').value,
+    metric:document.getElementById('trend-metric').value};
+}
+function setupTrendControls(data) {
+  trendData = data;
+  const selector = document.getElementById('trend-sector');
+  const previous = selector.value;
+  const keys = Object.keys(data.sector_history || {});
+  selector.replaceChildren(...keys.map(key=>new Option(SECTOR_NAMES[key] || key,key)));
+  selector.value = keys.includes(previous) ? previous : keys[0] || '';
+  document.getElementById('trend-boards').replaceChildren(...keys.map(key=>{
+    const button=document.createElement('button');
+    button.type='button';button.setAttribute('aria-pressed',String(key===selector.value));
+    const current=data.latest?.sectors?.[key];
+    button.textContent=`${SECTOR_NAMES[key] || key} · ${current?.index ?? '—'}`;
+    button.onclick=()=>{selector.value=key;renderCharts(trendData);};return button;
+  }));
+  for (const id of ['trend-start','trend-end','trend-day']) document.getElementById(id).max=TrendModel.todayShanghai();
+}
+function renderTrendDetail(day) {
+  const panel=document.getElementById('trend-detail');
+  const point=trendView?.points.find(point=>point.date===day);
+  const sector=trendOptions().sector;
+  panel.innerHTML=`<h3>${escapeHtml(SECTOR_NAMES[sector] || sector)} · ${escapeHtml(day || '未选择日期')}</h3>`;
+  if (trendView && (day<trendView.start || day>trendView.end)) {panel.innerHTML+='<p>所选日期不在当前范围内，请先调整时间范围。</p>';return;}
+  if (!point || point.missing) {panel.innerHTML+='<p>这一天没有已核验采集快照，不补值或插值。</p>';return;}
+  const quality=point.quality || {};
+  panel.innerHTML+=`<p>历史快照 · 综合指数 ${escapeHtml(TrendModel.valueFor(point,'index') ?? '—')} · 买入表达 ${escapeHtml(TrendModel.valueFor(point,'buy') ?? '—')} · 卖出表达 ${escapeHtml(TrendModel.valueFor(point,'sell') ?? '—')}</p>
+    <p>有效样本 ${escapeHtml(quality.valid_count ?? '未记录')}；近期有效 ${escapeHtml(quality.valid_fresh_count ?? '未记录')}。${escapeHtml((quality.reasons || []).join('；'))}</p>
+    <p>采集完成：${escapeHtml(point.observed_at || '未记录')}；标的 ${escapeHtml(point.instrument?.etf || '未记录')}；口径 ${escapeHtml(point.definition_id?.slice(0,12) || '未记录')}。</p>`;
+  const posts=point.top_newbie_posts || [];
+  panel.innerHTML+=posts.length ? posts.slice(0,5).map(post=>{
+    const url=safePostUrl(post.source_url);
+    return `<div class="summary-evidence">${escapeHtml(post.title)}<div class="summary-note">${escapeHtml(post.reasoning)}</div>${url ? `<a class="summary-source" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">查看当时原帖 ↗</a>` : '<span class="summary-note">原帖链接未记录或未通过核验</span>'}</div>`;
+  }).join('') : '<p>此快照未保留代表帖子。</p>';
+}
+for (const id of ['trend-sector','trend-range','trend-start','trend-end','trend-metric','trend-price']) {
+  document.getElementById(id).addEventListener('change',()=>{if(trendData) renderCharts(trendData);});
+}
+document.getElementById('trend-day').addEventListener('change',event=>renderTrendDetail(event.target.value));
 function renderCharts(data) {
   activeCharts.forEach(chart => chart.destroy());
   activeCharts = [];
   const chartsContainer = document.getElementById('charts');
   chartsContainer.innerHTML = '';
+  setupTrendControls(data);
+  const options=trendOptions();
+  trendView=TrendModel.buildTrend(data,options);
+  const summary=document.getElementById('trend-summary');
+  const dayPicker=document.getElementById('trend-day');
+  if (trendView.error) {summary.textContent=trendView.error;dayPicker.disabled=true;document.getElementById('trend-detail').textContent='日期范围无效，请重新选择。';return;}
+  dayPicker.disabled=false;dayPicker.min=trendView.start;dayPicker.max=trendView.end;
+  if (options.range!=='custom') {document.getElementById('trend-start').value=trendView.start;document.getElementById('trend-end').value=trendView.end;}
+  document.getElementById('trend-start').disabled=options.range!=='custom';document.getElementById('trend-end').disabled=options.range!=='custom';
+  const comparison=trendView.comparison;
+  summary.textContent=`${trendView.start} 至 ${trendView.end} · 已采集 ${trendView.recordedCount}/${trendView.dates.length} 天 · 指标有效 ${trendView.validCount} 天。`+
+    (comparison ? `同口径连续记录 ${comparison.from} → ${comparison.to}：${comparison.delta>0?'+':''}${comparison.delta} 分。` : '缺少连续同口径记录，暂不计算区间变化。')+
+    (trendView.validCount===1 ? '仅一个有效数据点，尚不能形成趋势。' : '');
+  if (document.getElementById('trend-price').checked && !trendView.prices.some(value=>value!==null)) summary.textContent+=' 所选区间没有可叠加的同标的核验行情。';
+  const recorded=trendView.points.filter(point=>!point.missing);
+  const day=dayPicker.value>=trendView.start && dayPicker.value<=trendView.end ? dayPicker.value : recorded.at(-1)?.date || trendView.end;
+  dayPicker.value=day;renderTrendDetail(day);
+  if (!trendView.recordedCount) {chartsContainer.textContent='该范围尚无情绪采集记录，可切换时间范围或等待后续采集。';return;}
   const history = data.sector_history || {};
   const priceHistory = data.price_history || {};
   const realDates = new Set(data.real_dates || []);
   const priceRealDates = new Set(data.price_real_dates || Array.from(realDates));
   
-  Object.entries(history).forEach(([sector, records]) => {
+  Object.entries(history).filter(([key])=>key===options.sector).forEach(([sector]) => {
+    const records=trendView.points;
     if (!records.length) return;
     
     const box = document.createElement('div');
     box.className = 'chart-box';
-    box.innerHTML = `<h3>📈 ${SECTOR_NAMES[sector] || sector} — 宝妈指数走势</h3><canvas id="chart-${sector}"></canvas>`;
+    box.innerHTML = `<h3>${escapeHtml(SECTOR_NAMES[sector] || sector)} — ${escapeHtml(trendView.label)}</h3><canvas id="chart-${sector}"></canvas>`;
     chartsContainer.appendChild(box);
     
     const canvas = box.querySelector('canvas');
@@ -572,28 +663,28 @@ function renderCharts(data) {
     const color = SECTOR_COLORS[sector] || '#94a3b8';
     
     // 价格数据按日期对齐
-    const pArr = priceHistory[sector] || [];
+    const pArr = document.getElementById('trend-price').checked ? trendView.dates.map((date,i)=>({date,price:trendView.prices[i]})) : [];
     const priceMap = {};
     pArr.forEach(p => { priceMap[p.date] = p.price; });
     const recordsByDate = new Map(records.map(record => [record.date, record]));
-    const dates = [...new Set([...records.map(r => r.date), ...pArr.map(p => p.date)])].sort();
-    const emotionRecords = dates.map(day => recordsByDate.get(day) || null);
-    const emotionVals = emotionRecords.map(record => record?.index ?? null);
+    const dates = trendView.dates;
+    const emotionRecords = dates.map(day => {const point=recordsByDate.get(day);return point ? {...point,index:TrendModel.valueFor(point,options.metric)} : null;});
+    const emotionVals = trendView.values;
     const priceVals = dates.map(day => priceMap[day] ?? null);
     const hasPrice = priceVals.some(v => v !== null);
     
     activeCharts.push(new Chart(ctx, {
       type: 'line',
       data: {
-        labels: dates.map(day => day.slice(5)),
+        labels: dates,
         datasets: [{
-          label: SECTOR_NAMES[sector],
+          label: trendView.label,
           data: emotionVals,
           borderColor: color,
           backgroundColor: color + '20',
           borderWidth: 2,
           fill: false,
-          tension: 0.3,
+          tension: 0,
           spanGaps: true,
           pointRadius: 2,
           pointHoverRadius: 5,
@@ -603,14 +694,14 @@ function renderCharts(data) {
             borderColor: ctx => emotionSegmentColor(emotionRecords, ctx.p0DataIndex, ctx.p1DataIndex, color),
           },
         }].concat(hasPrice ? {
-          label: SECTOR_NAMES[sector] + ' 当前映射ETF价格',
+          label: '当前映射ETF ' + (data.instruments?.[sector]?.etf || '未核验') + ' 价格（仅同标的区间）',
           data: priceVals,
           borderColor: '#f59e0b',
           backgroundColor: 'rgba(245,158,11,0.08)',
           borderWidth: 1.5,
           borderDash: [4, 2],
           fill: false,
-          tension: 0.3,
+          tension: 0,
           pointRadius: 1,
           pointHoverRadius: 4,
           yAxisID: 'y1',
@@ -620,11 +711,13 @@ function renderCharts(data) {
         } : [])
       },
       options: {
+        animation: false,
+        onClick: (_event,elements)=>{if(elements.length){dayPicker.value=dates[elements[0].index];renderTrendDetail(dayPicker.value);}},
         responsive: true,
         maintainAspectRatio: true,
         interaction: { mode: 'index', intersect: false },
         plugins: {
-          legend: { display: false },
+          legend: { display: true, labels:{color:'#cbd5e1'} },
           tooltip: {
             backgroundColor: '#1e293b',
             titleColor: '#e2e8f0',
@@ -636,8 +729,8 @@ function renderCharts(data) {
                 const set = ctx.dataset.yAxisID === 'y1' ? priceRealDates : realDates;
                 const tag = set.has(dates[ctx.dataIndex]) ? '' : '（模拟）';
                 return ctx.dataset.yAxisID === 'y1'
-                  ? `价格: ${ctx.parsed.y}${tag}`
-                  : `宝妈指数: ${ctx.parsed.y}${tag}`;
+                  ? `ETF ${data.instruments?.[sector]?.etf || '未核验'} 价格: ${ctx.parsed.y}${tag}`
+                  : `${trendView.label}: ${ctx.parsed.y}${tag}`;
               }
             }
           }
@@ -647,7 +740,7 @@ function renderCharts(data) {
             min: 0, max: 100, position: 'left',
             grid: { color: '#33415533' },
             ticks: { color: '#64748b' },
-            title: { display: true, text: '宝妈指数', color: '#64748b' },
+            title: { display: true, text: trendView.label, color: '#64748b' },
           },
           ...(hasPrice ? {
             y1: {
@@ -667,13 +760,22 @@ function renderCharts(data) {
       }
     }));
   });
+  if (trendView.samples.some(value=>value!==null)) {
+    const box=document.createElement('div');box.className='chart-box';
+    box.innerHTML='<h3>有效样本量 · 采集失败和缺采集日见日期详情</h3><canvas id="trend-samples"></canvas>';
+    chartsContainer.appendChild(box);
+    activeCharts.push(new Chart(box.querySelector('canvas').getContext('2d'),{type:'bar',data:{labels:trendView.dates,
+      datasets:[{label:'有效样本数',data:trendView.samples,backgroundColor:'#38bdf8'}]},options:{responsive:true,animation:false,
+      onClick:(_event,elements)=>{if(elements.length){dayPicker.value=trendView.dates[elements[0].index];renderTrendDetail(dayPicker.value);}},
+      scales:{y:{beginAtZero:true},x:{ticks:{maxTicksLimit:10}}},plugins:{legend:{display:false}}}}));
+  }
 }
 
 function emotionSegmentColor(emotionRecords, startIndex, endIndex, color) {
   const observations = emotionRecords.slice(startIndex, endIndex + 1).filter(Boolean);
   if (observations.length < 2 || observations.some(row => row.index == null)) return 'transparent';
   const definition = observations[0].definition_id;
-  return observations.every(row => row.definition_id === definition) ? color : 'transparent';
+  return definition && observations.every(row => row.definition_id === definition) ? color : 'transparent';
 }
 
 const POST_SOURCE_HOSTS = ['guba.eastmoney.com', 'xueqiu.com', 'xiaohongshu.com', 'xhslink.com'];
@@ -772,9 +874,10 @@ function loadData() {
       renderTopPosts(data);
     })
     .catch(err => {
+      trendData=null;trendView=null;
       activeCharts.forEach(chart => chart.destroy());
       activeCharts = [];
-      ['legend', 'signals-panel', 'charts', 'top-posts', 'daily-summary', 'quality-overview', 'recent-observations'].forEach(id => {
+      ['legend', 'signals-panel', 'charts', 'top-posts', 'daily-summary', 'quality-overview', 'recent-observations','trend-boards','trend-summary','trend-detail'].forEach(id => {
         document.getElementById(id).replaceChildren();
       });
       const banner = document.getElementById('mock-banner');
