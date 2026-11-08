@@ -17,7 +17,7 @@ from mom_index.market_data import fetch_market
 from mom_index.pipeline import run_pipeline, publish_dashboard
 from mom_index.provenance import SHANGHAI, now_local
 
-VERSION = '2026.10.24.3'
+VERSION = '2026.11.08.1'
 FRONTEND = Path(__file__).parent / 'frontend'
 
 

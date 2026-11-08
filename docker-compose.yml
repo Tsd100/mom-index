@@ -1,5 +1,5 @@
 x-mom-image: &mom-image
-  image: mom-index:2026.10.24.3
+  image: mom-index:2026.11.08.1
   build:
     context: .
     dockerfile: docker/Dockerfile

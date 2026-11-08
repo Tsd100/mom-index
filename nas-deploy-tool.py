@@ -56,7 +56,7 @@ def finalize(destination):
              for p in sorted(destination.rglob('*')) if p.is_file() and p.name != 'manifest.json'}
     has_wheels = any((destination / 'offline-deps' / 'wheels').glob('*.whl'))
     manifest = {'package_type': 'application_with_linux_wheels' if has_wheels else 'source_only',
-                'version': '2026.10.24.3', 'platform': 'linux/amd64',
+                'version': '2026.11.08.1', 'platform': 'linux/amd64',
                 'python': '3.12', 'base_image': 'python:3.12-slim-bookworm', 'base_image_included': False,
                 'runtime_data_included': False, 'files': files}
     (destination / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding='utf-8')
